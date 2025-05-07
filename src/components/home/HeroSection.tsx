@@ -1,17 +1,54 @@
 
 import { ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselPrevious, 
+  CarouselNext 
+} from "@/components/ui/carousel";
 
 const HeroSection = () => {
+  const heroImages = [
+    {
+      src: "https://images.unsplash.com/photo-1473163928189-364b2c4e1135?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+      alt: "African landscape"
+    },
+    {
+      src: "/lovable-uploads/d1e179de-04ff-44a0-99ca-de56cc1d0ef7.png",
+      alt: "TPAHLA Award Winners"
+    },
+    {
+      src: "/lovable-uploads/6ddca7b3-b3f0-4db0-aad3-1e16f7820a36.png",
+      alt: "TPAHLA Award Stage"
+    }
+  ];
+
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-0"></div>
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1473163928189-364b2c4e1135?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center z-[-1]"></div>
+      {/* Background Slider */}
+      <Carousel className="absolute inset-0 z-0 w-full h-full">
+        <CarouselContent className="h-full">
+          {heroImages.map((image, index) => (
+            <CarouselItem key={index} className="h-full w-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-10"></div>
+              <div className="absolute inset-0 african-pattern opacity-30 z-0"></div>
+              <div 
+                className="absolute inset-0 bg-cover bg-center z-[-1]" 
+                style={{ backgroundImage: `url('${image.src}')` }}
+              ></div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="absolute bottom-[15%] left-4 z-20">
+          <CarouselPrevious className="bg-black/30 hover:bg-black/50 text-white border-none" />
+        </div>
+        <div className="absolute bottom-[15%] right-4 z-20">
+          <CarouselNext className="bg-black/30 hover:bg-black/50 text-white border-none" />
+        </div>
+      </Carousel>
       
-      {/* African pattern overlay */}
-      <div className="absolute inset-0 african-pattern opacity-30 z-[-1]"></div>
-
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10 text-center">
         <div className="max-w-4xl mx-auto">
