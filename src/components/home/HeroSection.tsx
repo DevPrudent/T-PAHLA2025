@@ -12,8 +12,8 @@ import {
 const HeroSection = () => {
   const heroImages = [
     {
-      src: "https://images.unsplash.com/photo-1473163928189-364b2c4e1135?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
-      alt: "African landscape"
+      src: "/lovable-uploads/fb4bc1cc-d6a6-4be9-907f-939c06631e83.png",
+      alt: "TPAHLA Award Winners with Trophies"
     },
     {
       src: "/lovable-uploads/d1e179de-04ff-44a0-99ca-de56cc1d0ef7.png",
@@ -22,6 +22,10 @@ const HeroSection = () => {
     {
       src: "/lovable-uploads/6ddca7b3-b3f0-4db0-aad3-1e16f7820a36.png",
       alt: "TPAHLA Award Stage"
+    },
+    {
+      src: "https://images.unsplash.com/photo-1473163928189-364b2c4e1135?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+      alt: "African landscape"
     }
   ];
 
