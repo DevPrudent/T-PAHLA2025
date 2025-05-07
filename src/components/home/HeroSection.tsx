@@ -1,5 +1,6 @@
 
 import { ArrowDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
@@ -14,6 +15,14 @@ const HeroSection = () => {
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10 text-center">
         <div className="max-w-4xl mx-auto">
+          <div className="mb-8 flex justify-center">
+            <img 
+              src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
+              alt="TPAHLA Gold Logo" 
+              className="h-32 md:h-40 animate-fade-in"
+            />
+          </div>
+          
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-4 animate-fade-in">
             The Pan-African Humanitarian Leadership Award
           </h1>
@@ -23,15 +32,15 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <a href="#nominations" className="btn-primary">
+            <Link to="/nominations" className="btn-primary bg-tpahla-darkgreen hover:bg-tpahla-brightgreen">
               Nominate Now
-            </a>
-            <a href="#register" className="btn-secondary">
+            </Link>
+            <Link to="/register" className="btn-secondary bg-tpahla-gold hover:bg-amber-600">
               Register for Event
-            </a>
-            <a href="#sponsors" className="btn-outline border-white text-white hover:bg-white hover:text-gray-900">
+            </Link>
+            <Link to="/sponsors" className="btn-outline border-white text-white hover:bg-white hover:text-gray-900">
               Become a Sponsor
-            </a>
+            </Link>
           </div>
           
           {/* Event Date */}

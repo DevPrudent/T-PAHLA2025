@@ -63,14 +63,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom TPAHLA theme colors
+				// Updated TPAHLA theme colors based on the provided palette
 				tpahla: {
 					gold: '#D4AF37',
-					purple: '#9b87f5',
-					darkpurple: '#7E69AB',
-					red: '#B22222',
-					green: '#2E8B57',
-					brown: '#8B4513',
+					darkgreen: '#0A3B1F', // Deep green from logo
+					green: '#006400', // Green from palette
+					brightgreen: '#00843D', // Bright green from palette
+					red: '#FF0000', // Red from palette
+					orange: '#FF6600', // Orange from palette
 					neutral: '#F5F5DC',
 				}
 			},

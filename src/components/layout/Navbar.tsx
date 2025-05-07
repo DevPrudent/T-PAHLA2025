@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,35 +24,48 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Awards', href: '#awards' },
-    { name: 'Nominations', href: '#nominations' },
-    { name: 'Event', href: '#event' },
-    { name: 'Sponsors', href: '#sponsors' },
-    { name: 'Register', href: '#register' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/about' },
+    { name: 'Awards', href: '/awards' },
+    { name: 'Nominations', href: '/nominations' },
+    { name: 'Event', href: '/event' },
+    { name: 'Sponsors', href: '/sponsors' },
+    { name: 'Register', href: '/register' },
+    { name: 'Contact', href: '/contact' },
   ];
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
-          <a href="/" className="flex items-center">
-            <span className="text-2xl font-serif font-bold text-tpahla-purple">TPAHLA</span>
-          </a>
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/ab2b303e-1c3d-4b02-b6d2-e1a189a91287.png" 
+              alt="TPAHLA Logo" 
+              className="h-12 md:h-16"
+            />
+            <span className="sr-only">TPAHLA</span>
+          </Link>
         </div>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-1">
           {navLinks.map((link) => (
-            <a 
+            <Link 
               key={link.name} 
-              href={link.href}
-              className="navbar-link"
+              to={link.href}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                isActive(link.href) 
+                  ? 'text-tpahla-darkgreen font-bold border-b-2 border-tpahla-gold' 
+                  : 'text-gray-700 hover:text-tpahla-darkgreen'
+              }`}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -68,14 +82,18 @@ const Navbar = () => {
           <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4">
             <div className="flex flex-col space-y-2 px-4">
               {navLinks.map((link) => (
-                <a 
+                <Link 
                   key={link.name} 
-                  href={link.href}
-                  className="block py-2 text-gray-700 hover:text-tpahla-purple"
+                  to={link.href}
+                  className={`block py-2 transition-colors ${
+                    isActive(link.href) 
+                      ? 'text-tpahla-darkgreen font-bold' 
+                      : 'text-gray-700 hover:text-tpahla-darkgreen'
+                  }`}
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

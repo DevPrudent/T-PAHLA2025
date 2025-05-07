@@ -46,12 +46,12 @@ const CountdownTimer = () => {
   return (
     <section className="py-12 bg-gray-100">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-center mb-8">Countdown to the Awards Ceremony</h2>
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-center mb-8 text-tpahla-darkgreen">Countdown to the Awards Ceremony</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           {timerComponents.map((item, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-4 text-center border-t-4 border-tpahla-purple">
-              <div className="text-3xl md:text-5xl font-bold text-tpahla-purple">
+            <div key={index} className="bg-white rounded-lg shadow-md p-4 text-center border-t-4 border-tpahla-darkgreen">
+              <div className="text-3xl md:text-5xl font-bold text-tpahla-gold">
                 {item.value < 10 ? `0${item.value}` : item.value}
               </div>
               <div className="text-sm md:text-base text-gray-600 font-medium mt-2">{item.label}</div>

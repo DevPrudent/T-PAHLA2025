@@ -1,13 +1,22 @@
 
 import { Mail, MapPin, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8">
+    <footer className="bg-tpahla-darkgreen text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
-            <h3 className="text-xl font-serif font-bold mb-4">TPAHLA</h3>
+            <div className="mb-4">
+              <Link to="/">
+                <img 
+                  src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
+                  alt="TPAHLA Logo" 
+                  className="h-16" 
+                />
+              </Link>
+            </div>
             <p className="mb-4 text-gray-300">The Pan-African Humanitarian Leadership Award (TPAHLA) honors outstanding leaders, organizations, and institutions contributing to humanitarian service across Africa.</p>
             <div className="flex space-x-4">
               <a href="#" className="text-white hover:text-tpahla-gold transition-colors">
@@ -31,12 +40,12 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-serif font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#about" className="text-gray-300 hover:text-tpahla-gold transition-colors">About TPAHLA</a></li>
-              <li><a href="#awards" className="text-gray-300 hover:text-tpahla-gold transition-colors">Award Categories</a></li>
-              <li><a href="#nominations" className="text-gray-300 hover:text-tpahla-gold transition-colors">Nomination Process</a></li>
-              <li><a href="#event" className="text-gray-300 hover:text-tpahla-gold transition-colors">Event Details</a></li>
-              <li><a href="#sponsors" className="text-gray-300 hover:text-tpahla-gold transition-colors">Sponsorship</a></li>
-              <li><a href="#register" className="text-gray-300 hover:text-tpahla-gold transition-colors">Registration</a></li>
+              <li><Link to="/about" className="text-gray-300 hover:text-tpahla-gold transition-colors">About TPAHLA</Link></li>
+              <li><Link to="/awards" className="text-gray-300 hover:text-tpahla-gold transition-colors">Award Categories</Link></li>
+              <li><Link to="/nominations" className="text-gray-300 hover:text-tpahla-gold transition-colors">Nomination Process</Link></li>
+              <li><Link to="/event" className="text-gray-300 hover:text-tpahla-gold transition-colors">Event Details</Link></li>
+              <li><Link to="/sponsors" className="text-gray-300 hover:text-tpahla-gold transition-colors">Sponsorship</Link></li>
+              <li><Link to="/register" className="text-gray-300 hover:text-tpahla-gold transition-colors">Registration</Link></li>
             </ul>
           </div>
           
