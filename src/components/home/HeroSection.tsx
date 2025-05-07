@@ -32,12 +32,17 @@ const HeroSection = () => {
         <CarouselContent className="h-full">
           {heroImages.map((image, index) => (
             <CarouselItem key={index} className="h-full w-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-10"></div>
-              <div className="absolute inset-0 african-pattern opacity-30 z-0"></div>
               <div 
-                className="absolute inset-0 bg-cover bg-center z-[-1]" 
-                style={{ backgroundImage: `url('${image.src}')` }}
-              ></div>
+                className="h-full w-full bg-cover bg-center relative"
+              >
+                <img 
+                  src={image.src} 
+                  alt={image.alt} 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-10"></div>
+                <div className="absolute inset-0 african-pattern opacity-30 z-20"></div>
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -50,7 +55,7 @@ const HeroSection = () => {
       </Carousel>
       
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10 text-center">
+      <div className="container mx-auto px-4 relative z-30 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 flex justify-center">
             <img 
