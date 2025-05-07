@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -18,6 +19,10 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // Adding TPAHLA variants
+        "tpahla-primary": "bg-tpahla-purple text-white hover:bg-tpahla-darkpurple",
+        "tpahla-secondary": "bg-tpahla-gold text-white hover:bg-amber-600",
+        "tpahla-outline": "border-2 border-tpahla-purple text-tpahla-purple hover:bg-tpahla-purple hover:text-white"
       },
       size: {
         default: "h-10 px-4 py-2",
