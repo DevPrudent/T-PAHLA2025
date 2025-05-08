@@ -8,7 +8,7 @@ const HeroSection = () => {
       {/* Static Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/lovable-uploads/e71f763c-dd08-4592-8828-e8a2cf1e27d1.png" 
+          src="/lovable-uploads/e3b6554c-d090-4298-946e-9e71a11f3a2b.png" 
           alt="TPAHLA Award Ceremony" 
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -21,7 +21,7 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 flex justify-center">
             <img 
-              src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
+              src="/lovable-uploads/ab2b303e-1c3d-4b02-b6d2-e1a189a91287.png" 
               alt="TPAHLA Gold Logo" 
               className="h-32 md:h-40 animate-fade-in"
             />
