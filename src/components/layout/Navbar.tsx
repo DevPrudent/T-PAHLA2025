@@ -48,7 +48,9 @@ const Navbar = () => {
               alt="TPAHLA Logo" 
               className="h-12 md:h-16"
             />
-            <span className="sr-only">TPAHLA</span>
+            <span className={`ml-2 font-serif font-bold text-lg ${isScrolled ? 'text-tpahla-darkgreen' : 'text-white'}`}>
+              TPAHLA 2025
+            </span>
           </Link>
         </div>
 
@@ -60,8 +62,8 @@ const Navbar = () => {
               to={link.href}
               className={`px-3 py-2 text-sm font-medium transition-colors ${
                 isActive(link.href) 
-                  ? 'text-tpahla-darkgreen font-bold border-b-2 border-tpahla-gold' 
-                  : 'text-gray-700 hover:text-tpahla-darkgreen'
+                  ? (isScrolled ? 'text-tpahla-darkgreen font-bold border-b-2 border-tpahla-gold' : 'text-tpahla-gold font-bold border-b-2 border-tpahla-gold')
+                  : (isScrolled ? 'text-gray-700 hover:text-tpahla-darkgreen' : 'text-white hover:text-tpahla-gold')
               }`}
             >
               {link.name}
@@ -72,7 +74,7 @@ const Navbar = () => {
         {/* Mobile Nav Button */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-gray-700 focus:outline-none"
+          className={`md:hidden focus:outline-none ${isScrolled ? 'text-gray-700' : 'text-white'}`}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>

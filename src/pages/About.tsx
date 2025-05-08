@@ -1,137 +1,65 @@
 
+import React from 'react';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import PageBreadcrumb from '../components/layout/PageBreadcrumb';
 
 const About = () => {
+  const breadcrumbItems = [
+    { label: 'About', href: '/about' }
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Page Header */}
-      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">About TPAHLA</h1>
-          <p className="text-lg max-w-3xl mx-auto">
-            Celebrating Excellence in Humanitarian Leadership Across Africa
-          </p>
-        </div>
-      </div>
-      
-      <main className="py-12">
-        {/* Mission Section */}
-        <section className="container mx-auto px-4 mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen">Our Mission</h2>
-              <p className="text-gray-700 mb-4">
-                The Pan-African Humanitarian Leadership Award (TPAHLA) was established with a clear mission: to recognize, celebrate, and amplify the impact of exceptional individuals and organizations driving positive change across Africa.
-              </p>
-              <p className="text-gray-700 mb-4">
-                Our awards program seeks to highlight humanitarian excellence, inspire the next generation of leaders, and create a network of changemakers who can collaborate to address Africa's most pressing challenges.
-              </p>
-              <p className="text-gray-700">
-                By shining a spotlight on outstanding humanitarian work, TPAHLA aims to encourage greater investment in sustainable development initiatives that transform lives and communities throughout the continent.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src="/lovable-uploads/f2c9f7af-0587-4948-a828-bdef2efe5c76.png" 
-                  alt="TPAHLA Mission" 
-                  className="w-full h-auto"
-                />
-              </div>
-              <div className="absolute -bottom-4 -right-4 p-6 bg-tpahla-gold text-white rounded shadow-lg">
-                <p className="text-2xl font-serif">Est. 2020</p>
-              </div>
-            </div>
-          </div>
-        </section>
+      <main className="pt-20">
+        <PageBreadcrumb items={breadcrumbItems} />
         
-        {/* Vision Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen">Our Vision</h2>
-              <p className="text-xl text-gray-700">
-                To create a unified platform that identifies, celebrates, and amplifies the impact of humanitarian leaders working tirelessly to address Africa's most pressing challenges.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-serif font-bold mb-3 text-center">Inspiration</h3>
-                <p className="text-gray-600 text-center">
-                  Inspiring the next generation of humanitarian leaders to drive positive change across Africa.
-                </p>
-              </div>
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold mb-6">About TPAHLA</h2>
               
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                  </svg>
+              <div className="prose max-w-none">
+                <p className="text-lg mb-6">
+                  The Pan-African Humanitarian Leadership Award (TPAHLA) is a prestigious recognition program honoring outstanding leaders, organizations, and institutions that have made significant contributions to humanitarian service across Africa.
+                </p>
+                
+                <div className="mb-8">
+                  <h3 className="text-xl font-serif font-bold mb-4">Our Vision</h3>
+                  <p>
+                    To inspire and promote humanitarian excellence across Africa by recognizing those who have demonstrated exceptional leadership and service in addressing humanitarian challenges and improving lives.
+                  </p>
                 </div>
-                <h3 className="text-xl font-serif font-bold mb-3 text-center">Connection</h3>
-                <p className="text-gray-600 text-center">
-                  Building networks among humanitarian leaders to foster collaboration and knowledge sharing.
-                </p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                  </svg>
+                
+                <div className="mb-8">
+                  <h3 className="text-xl font-serif font-bold mb-4">Our Mission</h3>
+                  <p>
+                    We identify, celebrate, and promote extraordinary humanitarian leadership across Africa, fostering a culture of service, collaboration, and innovation in addressing pressing humanitarian issues.
+                  </p>
                 </div>
-                <h3 className="text-xl font-serif font-bold mb-3 text-center">Recognition</h3>
-                <p className="text-gray-600 text-center">
-                  Acknowledging the tireless efforts of individuals and organizations making a difference in African communities.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Organizers Section */}
-        <section className="container mx-auto px-4 py-16">
-          <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-darkgreen">The Organizers</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center p-4">
-                <img 
-                  src="/lovable-uploads/c9f09db1-f947-4d65-b7d6-7abc1351c1ff.png" 
-                  alt="IHSD Logo" 
-                  className="h-32 object-contain" 
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-serif font-bold mb-3">Institute for Humanitarian Studies and Social Development</h3>
-                <p className="text-gray-600">
-                  The IHSSD is a leading research and advocacy organization dedicated to advancing humanitarian principles and sustainable development across Africa. With a network of experts and partners, IHSSD provides thought leadership, conducts research, and implements programs that address social development challenges.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-tpahla-gold flex items-center justify-center p-4">
-                <img 
-                  src="/lovable-uploads/acbcde8d-b2f3-4145-adcb-8e72634f8d74.png" 
-                  alt="Hempawa Consult Logo" 
-                  className="h-32 object-contain" 
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-serif font-bold mb-3">Hempawa Consult</h3>
-                <p className="text-gray-600">
-                  Hempawa Consult is a premier consulting firm specializing in event management, strategic communications, and project implementation across Africa. With extensive experience organizing high-profile events, Hempawa brings a wealth of expertise to ensure TPAHLA achieves its goals of recognizing and celebrating humanitarian excellence.
-                </p>
+                
+                <div className="mb-8">
+                  <h3 className="text-xl font-serif font-bold mb-4">Core Values</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li><strong>Excellence:</strong> Recognizing and promoting the highest standards of humanitarian service.</li>
+                    <li><strong>Integrity:</strong> Upholding ethical principles and transparency in all our operations.</li>
+                    <li><strong>Inclusivity:</strong> Embracing diversity and ensuring representation across different regions, sectors, and demographics.</li>
+                    <li><strong>Impact:</strong> Focusing on recognizing work that creates meaningful, sustainable change in communities.</li>
+                    <li><strong>Innovation:</strong> Celebrating creative approaches to addressing humanitarian challenges.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-serif font-bold mb-4">Our History</h3>
+                  <p>
+                    Founded in 2020, TPAHLA emerged from a vision to spotlight the often unrecognized humanitarian heroes across the African continent. What began as a small recognition ceremony has grown into a continent-wide celebration of humanitarian excellence, drawing participants and nominees from all regions of Africa.
+                  </p>
+                  <p className="mt-4">
+                    The awards are organized by the Institute for Humanitarian Studies and Social Development (IHSSD) in partnership with Hempawa Consult, bringing together expertise in humanitarian affairs, social development, and event management.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
