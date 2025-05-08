@@ -1,10 +1,7 @@
-
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-
 const About = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Navbar />
       
       {/* Page Header */}
@@ -35,14 +32,10 @@ const About = () => {
             </div>
             <div className="relative">
               <div className="rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src="/lovable-uploads/f2c9f7af-0587-4948-a828-bdef2efe5c76.png" 
-                  alt="TPAHLA Mission" 
-                  className="w-full h-auto"
-                />
+                <img alt="TPAHLA Mission" className="w-full h-auto" src="/lovable-uploads/73cabd00-698a-4407-8cbb-b158dc3fa958.png" />
               </div>
               <div className="absolute -bottom-4 -right-4 p-6 bg-tpahla-gold text-white rounded shadow-lg">
-                <p className="text-2xl font-serif">Est. 2020</p>
+                <p className="text-2xl font-serif">Est. 2025</p>
               </div>
             </div>
           </div>
@@ -105,11 +98,7 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center p-4">
-                <img 
-                  src="/lovable-uploads/c9f09db1-f947-4d65-b7d6-7abc1351c1ff.png" 
-                  alt="IHSD Logo" 
-                  className="h-32 object-contain" 
-                />
+                <img alt="IHSD Logo" className="h-32 object-contain" src="/lovable-uploads/b97e6de0-72fd-47c6-8429-8d3be85dd2af.png" />
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-serif font-bold mb-3">Institute for Humanitarian Studies and Social Development</h3>
@@ -120,12 +109,8 @@ const About = () => {
             </div>
             
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-tpahla-gold flex items-center justify-center p-4">
-                <img 
-                  src="/lovable-uploads/acbcde8d-b2f3-4145-adcb-8e72634f8d74.png" 
-                  alt="Hempawa Consult Logo" 
-                  className="h-32 object-contain" 
-                />
+              <div className="h-48 flex items-center justify-center p-4 bg-red-900">
+                <img alt="Hempawa Consult Logo" className="h-32 object-contain" src="/lovable-uploads/c8a15bae-860c-4927-9901-dfe7459b6a8e.png" />
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-serif font-bold mb-3">Hempawa Consult</h3>
@@ -139,8 +124,6 @@ const About = () => {
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
