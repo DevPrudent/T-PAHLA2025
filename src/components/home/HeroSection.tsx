@@ -1,60 +1,20 @@
 
 import { ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselPrevious, 
-  CarouselNext 
-} from "@/components/ui/carousel";
 
 const HeroSection = () => {
-  const heroImages = [
-    {
-      src: "/lovable-uploads/e71f763c-dd08-4592-8828-e8a2cf1e27d1.png",
-      alt: "TPAHLA Award Ceremony"
-    },
-    {
-      src: "/lovable-uploads/20cd78e2-1d38-4072-94b5-f6bca2d0ba60.png",
-      alt: "TPAHLA Award Winners"
-    },
-    {
-      src: "/lovable-uploads/5c0c9c79-afbf-4e14-8803-9601780da78e.png",
-      alt: "TPAHLA Award Stage"
-    },
-    {
-      src: "/lovable-uploads/fb4bc1cc-d6a6-4be9-907f-939c06631e83.png",
-      alt: "TPAHLA Award Winners with Trophies"
-    }
-  ];
-
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Slider */}
-      <Carousel className="absolute inset-0 z-0 w-full h-full">
-        <CarouselContent className="h-full">
-          {heroImages.map((image, index) => (
-            <CarouselItem key={index} className="h-full w-full">
-              <div className="h-full w-full bg-cover bg-center relative">
-                <img 
-                  src={image.src} 
-                  alt={image.alt} 
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-10"></div>
-                <div className="absolute inset-0 african-pattern opacity-30 z-20"></div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div className="absolute bottom-[15%] left-4 z-20">
-          <CarouselPrevious className="bg-black/30 hover:bg-black/50 text-white border-none" />
-        </div>
-        <div className="absolute bottom-[15%] right-4 z-20">
-          <CarouselNext className="bg-black/30 hover:bg-black/50 text-white border-none" />
-        </div>
-      </Carousel>
+      {/* Static Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/lovable-uploads/e71f763c-dd08-4592-8828-e8a2cf1e27d1.png" 
+          alt="TPAHLA Award Ceremony" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/70 z-10"></div>
+        <div className="absolute inset-0 african-pattern opacity-30 z-20"></div>
+      </div>
       
       {/* Content */}
       <div className="container mx-auto px-4 relative z-30 text-center">
