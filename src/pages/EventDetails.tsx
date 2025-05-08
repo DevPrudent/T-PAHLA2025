@@ -1,108 +1,80 @@
-
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-
 const EventDetails = () => {
-  const schedule = [
-    {
-      date: "October 15, 2025",
-      title: "Arrivals & Welcome Reception",
-      events: [
-        {
-          time: "All Day",
-          name: "Finalist & Guest Arrivals",
-          description: "Welcome to Abuja, Nigeria. Check-in at the Abuja Continental Hotel."
-        },
-        {
-          time: "18:00 - 20:00",
-          name: "Welcome Reception",
-          description: "An informal networking event for early arrivals. Cocktails and light refreshments will be served."
-        }
-      ]
-    },
-    {
-      date: "October 16, 2025",
-      title: "Conference & Workshops",
-      events: [
-        {
-          time: "09:00 - 10:30",
-          name: "Opening Ceremony",
-          description: "Official welcome and opening remarks from TPAHLA organizers and distinguished guests."
-        },
-        {
-          time: "11:00 - 13:00",
-          name: "Panel Discussion: The Future of Humanitarian Leadership in Africa",
-          description: "Leading experts discuss emerging trends and challenges in humanitarian work across the continent."
-        },
-        {
-          time: "14:00 - 16:00",
-          name: "Workshops",
-          description: "Specialized workshops on various aspects of humanitarian work, leadership, and sustainable development."
-        },
-        {
-          time: "19:00 - 21:00",
-          name: "Cultural Evening",
-          description: "Celebration of African cultural heritage with performances, art, and cuisine."
-        }
-      ]
-    },
-    {
-      date: "October 17, 2025",
-      title: "Site Visits & Pre-Award Gala",
-      events: [
-        {
-          time: "09:00 - 12:00",
-          name: "Site Visits",
-          description: "Optional visits to humanitarian projects in and around Abuja."
-        },
-        {
-          time: "14:00 - 16:00",
-          name: "Finalists' Presentations",
-          description: "Award finalists share their work, impact, and vision for the future."
-        },
-        {
-          time: "19:00 - 22:00",
-          name: "Pre-Award Gala Dinner",
-          description: "Semi-formal dinner with special performances and keynote address."
-        }
-      ]
-    },
-    {
-      date: "October 18, 2025",
-      title: "Award Ceremony",
-      events: [
-        {
-          time: "10:00 - 12:00",
-          name: "Media Interviews",
-          description: "Press opportunities with finalists and organizers."
-        },
-        {
-          time: "14:00 - 16:00",
-          name: "Final Preparations",
-          description: "Rehearsals and preparation time for all participants."
-        },
-        {
-          time: "18:00 - 22:00",
-          name: "TPAHLA Awards Ceremony & Gala Dinner",
-          description: "The main event: awards presentation, dinner, entertainment, and celebration of humanitarian excellence."
-        }
-      ]
-    },
-    {
-      date: "October 19, 2025",
-      title: "Departures",
-      events: [
-        {
-          time: "All Day",
-          name: "Departures",
-          description: "Check-out and departures. Optional city tour for those with later flights."
-        }
-      ]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-white">
+  const schedule = [{
+    date: "October 15, 2025",
+    title: "Arrivals & Welcome Reception",
+    events: [{
+      time: "All Day",
+      name: "Finalist & Guest Arrivals",
+      description: "Welcome to Abuja, Nigeria. Check-in at the Abuja Continental Hotel."
+    }, {
+      time: "18:00 - 20:00",
+      name: "Welcome Reception",
+      description: "An informal networking event for early arrivals. Cocktails and light refreshments will be served."
+    }]
+  }, {
+    date: "October 16, 2025",
+    title: "Conference & Workshops",
+    events: [{
+      time: "09:00 - 10:30",
+      name: "Opening Ceremony",
+      description: "Official welcome and opening remarks from TPAHLA organizers and distinguished guests."
+    }, {
+      time: "11:00 - 13:00",
+      name: "Panel Discussion: The Future of Humanitarian Leadership in Africa",
+      description: "Leading experts discuss emerging trends and challenges in humanitarian work across the continent."
+    }, {
+      time: "14:00 - 16:00",
+      name: "Workshops",
+      description: "Specialized workshops on various aspects of humanitarian work, leadership, and sustainable development."
+    }, {
+      time: "19:00 - 21:00",
+      name: "Cultural Evening",
+      description: "Celebration of African cultural heritage with performances, art, and cuisine."
+    }]
+  }, {
+    date: "October 17, 2025",
+    title: "Site Visits & Pre-Award Gala",
+    events: [{
+      time: "09:00 - 12:00",
+      name: "Site Visits",
+      description: "Optional visits to humanitarian projects in and around Abuja."
+    }, {
+      time: "14:00 - 16:00",
+      name: "Finalists' Presentations",
+      description: "Award finalists share their work, impact, and vision for the future."
+    }, {
+      time: "19:00 - 22:00",
+      name: "Pre-Award Gala Dinner",
+      description: "Semi-formal dinner with special performances and keynote address."
+    }]
+  }, {
+    date: "October 18, 2025",
+    title: "Award Ceremony",
+    events: [{
+      time: "10:00 - 12:00",
+      name: "Media Interviews",
+      description: "Press opportunities with finalists and organizers."
+    }, {
+      time: "14:00 - 16:00",
+      name: "Final Preparations",
+      description: "Rehearsals and preparation time for all participants."
+    }, {
+      time: "18:00 - 22:00",
+      name: "TPAHLA Awards Ceremony & Gala Dinner",
+      description: "The main event: awards presentation, dinner, entertainment, and celebration of humanitarian excellence."
+    }]
+  }, {
+    date: "October 19, 2025",
+    title: "Departures",
+    events: [{
+      time: "All Day",
+      name: "Departures",
+      description: "Check-out and departures. Optional city tour for those with later flights."
+    }]
+  }];
+  return <div className="min-h-screen bg-white">
       <Navbar />
       
       {/* Page Header */}
@@ -135,11 +107,7 @@ const EventDetails = () => {
                 </div>
               </div>
               <div>
-                <img 
-                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" 
-                  alt="Abuja Continental Hotel" 
-                  className="rounded-lg shadow-lg"
-                />
+                <img alt="Abuja Continental Hotel" className="rounded-lg shadow-lg" src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" />
               </div>
             </div>
             
@@ -150,9 +118,9 @@ const EventDetails = () => {
                 <div>
                   <h4 className="font-bold text-gray-800 mb-2">Abuja Continental Hotel</h4>
                   <p className="text-gray-700 mb-4">
-                    Plot 701 Ahmadu Bello Way<br/>
-                    Cadastral Zone, Central Business District<br/>
-                    Abuja, FCT<br/>
+                    Plot 701 Ahmadu Bello Way<br />
+                    Cadastral Zone, Central Business District<br />
+                    Abuja, FCT<br />
                     Nigeria
                   </p>
                   <p className="text-gray-700 mb-2">
@@ -178,24 +146,20 @@ const EventDetails = () => {
             <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen text-center">Event Schedule</h2>
             
             <div className="space-y-8 mb-12">
-              {schedule.map((day, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+              {schedule.map((day, index) => <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="bg-tpahla-darkgreen text-white p-4">
                     <h3 className="text-xl font-medium">{day.date} - {day.title}</h3>
                   </div>
                   <div className="p-6">
-                    {day.events.map((event, idx) => (
-                      <div key={idx} className={`${idx !== 0 ? 'border-t border-gray-200 pt-4' : ''} ${idx !== day.events.length - 1 ? 'mb-4' : ''}`}>
+                    {day.events.map((event, idx) => <div key={idx} className={`${idx !== 0 ? 'border-t border-gray-200 pt-4' : ''} ${idx !== day.events.length - 1 ? 'mb-4' : ''}`}>
                         <div className="flex flex-wrap justify-between items-start">
                           <p className="font-medium text-tpahla-gold mb-1">{event.time}</p>
                           <h4 className="text-lg font-bold text-gray-800">{event.name}</h4>
                         </div>
                         <p className="text-gray-600">{event.description}</p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
             
             {/* Additional Activities */}
@@ -223,8 +187,6 @@ const EventDetails = () => {
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default EventDetails;
