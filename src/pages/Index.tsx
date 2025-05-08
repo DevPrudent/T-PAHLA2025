@@ -1,13 +1,10 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import HeroSection from "../components/home/HeroSection";
 import CountdownTimer from "../components/home/CountdownTimer";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Navbar />
       
       <main>
@@ -21,11 +18,7 @@ const Index = () => {
               {/* About Preview */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center">
-                  <img 
-                    src="/lovable-uploads/506fdaba-d5fe-4d7b-9d67-c78986d9b117.png" 
-                    alt="About TPAHLA" 
-                    className="h-full w-full object-cover" 
-                  />
+                  <img alt="About TPAHLA" className="h-full w-full object-cover" src="/lovable-uploads/d6cbd5f9-4bd4-447d-912d-aa8223a71b4f.jpg" />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-serif font-bold mb-3">About TPAHLA</h3>
@@ -41,11 +34,7 @@ const Index = () => {
               {/* Awards Preview */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-48 overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/3577e299-c4bd-48c5-a254-0ee248a54f63.png"
-                    alt="Award Categories" 
-                    className="h-full w-full object-cover"
-                  />
+                  <img alt="Award Categories" className="h-full w-full object-cover" src="/lovable-uploads/124ea25a-f191-4796-a71f-4d95ea937e26.jpg" />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-serif font-bold mb-3">Award Categories</h3>
@@ -61,11 +50,7 @@ const Index = () => {
               {/* Registration Preview */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-48 overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/b000f148-629a-44df-a8fb-5b95d30c253b.png"
-                    alt="Join The Event" 
-                    className="h-full w-full object-cover"
-                  />
+                  <img alt="Join The Event" className="h-full w-full object-cover" src="/lovable-uploads/2c11f3df-79f0-41bc-b465-50ab1387c508.png" />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-serif font-bold mb-3">Join The Event</h3>
@@ -101,8 +86,6 @@ const Index = () => {
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
