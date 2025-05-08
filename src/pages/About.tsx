@@ -36,7 +36,7 @@ const About = () => {
             <div className="relative">
               <div className="rounded-lg overflow-hidden shadow-xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1541971297127-c4e7c90e704e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" 
+                  src="/lovable-uploads/f2c9f7af-0587-4948-a828-bdef2efe5c76.png" 
                   alt="TPAHLA Mission" 
                   className="w-full h-auto"
                 />
@@ -104,10 +104,10 @@ const About = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center">
+              <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center p-4">
                 <img 
-                  src="/lovable-uploads/25dfd870-49b9-4a52-b0b4-5b02ea568e1c.png" 
-                  alt="TPAHLA Logo" 
+                  src="/lovable-uploads/c9f09db1-f947-4d65-b7d6-7abc1351c1ff.png" 
+                  alt="IHSD Logo" 
                   className="h-32 object-contain" 
                 />
               </div>
@@ -120,10 +120,10 @@ const About = () => {
             </div>
             
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-tpahla-gold flex items-center justify-center">
+              <div className="h-48 bg-tpahla-gold flex items-center justify-center p-4">
                 <img 
-                  src="/lovable-uploads/e9b4d7bd-47bb-4b51-955b-f0d915a73119.png" 
-                  alt="TPAHLA Logo" 
+                  src="/lovable-uploads/acbcde8d-b2f3-4145-adcb-8e72634f8d74.png" 
+                  alt="Hempawa Consult Logo" 
                   className="h-32 object-contain" 
                 />
               </div>

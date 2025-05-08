@@ -22,9 +22,9 @@ const Index = () => {
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center">
                   <img 
-                    src="/lovable-uploads/d50cd556-9676-462a-a4d9-2b4f8db58f81.png" 
-                    alt="TPAHLA Full Logo" 
-                    className="h-32 object-contain" 
+                    src="/lovable-uploads/506fdaba-d5fe-4d7b-9d67-c78986d9b117.png" 
+                    alt="About TPAHLA" 
+                    className="h-full w-full object-cover" 
                   />
                 </div>
                 <div className="p-6">
@@ -40,10 +40,12 @@ const Index = () => {
               
               {/* Awards Preview */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="h-48 bg-gradient-to-br from-tpahla-gold to-amber-600 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/3577e299-c4bd-48c5-a254-0ee248a54f63.png"
+                    alt="Award Categories" 
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-serif font-bold mb-3">Award Categories</h3>
@@ -58,11 +60,12 @@ const Index = () => {
               
               {/* Registration Preview */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="h-48 bg-gradient-to-r from-tpahla-darkgreen to-tpahla-brightgreen flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/b000f148-629a-44df-a8fb-5b95d30c253b.png"
+                    alt="Join The Event" 
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-serif font-bold mb-3">Join The Event</h3>

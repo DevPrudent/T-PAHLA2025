@@ -12,20 +12,20 @@ import {
 const HeroSection = () => {
   const heroImages = [
     {
-      src: "/lovable-uploads/fb4bc1cc-d6a6-4be9-907f-939c06631e83.png",
-      alt: "TPAHLA Award Winners with Trophies"
+      src: "/lovable-uploads/e71f763c-dd08-4592-8828-e8a2cf1e27d1.png",
+      alt: "TPAHLA Award Ceremony"
     },
     {
-      src: "/lovable-uploads/d1e179de-04ff-44a0-99ca-de56cc1d0ef7.png",
+      src: "/lovable-uploads/20cd78e2-1d38-4072-94b5-f6bca2d0ba60.png",
       alt: "TPAHLA Award Winners"
     },
     {
-      src: "/lovable-uploads/6ddca7b3-b3f0-4db0-aad3-1e16f7820a36.png",
+      src: "/lovable-uploads/5c0c9c79-afbf-4e14-8803-9601780da78e.png",
       alt: "TPAHLA Award Stage"
     },
     {
-      src: "https://images.unsplash.com/photo-1473163928189-364b2c4e1135?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
-      alt: "African landscape"
+      src: "/lovable-uploads/fb4bc1cc-d6a6-4be9-907f-939c06631e83.png",
+      alt: "TPAHLA Award Winners with Trophies"
     }
   ];
 
@@ -36,9 +36,7 @@ const HeroSection = () => {
         <CarouselContent className="h-full">
           {heroImages.map((image, index) => (
             <CarouselItem key={index} className="h-full w-full">
-              <div 
-                className="h-full w-full bg-cover bg-center relative"
-              >
+              <div className="h-full w-full bg-cover bg-center relative">
                 <img 
                   src={image.src} 
                   alt={image.alt} 
