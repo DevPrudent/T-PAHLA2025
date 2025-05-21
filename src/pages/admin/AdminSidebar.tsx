@@ -1,5 +1,4 @@
-
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +10,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Folder, Users, ListChecks, Settings, BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button"; // For logout button
+import { LayoutDashboard, Folder, Users, ListChecks, Settings, BarChart3, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
+import { toast } from "sonner";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -29,6 +31,19 @@ const futureAdminNavItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
+  const { user, signOut, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully!");
+      // AuthContext's signOut already navigates to /admin/login
+    } catch (error) {
+      toast.error("Logout failed. Please try again.");
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <Sidebar>
@@ -38,49 +53,59 @@ export function AdminSidebar() {
           <span className="font-semibold text-lg text-tpahla-gold">Admin Panel</span>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
-          <SidebarMenu>
-            {adminNavItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(item.href))}
-                >
-                  <Link to={item.href}>
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-        {/* Placeholder for future items if needed
-        <SidebarGroup>
-          <SidebarGroupLabel>Future</SidebarGroupLabel>
-          <SidebarMenu>
-            {futureAdminNavItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.href}
-                  disabled // Disabled for now
-                >
-                  <Link to={item.href}>
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-        */}
+      <SidebarContent className="flex flex-col justify-between">
+        <div>
+          <SidebarGroup>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
+            <SidebarMenu>
+              {adminNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(item.href))}
+                  >
+                    <Link to={item.href}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          {/* Placeholder for future items if needed
+          <SidebarGroup>
+            <SidebarGroupLabel>Future</SidebarGroupLabel>
+            <SidebarMenu>
+              {futureAdminNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.href}
+                    disabled // Disabled for now
+                  >
+                    <Link to={item.href}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          */}
+        </div>
       </SidebarContent>
-      <SidebarFooter className="p-4">
-        {/* Optional: Add footer content like user profile or logout */}
+      <SidebarFooter className="p-4 border-t">
+        {user && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            Logged in as: <span className="font-medium">{user.email}</span>
+          </div>
+        )}
+        <Button variant="outline" className="w-full" onClick={handleLogout} disabled={authLoading}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
