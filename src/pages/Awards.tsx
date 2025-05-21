@@ -3,95 +3,137 @@ import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, X } from "lucide-react";
+import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, SearchHeart } from "lucide-react"; // Added more icons
+
+// Define placeholder icons, could be actual components later
+const PlaceholderIcon = ({ className = "" }: { className?: string }) => (
+  <div className={`w-16 h-16 bg-tpahla-neutral-light rounded-md flex items-center justify-center border-2 border-tpahla-gold/50 ${className}`}>
+    <Award className="text-tpahla-gold opacity-70" size={28} />
+  </div>
+);
+
+
+const awardClusters = [
+  {
+    clusterTitle: "PAN-AFRICAN HUMANITARIAN LEADERSHIP & LEGACY",
+    IconComponent: Users,
+    description: "Recognizing individuals and organizations with exceptional leadership and significant, lasting contributions to humanitarian causes across Africa.",
+    awards: [
+      "African Humanitarian Hero (Highest Honor)",
+      "Pan-African Icon of Humanitarian Leadership",
+      "Humanitarian Lifetime Achievement Award",
+      "Distinguished Traditional Leadership for Humanitarian Support",
+      "Outstanding Humanitarian Organization of the Year"
+    ]
+  },
+  {
+    clusterTitle: "EXEMPLARY GOVERNANCE FOR HUMANITARIAN IMPACT",
+    IconComponent: ShieldCheck,
+    description: "Honoring public officials and governance structures that have demonstrably fostered environments conducive to humanitarian progress and development.",
+    awards: [
+      "Humanitarian Leadership in Governance Award",
+      "Best Humanitarian-Friendly President/Head of State Award",
+      "Best Humanitarian-Friendly First Lady Award",
+      "Best Humanitarian-Friendly Governor Award",
+      "Best Humanitarian-Friendly Minister of Education Award"
+    ]
+  },
+  {
+    clusterTitle: "YOUTH EMPOWERMENT & GENDER EQUALITY LEADERSHIP",
+    IconComponent: Users2,
+    description: "Celebrating leaders and initiatives that champion youth development and advance gender equality throughout the African continent.",
+    awards: [
+      "Humanitarian Youth Leadership Award",
+      "Gender Equity & Women Empowerment Award",
+      "Outstanding Public Office Holder for Gender Equality & Women’s Empowerment Award",
+      "Future Humanitarian Leaders Award"
+    ]
+  },
+  {
+    clusterTitle: "SUSTAINABLE DEVELOPMENT & ENVIRONMENTAL STEWARDSHIP",
+    IconComponent: Leaf,
+    description: "Recognizing efforts towards environmental protection, sustainable resource management, and climate action in Africa.",
+    awards: [
+      "Sustainable Development & Environmental Stewardship Award",
+      "Climate Change Leadership Award",
+      "Renewable Energy & Humanitarian Infrastructure Award",
+      "Clean Water, Sanitation & Hygiene (WASH) Award"
+    ]
+  },
+  {
+    clusterTitle: "HUMANITARIAN INNOVATION & TECHNOLOGY",
+    IconComponent: Lightbulb,
+    description: "Highlighting innovative solutions and technological advancements that enhance humanitarian effectiveness and outreach.",
+    awards: [
+      "Humanitarian Innovation & Technology Award",
+      "Corporate Social Responsibility (CSR) Excellence Award",
+      "Media & Advocacy for Humanitarian Excellence Award"
+    ]
+  },
+  {
+    clusterTitle: "DISASTER RELIEF & CRISIS MANAGEMENT",
+    IconComponent: Home, // Placeholder for something like a shield or emergency icon
+    description: "Acknowledging exceptional response and management in disaster situations and humanitarian crises.",
+    awards: [
+      "Disaster Relief & Emergency Response Award",
+      "Excellence in Disaster Relief & National Emergency Management Award",
+      "Humanitarian Food Security & Nutrition Award"
+    ]
+  },
+  {
+    clusterTitle: "PUBLIC SECTOR AND INSTITUTIONAL RECOGNITION",
+    IconComponent: Landmark,
+    description: "Honoring public sector bodies and institutions for their significant contributions to humanitarian development and good governance.",
+    awards: [
+      "Best Minister for Infrastructure & Humanitarian Development Award",
+      "Best Humanitarian-Friendly Minister of Finance Award",
+      "Best Humanitarian-Friendly Law Maker Award",
+      "Excellence in Anti-Corruption Leadership for Humanitarian Development Award"
+    ]
+  },
+  {
+    clusterTitle: "HUMANITARIAN, SOCIAL & CULTURAL CONTRIBUTIONS",
+    IconComponent: BookOpen,
+    description: "Recognizing impactful work in arts, culture, social initiatives, and education that promote humanitarian values.",
+    awards: [
+      "Arts, Culture & Humanitarian Storytelling Award",
+      "Social Impact Award",
+      "Humanitarian Education & Capacity-Building Award",
+      "Excellence in Humanitarian Advocacy Award"
+    ]
+  },
+  {
+    clusterTitle: "HUMAN RIGHTS & SOCIAL JUSTICE",
+    IconComponent: Scale,
+    description: "Celebrating champions of human rights, social justice, and support for vulnerable populations.",
+    awards: [
+      "Human Rights & Social Justice Award",
+      "Migration & Humanitarian Border Assistance Award"
+    ]
+  },
+  {
+    clusterTitle: "HUMANITARIAN RESEARCH & DEVELOPMENT",
+    IconComponent: SearchHeart,
+    description: "Honoring contributions to research, policy development, and public health that advance humanitarian goals.",
+    awards: [
+      "Humanitarian Scientific Research & Policy Development Award",
+      "Excellence in Public Health & Crisis Management Leadership Award"
+    ]
+  }
+];
+
 
 const Awards = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  const awardCategories = [
-    {
-      title: "Humanitarian Leadership & Legacy",
-      description: "Recognizing individuals who have demonstrated exceptional leadership in humanitarian initiatives with long-lasting impact across African communities.",
-      criteria: ["Demonstrated leadership in humanitarian work", "Measurable impact on communities", "Longevity of contributions", "Innovation in addressing challenges"],
-      icon: "/lovable-uploads/92b50466-de02-4bd7-be38-28457a5f67f4.png",
-      awards: [
-        "African Humanitarian Hero (Highest Honor)",
-        "Pan-African Icon of Humanitarian Leadership",
-        "Humanitarian Lifetime Achievement Award",
-        "Distinguished Traditional Leadership for Humanitarian Support",
-        "Outstanding Humanitarian Organization of the Year"
-      ]
-    },
-    {
-      title: "Youth Empowerment & Gender Equality",
-      description: "Honoring leaders who have made significant contributions to advancing youth development and gender equality in Africa.",
-      criteria: ["Innovative youth programs", "Advancement of gender equality", "Educational initiatives", "Empowerment outcomes"],
-      icon: "/lovable-uploads/a00d42e3-b690-4797-be0e-d243e4646af2.png",
-      awards: [
-        "Humanitarian Youth Leadership Award",
-        "Gender Equity & Women Empowerment Award",
-        "Outstanding Public Office Holder for Gender Equality & Women's Empowerment Award",
-        "Future Humanitarian Leaders Award"
-      ]
-    },
-    {
-      title: "Disaster Relief & Crisis Management",
-      description: "Celebrating organizations and individuals who have shown exceptional response to disasters and crisis situations in Africa.",
-      criteria: ["Rapid and effective response", "Lives saved and improved", "Resource mobilization", "Sustainable recovery support"],
-      icon: "/lovable-uploads/13d00a6d-4190-4282-ab91-94a117e549c4.png",
-      awards: [
-        "Disaster Relief & Emergency Response Award",
-        "Excellence in Disaster Relief & National Emergency Management Award",
-        "Humanitarian Food Security & Nutrition Award"
-      ]
-    },
-    {
-      title: "Health & Wellbeing",
-      description: "Recognizing outstanding contributions to improving healthcare access and wellbeing across African communities.",
-      criteria: ["Healthcare access improvements", "Disease prevention initiatives", "Mental health support", "Innovative health solutions"],
-      icon: "/lovable-uploads/b06f4b3d-06e0-424b-b0ae-8497f22a838e.png",
-      awards: [
-        "Excellence in Public Health & Crisis Management Leadership Award",
-        "Healthcare Innovation Award",
-        "Mental Health Advocacy Award",
-        "Community Health Empowerment Award"
-      ]
-    },
-    {
-      title: "Environmental Sustainability",
-      description: "Honoring individuals and organizations championing environmental conservation and sustainable practices in Africa.",
-      criteria: ["Environmental protection initiatives", "Community involvement", "Sustainable resource management", "Climate action leadership"],
-      icon: "/lovable-uploads/e3b6554c-d090-4298-946e-9e71a11f3a2b.png",
-      awards: [
-        "Sustainable Development & Environmental Stewardship Award",
-        "Climate Change Leadership Award",
-        "Renewable Energy & Humanitarian Infrastructure Award",
-        "Clean Water, Sanitation & Hygiene (WASH) Award"
-      ]
-    },
-    {
-      title: "Education & Capacity Building",
-      description: "Celebrating exceptional contributions to education and skills development across Africa.",
-      criteria: ["Educational access improvements", "Quality of education initiatives", "Skills development programs", "Educational infrastructure"],
-      icon: "/lovable-uploads/4a485718-b992-40c2-996e-3ab12464999b.png",
-      awards: [
-        "Humanitarian Education & Capacity-Building Award",
-        "Educational Innovation Award",
-        "Skills Development & Youth Empowerment Award",
-        "Academic Leadership for Social Change Award"
-      ]
-    }
-  ];
+  const [selectedCluster, setSelectedCluster] = useState<(typeof awardClusters[0]) | null>(null);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Page Header */}
-      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white">
+      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">Award Categories</h1>
-          <p className="text-lg max-w-3xl mx-auto">
+          <h1 className="text-4xl font-serif font-bold mb-4 text-tpahla-gold">Award Categories - TPAHLA 2025</h1>
+          <p className="text-lg max-w-3xl mx-auto text-tpahla-text-secondary">
             Recognizing Excellence in Various Facets of Humanitarian Leadership
           </p>
         </div>
@@ -99,62 +141,70 @@ const Awards = () => {
       
       <main className="py-12">
         <section className="container mx-auto px-4 mb-16">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <p className="text-gray-700">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <p className="text-tpahla-text-secondary">
               The Pan-African Humanitarian Leadership Award celebrates excellence across diverse areas of humanitarian work. Each category recognizes unique contributions to the development and wellbeing of African communities.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {awardCategories.map((category, index) => (
+            {awardClusters.map((cluster, index) => (
               <div 
                 key={index} 
-                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition-transform hover:-translate-y-1 cursor-pointer"
-                onClick={() => setSelectedCategory(category)}
+                className="bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20 hover:shadow-tpahla-gold/30 hover:border-tpahla-gold/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+                onClick={() => setSelectedCluster(cluster)}
               >
-                <div className="h-2 bg-tpahla-purple"></div>
+                <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
                 <div className="p-6">
-                  <div className="flex items-center justify-center mb-4">
-                    <img 
-                      src={category.icon} 
-                      alt={category.title}
-                      className="w-16 h-16 object-contain" 
-                    />
+                  <div className="flex items-center justify-center mb-6">
+                    <PlaceholderIcon />
                   </div>
-                  <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-darkgreen text-center">{category.title}</h3>
-                  <p className="text-gray-600 mb-4">{category.description}</p>
-                  <div>
-                    <h4 className="font-medium text-gray-700 mb-2">Key Criteria:</h4>
-                    <ul className="list-disc pl-5 text-gray-600">
-                      {category.criteria.map((criterion, i) => (
-                        <li key={i}>{criterion}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center h-16 flex items-center justify-center">{cluster.clusterTitle}</h3>
+                  <p className="text-tpahla-text-secondary text-sm mb-4 h-20 overflow-hidden">{cluster.description}</p>
                 </div>
-                <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                  <div className="text-center text-sm text-tpahla-purple font-medium">Click to view awards in this category</div>
+                <div className="px-6 py-4 bg-tpahla-neutral-light border-t border-tpahla-gold/10">
+                  <div className="text-center text-sm text-tpahla-gold font-medium group-hover:text-gradient-gold flex items-center justify-center">
+                    View Awards in this Cluster <ChevronRight size={18} className="ml-1 transform transition-transform group-hover:translate-x-1" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </section>
-        
-        {/* Past Winners Section */}
-        <section className="py-16 bg-gray-50">
+
+        {/* Unveiling of Humanitarian Ambassadors Section */}
+        <section className="py-16 bg-tpahla-neutral-light">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-darkgreen">Past Award Recipients</h2>
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-gold relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-24 after:h-1 after:bg-tpahla-emerald">
+                Unveiling of Humanitarian Ambassadors
+              </h2>
+              <p className="text-xl text-tpahla-text-secondary mb-8">
+                A Key Highlight of the TPAHLA 2025 Programme
+              </p>
+              <div className="bg-tpahla-neutral p-8 rounded-lg shadow-xl border-t-4 border-tpahla-gold">
+                <p className="text-tpahla-text-secondary text-left leading-relaxed">
+                  As part of the Pan-African Humanitarian Leadership Award (TPAHLA) programme, the unveiling of Humanitarian Ambassadors will be a key highlight. These ambassadors are outstanding individuals selected for their unwavering commitment to humanitarian service and their ability to advocate for and drive change across the continent. Their leadership qualities, impactful work in various humanitarian causes, and influence will serve as an inspiration to others and reinforce the spirit of altruism across Africa.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-gold relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-24 after:h-1 after:bg-tpahla-emerald">Past Award Recipients</h2>
             
             <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <p className="text-center text-gray-600 italic mb-6">
+              <div className="bg-tpahla-neutral rounded-lg shadow-xl p-8 border border-tpahla-gold/20">
+                <p className="text-center text-tpahla-text-secondary italic mb-6">
                   Information about past award recipients will be available after the inaugural ceremony on October 18, 2025.
                 </p>
                 <div className="flex justify-center">
                   <img 
                     src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
                     alt="TPAHLA Logo" 
-                    className="h-24" 
+                    className="h-24" // Logo might need adjustment for dark bg
                   />
                 </div>
               </div>
@@ -163,25 +213,25 @@ const Awards = () => {
         </section>
       </main>
       
-      <Dialog open={selectedCategory !== null} onOpenChange={() => setSelectedCategory(null)}>
-        <DialogContent className="max-w-3xl">
+      <Dialog open={selectedCluster !== null} onOpenChange={() => setSelectedCluster(null)}>
+        <DialogContent className="max-w-2xl bg-tpahla-neutral border-tpahla-gold text-tpahla-text-primary">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-serif flex items-center gap-2">
-              <Award className="text-tpahla-gold" size={24} />
-              <span>{selectedCategory?.title}</span>
+            <DialogTitle className="text-2xl font-serif flex items-center gap-3 text-tpahla-gold">
+              <Award className="text-tpahla-emerald" size={28} />
+              <span>{selectedCluster?.clusterTitle}</span>
             </DialogTitle>
-            <DialogDescription className="text-base text-gray-700 mt-2">
-              {selectedCategory?.description}
+            <DialogDescription className="text-base text-tpahla-text-secondary mt-2 pt-2 border-t border-tpahla-gold/20">
+              {selectedCluster?.description}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-tpahla-darkgreen border-b border-gray-200 pb-2">Awards in this Category</h3>
+          <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pr-2">
+            <h3 className="text-lg font-medium text-tpahla-gold border-b border-tpahla-gold/20 pb-2">Awards in this Cluster</h3>
             <ul className="space-y-3">
-              {selectedCategory?.awards.map((award, i) => (
-                <li key={i} className="p-3 bg-gray-50 rounded-md flex items-start">
-                  <Award className="text-tpahla-gold mr-2 flex-shrink-0 mt-0.5" size={18} />
+              {selectedCluster?.awards.map((award, i) => (
+                <li key={i} className="p-3 bg-tpahla-neutral-light rounded-md flex items-start shadow">
+                  <Award className="text-tpahla-gold mr-3 flex-shrink-0 mt-1" size={20} />
                   <div>
-                    <p className="font-medium">{award}</p>
+                    <p className="font-medium text-tpahla-text-primary">{award}</p>
                   </div>
                 </li>
               ))}
