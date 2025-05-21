@@ -1,21 +1,23 @@
+
 import { useState, useEffect, ChangeEvent } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast"; // Using the shadcn toast
+import { useToast } from "@/hooks/use-toast"; // Updated import path
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, QueryKey } from "@tanstack/react-query";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, UploadCloud, LucideIcon } from "lucide-react";
+import type { Json } from "@/integrations/supabase/types"; // Import Json type if needed for clarity, though not strictly necessary for the fix
 
-// Type for an award category, matching the database structure
+// Type for an award category, matching the database structure more closely for `awards`
 interface AwardCategory {
   id: string;
   cluster_title: string;
   description: string | null;
-  awards: string[] | null;
+  awards: string[] | null; // This is what our application logic expects
   icon_name: string | null;
   image_path: string | null;
   created_at?: string;
@@ -56,13 +58,24 @@ const Awards = () => {
   // Fetch award categories from Supabase
   const { data: awardClusters, isLoading, error: fetchError } = useQuery<AwardCategory[], Error>({
     queryKey: ['awardCategories'],
-    queryFn: async () => {
+    queryFn: async (): Promise<AwardCategory[]> => {
       const { data, error } = await supabase
         .from('award_categories')
         .select('*')
         .order('created_at', { ascending: true });
+
       if (error) throw error;
-      return data || [];
+
+      // Transform the data to match the AwardCategory interface, specifically the 'awards' field
+      const typedData = (data || []).map(item => ({
+        ...item,
+        // Supabase returns 'awards' as Json | null. We assert it as string[] | null
+        // based on how we inserted data (as JSON arrays of strings).
+        awards: item.awards as string[] | null,
+        // Ensure other fields that might be Json but are typed more specifically are handled if necessary,
+        // though 'awards' is the one causing the current error.
+      }));
+      return typedData;
     },
   });
 
@@ -297,6 +310,9 @@ const Awards = () => {
                 </li>
               ))}
             </ul>
+            {(!selectedCluster?.awards || selectedCluster?.awards?.length === 0) && (
+                <p className="text-tpahla-text-secondary italic">No specific awards listed for this cluster yet.</p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -307,3 +323,4 @@ const Awards = () => {
 };
 
 export default Awards;
+
