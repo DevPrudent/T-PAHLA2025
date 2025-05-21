@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -9,7 +10,8 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
+      // Adjust scroll threshold if needed, considering the new Navbar position
+      if (window.scrollY > 10) { // Changed from 50, as Navbar is already offset
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -37,7 +39,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-background shadow-lg py-2 border-b border-tpahla-gold/20' : 'bg-transparent py-4'}`}>
+    <header className={`fixed top-20 left-0 right-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-background shadow-lg py-2 border-b border-tpahla-gold/20' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
