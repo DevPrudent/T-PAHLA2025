@@ -6,14 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { useState } from "react";
 
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthContext"; // Import AuthProvider
 
-// Import layout components
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import NotificationBanner from "@/components/common/NotificationBanner";
-
-// Public pages
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Awards from "./pages/Awards";
@@ -26,21 +20,18 @@ import NotFound from "./pages/NotFound";
 
 // Admin pages
 import AdminLayout from "./pages/admin/AdminLayout";
-import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage"; // Import AdminLoginPage
 import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
 
+// Define a layout for public pages if needed, or just render them directly
 const PublicLayout = () => (
-  <div className="flex flex-col min-h-screen">
-    <NotificationBanner />
-    <Navbar />
-    <main className="flex-grow pt-24 bg-background"> {/* pt-24 for Navbar height (approx 6rem) */}
-      <Outlet />
-    </main>
-    <Footer />
-  </div>
+  <>
+    {/* You might have a Navbar/Footer component here for public pages */}
+    <Outlet />
+  </>
 );
 
 const App = () => {
@@ -52,7 +43,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AuthProvider>
+          <AuthProvider> {/* Wrap routes with AuthProvider */}
             <Routes>
               {/* Public Routes */}
               <Route element={<PublicLayout />}>
@@ -67,14 +58,16 @@ const App = () => {
               </Route>
 
               {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLoginPage />} />
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin/login" element={<AdminLoginPage />} /> {/* Login page route */}
+              <Route path="/admin" element={<AdminLayout />}> {/* Protected admin routes */}
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
                 <Route path="nominees" element={<NomineesPage />} />
                 <Route path="transactions" element={<TransactionsPage />} />
+                {/* Add other admin routes here as they are built */}
               </Route>
 
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

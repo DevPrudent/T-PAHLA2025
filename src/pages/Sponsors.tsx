@@ -1,16 +1,15 @@
 
-// Navbar and Footer imports are removed
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import SponsorSection from "../components/home/SponsorSection";
 
 const Sponsors = () => {
   return (
-    // Outer div and Navbar/Footer are removed. PublicLayout handles this.
-    // The bg-white for the page content needs to be considered.
-    // PublicLayout's main has bg-background. We can add bg-white to sections if needed.
-    <>
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      
       {/* Page Header */}
-      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white"> {/* This pt-24 might need to be removed or adjusted as Navbar is already accounted for by PublicLayout's main pt-24 */}
-                                                                  {/* For now, let's remove this specific pt-24, as the content starts below the navbar */}
+      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-serif font-bold mb-4">Sponsorship Opportunities</h1>
           <p className="text-lg max-w-3xl mx-auto">
@@ -19,10 +18,9 @@ const Sponsors = () => {
         </div>
       </div>
       
-      {/* main tag removed, now part of PublicLayout. Adding bg-white to content sections */}
-      <div className="bg-white"> {/* Added wrapper for bg-white if needed */}
+      <main className="py-12">
         {/* Sponsorship Overview */}
-        <section className="container mx-auto px-4 py-12 mb-16"> {/* Added py-12 for spacing */}
+        <section className="container mx-auto px-4 mb-16">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen">Why Sponsor TPAHLA?</h2>
             <p className="text-gray-700">
@@ -69,8 +67,10 @@ const Sponsors = () => {
           </div>
         </section>
         
+        {/* Sponsorship Packages */}
         <SponsorSection />
         
+        {/* Contact for Sponsorship */}
         <section className="container mx-auto px-4 py-12">
           <div className="max-w-2xl mx-auto bg-tpahla-darkgreen text-white rounded-lg shadow-lg overflow-hidden">
             <div className="p-8">
@@ -100,8 +100,10 @@ const Sponsors = () => {
             </div>
           </div>
         </section>
-      </div>
-    </>
+      </main>
+      
+      <Footer />
+    </div>
   );
 };
 
