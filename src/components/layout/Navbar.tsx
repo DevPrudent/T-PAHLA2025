@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -43,7 +42,6 @@ const Navbar = () => {
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
             <img alt="TPAHLA Logo" className="h-12 md:h-16" src="/lovable-uploads/62fe4193-0108-4af1-94b9-a45993de1c9d.png" />
-            <span className="text-xl font-serif font-bold text-tpahla-gold hidden sm:inline">TPAHLA 2025</span>
           </Link>
         </div>
 
