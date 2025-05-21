@@ -16,6 +16,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Form,
   FormControl,
   FormField,
@@ -25,6 +36,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -66,7 +79,8 @@ const categoryFormSchema = z.object({
   description: z.string().optional(),
   icon_name: z.string().optional(),
   awards: z.string().optional(), // Newline-separated awards
-  image_file: z.custom<FileList>((val) => val instanceof FileList, "Image is required").nullable().refine(files => files && files.length > 0, 'Image is required.'),
+  image_file: z.custom<FileList>((val) => val instanceof FileList).nullable().optional(),
+  remove_image: z.boolean().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -77,9 +91,27 @@ const fetchAwardCategories = async (): Promise<AwardCategoryRow[]> => {
   return data || [];
 };
 
+// Helper to get filename from Supabase public URL
+const getFileNameFromPath = (path: string | null | undefined): string | null => {
+    if (!path) return null;
+    try {
+        const url = new URL(path);
+        const pathSegments = url.pathname.split('/');
+        return pathSegments[pathSegments.length - 1];
+    } catch (e) { // Not a URL, might be just a path fragment
+        const pathSegments = path.split('/');
+        return pathSegments[pathSegments.length -1];
+    }
+}
+
 const CategoriesPage = () => {
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<AwardCategoryRow | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<AwardCategoryRow | null>(null);
+
 
   const { data: categories, isLoading, error } = useQuery<AwardCategoryRow[], Error>({
     queryKey: ['awardCategoriesAdmin'],
@@ -91,30 +123,50 @@ const CategoriesPage = () => {
     defaultValues: {
       cluster_title: '',
       description: '',
-      icon_name: iconList[0].name, // Default to first icon
+      icon_name: iconList[0].name,
       awards: '',
       image_file: null,
+      remove_image: false,
     },
   });
 
+  const handleOpenEditDialog = (category: AwardCategoryRow) => {
+    setEditingCategory(category);
+    form.reset({
+      cluster_title: category.cluster_title,
+      description: category.description || '',
+      icon_name: category.icon_name || iconList[0].name,
+      awards: category.awards ? (category.awards as string[]).join('\n') : '',
+      image_file: null, // File input cannot be pre-filled for security
+      remove_image: false,
+    });
+    setIsEditDialogOpen(true);
+  };
+  
+  const handleOpenDeleteDialog = (category: AwardCategoryRow) => {
+    setDeletingCategory(category);
+    setIsDeleteDialogOpen(true);
+  };
+
   const addCategoryMutation = useMutation({
     mutationFn: async (values: CategoryFormValues) => {
-      let imagePath: string | null = null;
-      if (values.image_file && values.image_file.length > 0) {
-        const file = values.image_file[0];
-        const fileName = `${Date.now()}-${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('category_images')
-          .upload(fileName, file);
-
-        if (uploadError) {
-          console.error('Image upload error:', uploadError);
-          throw new Error(`Image upload failed: ${uploadError.message}`);
-        }
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage.from('category_images').getPublicUrl(uploadData.path);
-        imagePath = publicUrlData.publicUrl;
+      if (!values.image_file || values.image_file.length === 0) {
+        throw new Error("Image is required when adding a new category.");
       }
+
+      let imagePath: string | null = null;
+      const file = values.image_file[0];
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('category_images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        throw new Error(`Image upload failed: ${uploadError.message}`);
+      }
+      const { data: publicUrlData } = supabase.storage.from('category_images').getPublicUrl(uploadData.path);
+      imagePath = publicUrlData.publicUrl;
 
       const awardsArray = values.awards?.split('\n').map(a => a.trim()).filter(a => a) || [];
 
@@ -128,18 +180,17 @@ const CategoriesPage = () => {
 
       if (insertError) {
         console.error('Insert category error:', insertError);
-        // Attempt to delete uploaded image if DB insert fails
         if (imagePath) {
-            const pathParts = imagePath.split('/');
-            const uploadedFileName = pathParts[pathParts.length -1];
-            await supabase.storage.from('category_images').remove([uploadedFileName]);
+            const uploadedFileName = getFileNameFromPath(uploadData.path);
+            if (uploadedFileName) await supabase.storage.from('category_images').remove([uploadedFileName]);
         }
         throw new Error(`Failed to add category: ${insertError.message}`);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['awardCategoriesAdmin'] });
-      queryClient.invalidateQueries({ queryKey: ['awardCategories'] }); // Invalidate public page query too
+      queryClient.invalidateQueries({ queryKey: ['awardCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['awardCategoriesCount'] });
       toast.success('Category added successfully!');
       setIsAddDialogOpen(false);
       form.reset();
@@ -149,17 +200,146 @@ const CategoriesPage = () => {
     },
   });
 
+  const editCategoryMutation = useMutation({
+    mutationFn: async (values: CategoryFormValues) => {
+      if (!editingCategory) throw new Error("No category selected for editing.");
+
+      let newImagePath: string | null | undefined = editingCategory.image_path; // Keep old if not changed
+
+      // 1. Handle image removal
+      if (values.remove_image) {
+        if (editingCategory.image_path) {
+          const oldFileName = getFileNameFromPath(editingCategory.image_path);
+          if (oldFileName) {
+            const { error: deleteError } = await supabase.storage.from('category_images').remove([oldFileName]);
+            if (deleteError) console.error("Error deleting old image:", deleteError.message);
+          }
+        }
+        newImagePath = null;
+      } 
+      // 2. Handle new image upload (if remove_image is false and new file provided)
+      else if (values.image_file && values.image_file.length > 0) {
+        // Delete old image first
+        if (editingCategory.image_path) {
+          const oldFileName = getFileNameFromPath(editingCategory.image_path);
+          if (oldFileName) {
+            const { error: deleteError } = await supabase.storage.from('category_images').remove([oldFileName]);
+            if (deleteError) console.error("Error deleting old image during replacement:", deleteError.message);
+          }
+        }
+        // Upload new image
+        const file = values.image_file[0];
+        const fileName = `${Date.now()}-${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('category_images')
+          .upload(fileName, file);
+
+        if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+        const { data: publicUrlData } = supabase.storage.from('category_images').getPublicUrl(uploadData.path);
+        newImagePath = publicUrlData.publicUrl;
+      }
+
+      const awardsArray = values.awards?.split('\n').map(a => a.trim()).filter(a => a) || [];
+
+      const { error: updateError } = await supabase
+        .from('award_categories')
+        .update({
+          cluster_title: values.cluster_title,
+          description: values.description,
+          icon_name: values.icon_name,
+          awards: awardsArray,
+          image_path: newImagePath,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingCategory.id);
+
+      if (updateError) {
+        // If DB update fails but new image was uploaded, try to delete new image
+        if (newImagePath && newImagePath !== editingCategory.image_path && values.image_file && values.image_file.length > 0) {
+             const uploadedFileName = getFileNameFromPath(newImagePath);
+             if(uploadedFileName) await supabase.storage.from('category_images').remove([uploadedFileName]);
+        }
+        throw new Error(`Failed to update category: ${updateError.message}`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['awardCategoriesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['awardCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['awardCategoriesCount'] });
+      toast.success('Category updated successfully!');
+      setIsEditDialogOpen(false);
+      setEditingCategory(null);
+      form.reset();
+    },
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (categoryToDelete: AwardCategoryRow) => {
+      // 1. Delete from database
+      const { error: dbError } = await supabase
+        .from('award_categories')
+        .delete()
+        .eq('id', categoryToDelete.id);
+
+      if (dbError) {
+        throw new Error(`Failed to delete category from database: ${dbError.message}`);
+      }
+
+      // 2. Delete image from storage if it exists
+      if (categoryToDelete.image_path) {
+        const fileName = getFileNameFromPath(categoryToDelete.image_path);
+        if (fileName) {
+            const { error: storageError } = await supabase.storage
+            .from('category_images')
+            .remove([fileName]);
+            if (storageError) {
+                // Log error but don't necessarily throw, as DB entry is deleted.
+                // User might need to manually clean storage if this happens.
+                console.error(`Failed to delete image from storage, but category deleted from DB. Image path: ${fileName}`, storageError);
+                toast.warning(`Category deleted, but failed to remove image '${fileName}' from storage. Please check storage manually.`);
+            }
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['awardCategoriesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['awardCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['awardCategoriesCount'] });
+      toast.success('Category deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setDeletingCategory(null);
+    },
+    onError: (error) => {
+      toast.error(`Error deleting category: ${error.message}`);
+      setIsDeleteDialogOpen(false);
+      setDeletingCategory(null);
+    },
+  });
+
   const onSubmit = (values: CategoryFormValues) => {
-    addCategoryMutation.mutate(values);
+    if (editingCategory) {
+      editCategoryMutation.mutate(values);
+    } else {
+      addCategoryMutation.mutate(values);
+    }
   };
+  
+  const currentMutation = editingCategory ? editCategoryMutation : addCategoryMutation;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Manage Categories</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={(isOpen) => {
+          if (!isOpen) form.reset(); // Reset form when closing "Add" dialog
+          setIsAddDialogOpen(isOpen);
+          setEditingCategory(null); // Ensure not in edit mode
+        }}>
           <DialogTrigger asChild>
-            <Button onClick={() => form.reset()}>
+            <Button onClick={() => { form.reset(); setEditingCategory(null); setIsAddDialogOpen(true); } }>
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Category
             </Button>
           </DialogTrigger>
@@ -170,7 +350,8 @@ const CategoriesPage = () => {
                 Fill in the details for the new award category. Click save when you're done.
               </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
+            {/* Form content is now shared, shown below within the Edit Dialog section for brevity but applies to Add too */}
+             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
@@ -241,21 +422,22 @@ const CategoriesPage = () => {
                  <FormField
                   control={form.control}
                   name="image_file"
-                  render={({ field: { onChange, value, ...rest } }) => (
+                  render={({ field: { onChange, value, ...rest } }) => ( // value here will be FileList or null
                     <FormItem>
-                      <FormLabel>Category Image/Thumbnail</FormLabel>
+                      <FormLabel>Category Image/Thumbnail {editingCategory ? "(Leave blank to keep current)" : "(Required)"}</FormLabel>
                       <FormControl>
                         <Input 
                           type="file" 
                           accept="image/png, image/jpeg, image/gif, image/webp"
-                          onChange={(e) => onChange(e.target.files)}
-                          {...rest}
+                          onChange={(e) => onChange(e.target.files)} // Pass FileList or null
+                          {...rest} // Pass name, onBlur, ref
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {/* This section will be handled by the shared form below */}
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
                   <Button type="submit" disabled={addCategoryMutation.isPending}>
@@ -268,6 +450,175 @@ const CategoriesPage = () => {
           </DialogContent>
         </Dialog>
       </div>
+      
+      {/* Edit Category Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(isOpen) => {
+        if (!isOpen) { setEditingCategory(null); form.reset(); }
+        setIsEditDialogOpen(isOpen);
+      }}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Edit Award Category</DialogTitle>
+            <DialogDescription>
+              Update the details for the award category. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}> {/* Shared form */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="cluster_title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cluster Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="icon_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}> {/* Use value here for controlled component */}
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an icon" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {iconList.map(icon => (
+                          <SelectItem key={icon.name} value={icon.name}>
+                            <div className="flex items-center">
+                              <icon.IconComponent className="mr-2 h-4 w-4" />
+                              {icon.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="awards"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Awards in this Cluster (one per line)</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                  control={form.control}
+                  name="image_file"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem>
+                      <FormLabel>New Category Image/Thumbnail (Optional)</FormLabel>
+                       {editingCategory?.image_path && !form.watch("remove_image") && (
+                         <div className="mb-2">
+                           <p className="text-sm text-muted-foreground">Current image:</p>
+                           <img src={editingCategory.image_path} alt="Current category image" className="h-20 w-20 object-cover rounded-sm border" />
+                         </div>
+                       )}
+                      <FormControl>
+                        <Input 
+                          type="file" 
+                          accept="image/png, image/jpeg, image/gif, image/webp"
+                          onChange={(e) => onChange(e.target.files)}
+                          {...rest}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {editingCategory?.image_path && (
+                  <FormField
+                    control={form.control}
+                    name="remove_image"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Remove current image?
+                          </FormLabel>
+                          <FormDescription>
+                            If checked, the current image will be removed. If a new image is also uploaded, this option is ignored.
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                )}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => { setIsEditDialogOpen(false); setEditingCategory(null); form.reset(); }}>Cancel</Button>
+                <Button type="submit" disabled={currentMutation.isPending}>
+                  {currentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the category
+              "{deletingCategory?.cluster_title}" and its associated image (if any).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingCategory(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingCategory) {
+                  deleteCategoryMutation.mutate(deletingCategory);
+                }
+              }}
+              disabled={deleteCategoryMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteCategoryMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {isLoading && <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /> <span className="ml-2">Loading categories...</span></div>}
       {error && (
@@ -285,7 +636,7 @@ const CategoriesPage = () => {
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Cluster Title</TableHead>
                 <TableHead>Icon</TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                <TableHead className="w-[120px] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -317,10 +668,10 @@ const CategoriesPage = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="mr-1" disabled> {/* Edit to be implemented */}
+                      <Button variant="ghost" size="icon" className="mr-1" onClick={() => handleOpenEditDialog(category)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" disabled> {/* Delete to be implemented */}
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleOpenDeleteDialog(category)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -336,4 +687,3 @@ const CategoriesPage = () => {
 };
 
 export default CategoriesPage;
-
