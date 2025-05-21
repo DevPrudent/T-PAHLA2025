@@ -2,7 +2,8 @@ import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search } from "lucide-react"; // Replaced SearchHeart with Search
+import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image } from "lucide-react"; // Added Image icon
+import { AspectRatio } from "@/components/ui/aspect-ratio"; // Import AspectRatio
 
 // Define placeholder icons, could be actual components later
 const PlaceholderIcon = ({ className = "" }: { className?: string }) => (
@@ -150,19 +151,24 @@ const Awards = () => {
             {awardClusters.map((cluster, index) => (
               <div 
                 key={index} 
-                className="bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20 hover:shadow-tpahla-gold/30 hover:border-tpahla-gold/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+                className="flex flex-col bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20 hover:shadow-tpahla-gold/30 hover:border-tpahla-gold/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
                 onClick={() => setSelectedCluster(cluster)}
               >
                 <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
-                <div className="p-6">
-                  <div className="flex items-center justify-center mb-6">
-                    {/* Using PlaceholderIcon which internally uses a generic Award icon */}
-                    {/* If specific icons per cluster are desired later, cluster.IconComponent could be used here */}
-                    <PlaceholderIcon />
-                  </div>
-                  <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center h-16 flex items-center justify-center">{cluster.clusterTitle}</h3>
-                  <p className="text-tpahla-text-secondary text-sm mb-4 h-20 overflow-hidden">{cluster.description}</p>
+                
+                <div className="w-full">
+                  <AspectRatio ratio={16 / 9} className="bg-tpahla-neutral-light">
+                    <div className="flex items-center justify-center h-full">
+                      <Image className="w-16 h-16 text-tpahla-gold opacity-50" strokeWidth={1.5} />
+                    </div>
+                  </AspectRatio>
                 </div>
+
+                <div className="p-6 flex-grow">
+                  <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center">{cluster.clusterTitle}</h3>
+                  <p className="text-tpahla-text-secondary text-sm mb-4 min-h-[5rem] overflow-hidden">{cluster.description}</p>
+                </div>
+
                 <div className="px-6 py-4 bg-tpahla-neutral-light border-t border-tpahla-gold/10">
                   <div className="text-center text-sm text-tpahla-gold font-medium group-hover:text-gradient-gold flex items-center justify-center">
                     View Awards in this Cluster <ChevronRight size={18} className="ml-1 transform transition-transform group-hover:translate-x-1" />
