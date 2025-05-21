@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash } from "lucide-react";
+import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash, LucideProps } from "lucide-react"; // Added LucideProps
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"; // For loading state
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
 
 // Type for icon components
-type LucideIconComponent = React.FC<React.SVGProps<SVGSVGElement>>;
+type LucideIconComponent = React.FC<LucideProps>; // Updated to use LucideProps
 
 // Icon mapping
 const iconMap: Record<string, LucideIconComponent> = {
