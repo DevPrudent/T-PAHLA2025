@@ -9,39 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      award_categories: {
-        Row: {
-          awards: Json | null
-          cluster_title: string
-          created_at: string | null
-          description: string | null
-          icon_name: string | null
-          id: string
-          image_path: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          awards?: Json | null
-          cluster_title: string
-          created_at?: string | null
-          description?: string | null
-          icon_name?: string | null
-          id?: string
-          image_path?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          awards?: Json | null
-          cluster_title?: string
-          created_at?: string | null
-          description?: string | null
-          icon_name?: string | null
-          id?: string
-          image_path?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
