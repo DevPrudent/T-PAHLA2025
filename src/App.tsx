@@ -36,8 +36,11 @@ const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
     <NotificationBanner />
     <Navbar />
-    {/* Adjust pt-24 if Navbar height changes significantly. This accounts for fixed Navbar. */}
-    <div className="flex-grow pt-24"> {/* Increased padding to ensure content clears tallest navbar state */}
+    {/* Adjust pt value to account for NotificationBanner and Navbar height */}
+    {/* Estimated NotificationBanner height: ~64px (p-4 + content) */}
+    {/* Estimated Navbar height: ~96px (h-16 logo + py-4) */}
+    {/* Total estimated offset: 64px + 96px = 160px. Tailwind: 160/4 = pt-40 */}
+    <div className="flex-grow pt-40"> {/* Increased padding from pt-24 */}
       <Outlet />
     </div>
     <Footer />
