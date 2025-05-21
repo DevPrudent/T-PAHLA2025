@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDescription as DialogDescriptionComponent,
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
@@ -24,7 +23,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
   Form,
@@ -33,11 +31,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -334,23 +332,22 @@ const CategoriesPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Manage Categories</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={(isOpen) => {
-          if (!isOpen) form.reset(); // Reset form when closing "Add" dialog
+          if (!isOpen) form.reset();
           setIsAddDialogOpen(isOpen);
-          setEditingCategory(null); // Ensure not in edit mode
+          setEditingCategory(null); 
         }}>
           <DialogTrigger asChild>
-            <Button onClick={() => { form.reset(); setEditingCategory(null); setIsAddDialogOpen(true); } }>
+            <Button onClick={() => { form.reset({ cluster_title: '', description: '', icon_name: iconList[0].name, awards: '', image_file: null, remove_image: false }); setEditingCategory(null); setIsAddDialogOpen(true); } }>
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Category
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[525px]">
             <DialogHeader>
               <DialogTitle>Add New Award Category</DialogTitle>
-              <DialogDescription>
+              <DialogDescriptionComponent>
                 Fill in the details for the new award category. Click save when you're done.
-              </DialogDescription>
+              </DialogDescriptionComponent>
             </DialogHeader>
-            {/* Form content is now shared, shown below within the Edit Dialog section for brevity but applies to Add too */}
              <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -371,7 +368,7 @@ const CategoriesPage = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Brief description of the category cluster..." {...field} />
                       </FormControl>
@@ -411,9 +408,9 @@ const CategoriesPage = () => {
                   name="awards"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Awards in this Cluster (one per line)</FormLabel>
+                      <FormLabel>Awards in this Cluster (Optional, one per line)</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., Best Community Project&#10;Volunteer of the Year" {...field} rows={4}/>
+                        <Textarea placeholder="e.g., Best Community Project&#10;Volunteer of the Year" {...field} rows={3}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -422,22 +419,21 @@ const CategoriesPage = () => {
                  <FormField
                   control={form.control}
                   name="image_file"
-                  render={({ field: { onChange, value, ...rest } }) => ( // value here will be FileList or null
+                  render={({ field: { onChange, value, ...rest } }) => ( 
                     <FormItem>
                       <FormLabel>Category Image/Thumbnail {editingCategory ? "(Leave blank to keep current)" : "(Required)"}</FormLabel>
                       <FormControl>
                         <Input 
                           type="file" 
                           accept="image/png, image/jpeg, image/gif, image/webp"
-                          onChange={(e) => onChange(e.target.files)} // Pass FileList or null
-                          {...rest} // Pass name, onBlur, ref
+                          onChange={(e) => onChange(e.target.files)} 
+                          {...rest} 
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {/* This section will be handled by the shared form below */}
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
                   <Button type="submit" disabled={addCategoryMutation.isPending}>
@@ -451,7 +447,6 @@ const CategoriesPage = () => {
         </Dialog>
       </div>
       
-      {/* Edit Category Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(isOpen) => {
         if (!isOpen) { setEditingCategory(null); form.reset(); }
         setIsEditDialogOpen(isOpen);
@@ -459,11 +454,11 @@ const CategoriesPage = () => {
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
             <DialogTitle>Edit Award Category</DialogTitle>
-            <DialogDescription>
+            <DialogDescriptionComponent>
               Update the details for the award category. Click save when you're done.
-            </DialogDescription>
+            </DialogDescriptionComponent>
           </DialogHeader>
-          <Form {...form}> {/* Shared form */}
+          <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
@@ -483,7 +478,7 @@ const CategoriesPage = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -497,7 +492,7 @@ const CategoriesPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Icon</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}> {/* Use value here for controlled component */}
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select an icon" />
@@ -523,9 +518,9 @@ const CategoriesPage = () => {
                 name="awards"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Awards in this Cluster (one per line)</FormLabel>
+                    <FormLabel>Awards in this Cluster (Optional, one per line)</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={4} />
+                      <Textarea {...field} rows={3} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -572,7 +567,7 @@ const CategoriesPage = () => {
                             Remove current image?
                           </FormLabel>
                           <FormDescription>
-                            If checked, the current image will be removed. If a new image is also uploaded, this option is ignored.
+                            If checked, the current image will be removed. A new image will replace it if uploaded.
                           </FormDescription>
                         </div>
                       </FormItem>
@@ -581,8 +576,8 @@ const CategoriesPage = () => {
                 )}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => { setIsEditDialogOpen(false); setEditingCategory(null); form.reset(); }}>Cancel</Button>
-                <Button type="submit" disabled={currentMutation.isPending}>
-                  {currentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={editCategoryMutation.isPending}>
+                  {editCategoryMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Changes
                 </Button>
               </DialogFooter>
@@ -591,7 +586,6 @@ const CategoriesPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -635,20 +629,23 @@ const CategoriesPage = () => {
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Cluster Title</TableHead>
-                <TableHead>Icon</TableHead>
+                <TableHead className="hidden sm:table-cell">Description</TableHead>
+                <TableHead className="hidden md:table-cell">Awards</TableHead>
+                <TableHead className="hidden lg:table-cell">Icon</TableHead>
                 <TableHead className="w-[120px] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No categories found. Add one to get started!
                   </TableCell>
                 </TableRow>
               )}
               {categories.map((category) => {
                 const IconComp = iconList.find(icon => icon.name === category.icon_name)?.IconComponent || HelpCircle;
+                const awardsList = Array.isArray(category.awards) ? category.awards : [];
                 return (
                   <TableRow key={category.id}>
                     <TableCell>
@@ -661,7 +658,11 @@ const CategoriesPage = () => {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{category.cluster_title}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell text-sm text-muted-foreground truncate max-w-[150px]">{category.description || '-'}</TableCell>
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                      {awardsList.length > 0 ? `${awardsList.length} award(s)` : '-'}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <div className="flex items-center">
                         <IconComp className="mr-2 h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">{category.icon_name}</span>
