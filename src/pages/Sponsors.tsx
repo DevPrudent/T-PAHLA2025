@@ -1,11 +1,16 @@
+
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import SponsorSection from "../components/home/SponsorSection";
 
 const Sponsors = () => {
   return (
-    <div className="bg-background">
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      
       {/* Page Header */}
-      <div className="pt-0 pb-12 bg-tpahla-darkgreen text-white">
-        <div className="container mx-auto px-4 text-center pt-8">
+      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white">
+        <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-serif font-bold mb-4">Sponsorship Opportunities</h1>
           <p className="text-lg max-w-3xl mx-auto">
             Partner with TPAHLA to Support Humanitarian Excellence in Africa
@@ -18,44 +23,44 @@ const Sponsors = () => {
         <section className="container mx-auto px-4 mb-16">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen">Why Sponsor TPAHLA?</h2>
-            <p className="text-muted-foreground">
+            <p className="text-gray-700">
               By sponsoring The Pan-African Humanitarian Leadership Award, your organization demonstrates commitment to sustainable development and humanitarian excellence across Africa while gaining valuable visibility among key stakeholders.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-            <div className="bg-card p-6 rounded-lg shadow-md text-center border border-border">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Brand Visibility</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-serif font-bold mb-3">Brand Visibility</h3>
+              <p className="text-gray-600">
                 Showcase your brand to influential leaders, organizations, and media from across Africa and beyond.
               </p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg shadow-md text-center border border-border">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Networking</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-serif font-bold mb-3">Networking</h3>
+              <p className="text-gray-600">
                 Connect with government officials, humanitarian leaders, and potential partners in a prestigious setting.
               </p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg shadow-md text-center border border-border">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center mb-4 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Corporate Social Responsibility</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-serif font-bold mb-3">Corporate Social Responsibility</h3>
+              <p className="text-gray-600">
                 Demonstrate your organization's commitment to social development and humanitarian causes in Africa.
               </p>
             </div>
@@ -96,6 +101,8 @@ const Sponsors = () => {
           </div>
         </section>
       </main>
+      
+      <Footer />
     </div>
   );
 };
