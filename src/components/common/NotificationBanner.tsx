@@ -4,7 +4,8 @@ import { Info } from "lucide-react";
 
 const NotificationBanner = () => {
   return (
-    <div className="bg-tpahla-neutral border-t-4 border-tpahla-gold p-4 md:p-6 shadow-lg rounded-b-lg mb-12">
+    // Removed mb-12 from this div
+    <div className="bg-tpahla-neutral border-t-4 border-tpahla-gold p-4 md:p-6 shadow-lg rounded-b-lg">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
         <div className="flex items-center mb-4 md:mb-0">
           <Info className="text-tpahla-gold h-8 w-8 mr-3" />

@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash, LucideProps } from "lucide-react"; // Added LucideProps
+import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash, LucideProps } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Type for icon components
-type LucideIconComponent = React.FC<LucideProps>; // Updated to use LucideProps
+type LucideIconComponent = React.FC<LucideProps>;
 
 // Icon mapping
 const iconMap: Record<string, LucideIconComponent> = {
@@ -78,7 +76,6 @@ const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
   });
 };
 
-
 const Awards = () => {
   const [selectedCluster, setSelectedCluster] = useState<AwardCluster | null>(null);
 
@@ -89,10 +86,11 @@ const Awards = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {/* Navbar and Footer are now rendered by PublicLayout in App.tsx */}
       
-      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
-        <div className="container mx-auto px-4 text-center">
+      {/* Removed pt-24 from this div. PublicLayout's pt-24 will handle navbar clearance. */}
+      <div className="pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
+        <div className="container mx-auto px-4 text-center pt-8">
           <h1 className="text-4xl font-serif font-bold mb-4 text-tpahla-gold">Award Categories - TPAHLA 2025</h1>
           <p className="text-lg max-w-3xl mx-auto text-tpahla-text-secondary">
             Recognizing Excellence in Various Facets of Humanitarian Leadership
@@ -254,7 +252,7 @@ const Awards = () => {
         </DialogContent>
       </Dialog>
       
-      <Footer />
+      {/* Footer is now rendered by PublicLayout in App.tsx */}
     </div>
   );
 };
