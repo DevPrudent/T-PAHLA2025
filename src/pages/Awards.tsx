@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, SearchHeart } from "lucide-react"; // Added more icons
+import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search } from "lucide-react"; // Replaced SearchHeart with Search
 
 // Define placeholder icons, could be actual components later
 const PlaceholderIcon = ({ className = "" }: { className?: string }) => (
@@ -72,7 +71,7 @@ const awardClusters = [
   },
   {
     clusterTitle: "DISASTER RELIEF & CRISIS MANAGEMENT",
-    IconComponent: Home, // Placeholder for something like a shield or emergency icon
+    IconComponent: Home, 
     description: "Acknowledging exceptional response and management in disaster situations and humanitarian crises.",
     awards: [
       "Disaster Relief & Emergency Response Award",
@@ -113,7 +112,7 @@ const awardClusters = [
   },
   {
     clusterTitle: "HUMANITARIAN RESEARCH & DEVELOPMENT",
-    IconComponent: SearchHeart,
+    IconComponent: Search, // Changed from SearchHeart
     description: "Honoring contributions to research, policy development, and public health that advance humanitarian goals.",
     awards: [
       "Humanitarian Scientific Research & Policy Development Award",
@@ -157,6 +156,8 @@ const Awards = () => {
                 <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
                 <div className="p-6">
                   <div className="flex items-center justify-center mb-6">
+                    {/* Using PlaceholderIcon which internally uses a generic Award icon */}
+                    {/* If specific icons per cluster are desired later, cluster.IconComponent could be used here */}
                     <PlaceholderIcon />
                   </div>
                   <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center h-16 flex items-center justify-center">{cluster.clusterTitle}</h3>
@@ -204,7 +205,7 @@ const Awards = () => {
                   <img 
                     src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
                     alt="TPAHLA Logo" 
-                    className="h-24" // Logo might need adjustment for dark bg
+                    className="h-24"
                   />
                 </div>
               </div>
@@ -217,7 +218,8 @@ const Awards = () => {
         <DialogContent className="max-w-2xl bg-tpahla-neutral border-tpahla-gold text-tpahla-text-primary">
           <DialogHeader>
             <DialogTitle className="text-2xl font-serif flex items-center gap-3 text-tpahla-gold">
-              <Award className="text-tpahla-emerald" size={28} />
+              {/* Conditionally render IconComponent if it exists on selectedCluster */}
+              {selectedCluster && selectedCluster.IconComponent && <selectedCluster.IconComponent className="text-tpahla-emerald" size={28} />}
               <span>{selectedCluster?.clusterTitle}</span>
             </DialogTitle>
             <DialogDescription className="text-base text-tpahla-text-secondary mt-2 pt-2 border-t border-tpahla-gold/20">

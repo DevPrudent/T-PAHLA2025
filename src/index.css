@@ -61,7 +61,14 @@
 
 @layer base {
   html {
-    @apply dark; /* Apply dark mode to html tag by default */
+    /* 
+      The 'dark' class should be added to the <html> tag directly 
+      (e.g., in index.html or via JavaScript) for Tailwind's dark: variants 
+      to work with darkMode: 'class'.
+      The previous @apply dark; directive here was causing a build error 
+      as 'dark' is not a standard utility class to be applied.
+      The site uses dark theme CSS variables by default from :root.
+    */
   }
   * {
     @apply border-border;
@@ -84,6 +91,7 @@
 }
 
 @layer components {
+  /* ... keep existing code (.btn-primary, .btn-secondary, etc.) */
   .btn-primary {
     @apply bg-tpahla-gold-gradient text-tpahla-darkgreen font-medium py-2.5 px-6 rounded-md transition-all duration-300 hover:shadow-lg hover:brightness-110;
   }
@@ -136,3 +144,4 @@
     @apply bg-clip-text text-transparent bg-tpahla-gold-gradient;
   }
 }
+
