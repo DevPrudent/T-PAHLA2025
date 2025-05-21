@@ -2,10 +2,10 @@ import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image } from "lucide-react"; // Added Image icon
-import { AspectRatio } from "@/components/ui/aspect-ratio"; // Import AspectRatio
+import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search } from "lucide-react"; // Removed Image, it's no longer used here
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
-// Define placeholder icons, could be actual components later
+// Define placeholder icons, could be actual components later - this is not used for cards anymore
 const PlaceholderIcon = ({ className = "" }: { className?: string }) => (
   <div className={`w-16 h-16 bg-tpahla-neutral-light rounded-md flex items-center justify-center border-2 border-tpahla-gold/50 ${className}`}>
     <Award className="text-tpahla-gold opacity-70" size={28} />
@@ -24,7 +24,8 @@ const awardClusters = [
       "Humanitarian Lifetime Achievement Award",
       "Distinguished Traditional Leadership for Humanitarian Support",
       "Outstanding Humanitarian Organization of the Year"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1470071459604-3b5ec3a7fe05.jpg" // Example: foggy mountain summit
   },
   {
     clusterTitle: "EXEMPLARY GOVERNANCE FOR HUMANITARIAN IMPACT",
@@ -36,7 +37,8 @@ const awardClusters = [
       "Best Humanitarian-Friendly First Lady Award",
       "Best Humanitarian-Friendly Governor Award",
       "Best Humanitarian-Friendly Minister of Education Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1487958449943-2429e8be8625.jpg" // Example: white concrete building
   },
   {
     clusterTitle: "YOUTH EMPOWERMENT & GENDER EQUALITY LEADERSHIP",
@@ -47,7 +49,8 @@ const awardClusters = [
       "Gender Equity & Women Empowerment Award",
       "Outstanding Public Office Holder for Gender Equality & Women’s Empowerment Award",
       "Future Humanitarian Leaders Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1519389950473-47ba0277781c.jpg" // Example: people collaborating
   },
   {
     clusterTitle: "SUSTAINABLE DEVELOPMENT & ENVIRONMENTAL STEWARDSHIP",
@@ -58,7 +61,8 @@ const awardClusters = [
       "Climate Change Leadership Award",
       "Renewable Energy & Humanitarian Infrastructure Award",
       "Clean Water, Sanitation & Hygiene (WASH) Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1501854140801-50d01698950b.jpg" // Example: green mountains
   },
   {
     clusterTitle: "HUMANITARIAN INNOVATION & TECHNOLOGY",
@@ -68,7 +72,8 @@ const awardClusters = [
       "Humanitarian Innovation & Technology Award",
       "Corporate Social Responsibility (CSR) Excellence Award",
       "Media & Advocacy for Humanitarian Excellence Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1488590528505-98d2b5aba04b.jpg" // Example: laptop computer
   },
   {
     clusterTitle: "DISASTER RELIEF & CRISIS MANAGEMENT",
@@ -78,7 +83,8 @@ const awardClusters = [
       "Disaster Relief & Emergency Response Award",
       "Excellence in Disaster Relief & National Emergency Management Award",
       "Humanitarian Food Security & Nutrition Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1466721591366-2d5fba72006d.jpg" // Example: antelope and zebra (resilience/nature)
   },
   {
     clusterTitle: "PUBLIC SECTOR AND INSTITUTIONAL RECOGNITION",
@@ -89,7 +95,8 @@ const awardClusters = [
       "Best Humanitarian-Friendly Minister of Finance Award",
       "Best Humanitarian-Friendly Law Maker Award",
       "Excellence in Anti-Corruption Leadership for Humanitarian Development Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1426604966848-d7adac402bff.jpg" // Example: landmark building
   },
   {
     clusterTitle: "HUMANITARIAN, SOCIAL & CULTURAL CONTRIBUTIONS",
@@ -100,7 +107,8 @@ const awardClusters = [
       "Social Impact Award",
       "Humanitarian Education & Capacity-Building Award",
       "Excellence in Humanitarian Advocacy Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1473091534298-04dcbce3278c.jpg" // Example: stylus pen (creativity/education)
   },
   {
     clusterTitle: "HUMAN RIGHTS & SOCIAL JUSTICE",
@@ -109,16 +117,18 @@ const awardClusters = [
     awards: [
       "Human Rights & Social Justice Award",
       "Migration & Humanitarian Border Assistance Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1452960962994-acf4fd70b632.jpg" // Example: herd of sheep (community/vulnerable)
   },
   {
     clusterTitle: "HUMANITARIAN RESEARCH & DEVELOPMENT",
-    IconComponent: Search, // Changed from SearchHeart
+    IconComponent: Search,
     description: "Honoring contributions to research, policy development, and public health that advance humanitarian goals.",
     awards: [
       "Humanitarian Scientific Research & Policy Development Award",
       "Excellence in Public Health & Crisis Management Leadership Award"
-    ]
+    ],
+    imageUrl: "/placeholders/photo-1518770660439-4636190af475.jpg" // Example: circuit board (research/tech)
   }
 ];
 
@@ -158,9 +168,16 @@ const Awards = () => {
                 
                 <div className="w-full">
                   <AspectRatio ratio={16 / 9} className="bg-tpahla-neutral-light">
-                    <div className="flex items-center justify-center h-full">
-                      <Image className="w-16 h-16 text-tpahla-gold opacity-50" strokeWidth={1.5} />
-                    </div>
+                    <img 
+                      src={cluster.imageUrl} 
+                      alt={cluster.clusterTitle} 
+                      className="object-cover w-full h-full" 
+                      onError={(e) => {
+                        // Fallback for broken images, or you can set a default placeholder
+                        (e.target as HTMLImageElement).src = "/placeholder.svg"; // Ensure you have a placeholder.svg in your public folder
+                        (e.target as HTMLImageElement).alt = "Placeholder Image";
+                      }}
+                    />
                   </AspectRatio>
                 </div>
 
@@ -224,7 +241,6 @@ const Awards = () => {
         <DialogContent className="max-w-2xl bg-tpahla-neutral border-tpahla-gold text-tpahla-text-primary">
           <DialogHeader>
             <DialogTitle className="text-2xl font-serif flex items-center gap-3 text-tpahla-gold">
-              {/* Conditionally render IconComponent if it exists on selectedCluster */}
               {selectedCluster && selectedCluster.IconComponent && <selectedCluster.IconComponent className="text-tpahla-emerald" size={28} />}
               <span>{selectedCluster?.clusterTitle}</span>
             </DialogTitle>
