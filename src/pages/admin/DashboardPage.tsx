@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Users, Award, DollarSign, CheckCircle, Clock } from "lucide-react";
 
 const DashboardPage = () => {
-  // Placeholder data for stats
+  // Updated stats with zero values
   const stats = [
-    { title: "Total Nominations", value: "1,234", icon: Award, change: "+12%" },
-    { title: "Registered Members", value: "567", icon: Users, change: "+5%" },
-    { title: "Total Inflow", value: "₦10.5M", icon: DollarSign, change: "+20%" },
-    { title: "Approved Nominees", value: "450", icon: CheckCircle, change: "+8%" },
-    { title: "Pending Approvals", value: "32", icon: Clock, change: "-3%" },
+    { title: "Total Nominations", value: "0", icon: Award, change: "+0%" },
+    { title: "Registered Members", value: "0", icon: Users, change: "+0%" },
+    { title: "Total Inflow", value: "₦0", icon: DollarSign, change: "+0%" },
+    { title: "Approved Nominees", value: "0", icon: CheckCircle, change: "+0%" },
+    { title: "Pending Approvals", value: "0", icon: Clock, change: "-0%" },
   ];
 
   return (

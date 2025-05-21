@@ -1,130 +1,91 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image } from "lucide-react"; // Added Image icon
-import { AspectRatio } from "@/components/ui/aspect-ratio"; // Import AspectRatio
+import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For error state
 
-// Define placeholder icons, could be actual components later
-const PlaceholderIcon = ({ className = "" }: { className?: string }) => (
-  <div className={`w-16 h-16 bg-tpahla-neutral-light rounded-md flex items-center justify-center border-2 border-tpahla-gold/50 ${className}`}>
-    <Award className="text-tpahla-gold opacity-70" size={28} />
-  </div>
-);
+// Type for icon components
+type LucideIconComponent = React.FC<React.SVGProps<SVGSVGElement>>;
 
+// Icon mapping
+const iconMap: Record<string, LucideIconComponent> = {
+  Users,
+  ShieldCheck,
+  Users2,
+  Leaf,
+  Lightbulb,
+  Home,
+  Landmark,
+  BookOpen,
+  Scale,
+  Search,
+  Default: HelpCircle,
+};
 
-const awardClusters = [
-  {
-    clusterTitle: "PAN-AFRICAN HUMANITARIAN LEADERSHIP & LEGACY",
-    IconComponent: Users,
-    description: "Recognizing individuals and organizations with exceptional leadership and significant, lasting contributions to humanitarian causes across Africa.",
-    awards: [
-      "African Humanitarian Hero (Highest Honor)",
-      "Pan-African Icon of Humanitarian Leadership",
-      "Humanitarian Lifetime Achievement Award",
-      "Distinguished Traditional Leadership for Humanitarian Support",
-      "Outstanding Humanitarian Organization of the Year"
-    ]
-  },
-  {
-    clusterTitle: "EXEMPLARY GOVERNANCE FOR HUMANITARIAN IMPACT",
-    IconComponent: ShieldCheck,
-    description: "Honoring public officials and governance structures that have demonstrably fostered environments conducive to humanitarian progress and development.",
-    awards: [
-      "Humanitarian Leadership in Governance Award",
-      "Best Humanitarian-Friendly President/Head of State Award",
-      "Best Humanitarian-Friendly First Lady Award",
-      "Best Humanitarian-Friendly Governor Award",
-      "Best Humanitarian-Friendly Minister of Education Award"
-    ]
-  },
-  {
-    clusterTitle: "YOUTH EMPOWERMENT & GENDER EQUALITY LEADERSHIP",
-    IconComponent: Users2,
-    description: "Celebrating leaders and initiatives that champion youth development and advance gender equality throughout the African continent.",
-    awards: [
-      "Humanitarian Youth Leadership Award",
-      "Gender Equity & Women Empowerment Award",
-      "Outstanding Public Office Holder for Gender Equality & Women’s Empowerment Award",
-      "Future Humanitarian Leaders Award"
-    ]
-  },
-  {
-    clusterTitle: "SUSTAINABLE DEVELOPMENT & ENVIRONMENTAL STEWARDSHIP",
-    IconComponent: Leaf,
-    description: "Recognizing efforts towards environmental protection, sustainable resource management, and climate action in Africa.",
-    awards: [
-      "Sustainable Development & Environmental Stewardship Award",
-      "Climate Change Leadership Award",
-      "Renewable Energy & Humanitarian Infrastructure Award",
-      "Clean Water, Sanitation & Hygiene (WASH) Award"
-    ]
-  },
-  {
-    clusterTitle: "HUMANITARIAN INNOVATION & TECHNOLOGY",
-    IconComponent: Lightbulb,
-    description: "Highlighting innovative solutions and technological advancements that enhance humanitarian effectiveness and outreach.",
-    awards: [
-      "Humanitarian Innovation & Technology Award",
-      "Corporate Social Responsibility (CSR) Excellence Award",
-      "Media & Advocacy for Humanitarian Excellence Award"
-    ]
-  },
-  {
-    clusterTitle: "DISASTER RELIEF & CRISIS MANAGEMENT",
-    IconComponent: Home, 
-    description: "Acknowledging exceptional response and management in disaster situations and humanitarian crises.",
-    awards: [
-      "Disaster Relief & Emergency Response Award",
-      "Excellence in Disaster Relief & National Emergency Management Award",
-      "Humanitarian Food Security & Nutrition Award"
-    ]
-  },
-  {
-    clusterTitle: "PUBLIC SECTOR AND INSTITUTIONAL RECOGNITION",
-    IconComponent: Landmark,
-    description: "Honoring public sector bodies and institutions for their significant contributions to humanitarian development and good governance.",
-    awards: [
-      "Best Minister for Infrastructure & Humanitarian Development Award",
-      "Best Humanitarian-Friendly Minister of Finance Award",
-      "Best Humanitarian-Friendly Law Maker Award",
-      "Excellence in Anti-Corruption Leadership for Humanitarian Development Award"
-    ]
-  },
-  {
-    clusterTitle: "HUMANITARIAN, SOCIAL & CULTURAL CONTRIBUTIONS",
-    IconComponent: BookOpen,
-    description: "Recognizing impactful work in arts, culture, social initiatives, and education that promote humanitarian values.",
-    awards: [
-      "Arts, Culture & Humanitarian Storytelling Award",
-      "Social Impact Award",
-      "Humanitarian Education & Capacity-Building Award",
-      "Excellence in Humanitarian Advocacy Award"
-    ]
-  },
-  {
-    clusterTitle: "HUMAN RIGHTS & SOCIAL JUSTICE",
-    IconComponent: Scale,
-    description: "Celebrating champions of human rights, social justice, and support for vulnerable populations.",
-    awards: [
-      "Human Rights & Social Justice Award",
-      "Migration & Humanitarian Border Assistance Award"
-    ]
-  },
-  {
-    clusterTitle: "HUMANITARIAN RESEARCH & DEVELOPMENT",
-    IconComponent: Search, // Changed from SearchHeart
-    description: "Honoring contributions to research, policy development, and public health that advance humanitarian goals.",
-    awards: [
-      "Humanitarian Scientific Research & Policy Development Award",
-      "Excellence in Public Health & Crisis Management Leadership Award"
-    ]
+// Type for data structure after fetching and transforming
+interface AwardCluster {
+  id: string;
+  clusterTitle: string;
+  IconComponent: LucideIconComponent;
+  description: string;
+  awards: string[];
+  imagePath: string | null;
+}
+
+// Type for raw data from Supabase
+interface AwardCategoryFromDB {
+  id: string;
+  cluster_title: string;
+  description: string | null;
+  awards: unknown | null; // Supabase jsonb can be 'unknown' initially
+  icon_name: string | null;
+  image_path: string | null;
+}
+
+const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
+  const { data, error } = await supabase
+    .from("award_categories")
+    .select("id, cluster_title, description, awards, icon_name, image_path")
+    .order("cluster_title", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching award categories:", error);
+    throw new Error(error.message);
   }
-];
+  if (!data) {
+    return [];
+  }
+
+  return data.map((category: AwardCategoryFromDB) => {
+    let parsedAwards: string[] = [];
+    if (category.awards && Array.isArray(category.awards)) {
+      parsedAwards = category.awards.filter((award: unknown): award is string => typeof award === 'string');
+    }
+    
+    return {
+      id: category.id,
+      clusterTitle: category.cluster_title,
+      description: category.description || "No description available.",
+      awards: parsedAwards,
+      IconComponent: category.icon_name ? (iconMap[category.icon_name] || iconMap.Default) : iconMap.Default,
+      imagePath: category.image_path,
+    };
+  });
+};
 
 
 const Awards = () => {
-  const [selectedCluster, setSelectedCluster] = useState<(typeof awardClusters[0]) | null>(null);
+  const [selectedCluster, setSelectedCluster] = useState<AwardCluster | null>(null);
+
+  const { data: awardClusters, isLoading, error, refetch } = useQuery<AwardCluster[], Error>({
+    queryKey: ["awardCategories"],
+    queryFn: fetchAwardCategories,
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,36 +108,78 @@ const Awards = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {awardClusters.map((cluster, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20 hover:shadow-tpahla-gold/30 hover:border-tpahla-gold/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
-                onClick={() => setSelectedCluster(cluster)}
-              >
-                <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
-                
-                <div className="w-full">
+          {isLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="flex flex-col bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20">
+                  <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
                   <AspectRatio ratio={16 / 9} className="bg-tpahla-neutral-light">
-                    <div className="flex items-center justify-center h-full">
-                      <Image className="w-16 h-16 text-tpahla-gold opacity-50" strokeWidth={1.5} />
-                    </div>
+                    <Skeleton className="w-full h-full" />
                   </AspectRatio>
-                </div>
-
-                <div className="p-6 flex-grow">
-                  <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center">{cluster.clusterTitle}</h3>
-                  <p className="text-tpahla-text-secondary text-sm mb-4 min-h-[5rem] overflow-hidden">{cluster.description}</p>
-                </div>
-
-                <div className="px-6 py-4 bg-tpahla-neutral-light border-t border-tpahla-gold/10">
-                  <div className="text-center text-sm text-tpahla-gold font-medium group-hover:text-gradient-gold flex items-center justify-center">
-                    View Awards in this Cluster <ChevronRight size={18} className="ml-1 transform transition-transform group-hover:translate-x-1" />
+                  <div className="p-6 flex-grow">
+                    <Skeleton className="h-6 w-3/4 mb-3" />
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-4 w-2/3 mb-4" />
+                  </div>
+                  <div className="px-6 py-4 bg-tpahla-neutral-light border-t border-tpahla-gold/10">
+                    <Skeleton className="h-5 w-1/2 mx-auto" />
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {error && (
+             <Alert variant="destructive" className="max-w-2xl mx-auto">
+              <ServerCrash className="h-5 w-5" />
+              <AlertTitle>Error Fetching Categories</AlertTitle>
+              <AlertDescription>
+                Could not load award categories. Please try again later.
+                <button onClick={() => refetch()} className="ml-2 text-sm underline">Try again</button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!isLoading && !error && awardClusters && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {awardClusters.map((cluster) => (
+                <div 
+                  key={cluster.id} 
+                  className="flex flex-col bg-tpahla-neutral rounded-lg shadow-xl overflow-hidden border border-tpahla-gold/20 hover:shadow-tpahla-gold/30 hover:border-tpahla-gold/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+                  onClick={() => setSelectedCluster(cluster)}
+                >
+                  <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
+                  
+                  <div className="w-full">
+                    <AspectRatio ratio={16 / 9} className="bg-tpahla-neutral-light">
+                      {cluster.imagePath ? (
+                        <img src={cluster.imagePath} alt={cluster.clusterTitle} className="object-cover w-full h-full" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <ImageIcon className="w-16 h-16 text-tpahla-gold opacity-50" strokeWidth={1.5} />
+                        </div>
+                      )}
+                    </AspectRatio>
+                  </div>
+
+                  <div className="p-6 flex-grow">
+                    <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold text-center">{cluster.clusterTitle}</h3>
+                    <p className="text-tpahla-text-secondary text-sm mb-4 min-h-[5rem] overflow-hidden text-ellipsis line-clamp-4">{cluster.description}</p>
+                  </div>
+
+                  <div className="px-6 py-4 bg-tpahla-neutral-light border-t border-tpahla-gold/10">
+                    <div className="text-center text-sm text-tpahla-gold font-medium group-hover:text-gradient-gold flex items-center justify-center">
+                      View Awards in this Cluster <ChevronRight size={18} className="ml-1 transform transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+           {!isLoading && !error && (!awardClusters || awardClusters.length === 0) && (
+            <p className="text-center text-tpahla-text-secondary col-span-full">No award categories found. Please check back later or add categories in the admin dashboard.</p>
+           )}
         </section>
 
         {/* Unveiling of Humanitarian Ambassadors Section */}
@@ -224,7 +227,6 @@ const Awards = () => {
         <DialogContent className="max-w-2xl bg-tpahla-neutral border-tpahla-gold text-tpahla-text-primary">
           <DialogHeader>
             <DialogTitle className="text-2xl font-serif flex items-center gap-3 text-tpahla-gold">
-              {/* Conditionally render IconComponent if it exists on selectedCluster */}
               {selectedCluster && selectedCluster.IconComponent && <selectedCluster.IconComponent className="text-tpahla-emerald" size={28} />}
               <span>{selectedCluster?.clusterTitle}</span>
             </DialogTitle>
@@ -234,16 +236,20 @@ const Awards = () => {
           </DialogHeader>
           <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pr-2">
             <h3 className="text-lg font-medium text-tpahla-gold border-b border-tpahla-gold/20 pb-2">Awards in this Cluster</h3>
-            <ul className="space-y-3">
-              {selectedCluster?.awards.map((award, i) => (
-                <li key={i} className="p-3 bg-tpahla-neutral-light rounded-md flex items-start shadow">
-                  <Award className="text-tpahla-gold mr-3 flex-shrink-0 mt-1" size={20} />
-                  <div>
-                    <p className="font-medium text-tpahla-text-primary">{award}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {selectedCluster && selectedCluster.awards.length > 0 ? (
+              <ul className="space-y-3">
+                {selectedCluster.awards.map((award, i) => (
+                  <li key={i} className="p-3 bg-tpahla-neutral-light rounded-md flex items-start shadow">
+                    <AwardIcon className="text-tpahla-gold mr-3 flex-shrink-0 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-tpahla-text-primary">{award}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-tpahla-text-secondary">No specific awards listed for this cluster yet.</p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
