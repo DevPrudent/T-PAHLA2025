@@ -1,225 +1,149 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CalendarIcon, AlertCircle, InfoIcon } from "lucide-react"; // Added InfoIcon
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Added AlertTitle
+import { NominationProvider, useNomination } from "@/contexts/NominationContext";
+import NominationFormWrapper from "@/components/nominations/NominationFormWrapper";
+import NotificationBanner from "@/components/common/NotificationBanner"; // Assuming this is desired on all pages
 
-const Nominations = () => {
-  const [isNominationOpen, setIsNominationOpen] = useState(false);
+const NominationsContent = () => {
+  const { resetNomination } = useNomination(); // Get reset function
+  // const [isNominationOpen, setIsNominationOpen] = useState(false); // Kept for future use if needed for overall open/close
+
+  // For now, assuming nominations are always "open" for the form to be active.
+  // The June 1st logic can be for a global switch later.
+  const isNominationOpen = true; 
   
   useEffect(() => {
-    const currentDate = new Date();
-    const nominationsOpenDate = new Date(currentDate.getFullYear(), 5, 1); // June 1st
-    setIsNominationOpen(currentDate >= nominationsOpenDate);
-  }, []);
+    // Reset form when component mounts or nominationId changes to null externally
+    resetNomination();
+  }, [resetNomination]);
+
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-tpahla-dark text-gray-200"> {/* Dark theme base */}
+      <NotificationBanner />
       <Navbar />
       
-      {/* Page Header */}
-      <div className="pt-24 pb-12 bg-tpahla-darkgreen text-white">
+      <div className="pt-32 pb-12 bg-gradient-to-b from-tpahla-dark to-tpahla-darkgreen">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-serif font-bold mb-4">Nominations</h1>
-          <p className="text-lg max-w-3xl mx-auto">
-            Submit Your Nominations for The Pan-African Humanitarian Leadership Award
+          <h1 className="text-5xl font-serif font-bold mb-4 text-tpahla-gold">Nominations</h1>
+          <p className="text-xl max-w-3xl mx-auto text-gray-300">
+            Submit Your Nominations for The Pan-African Humanitarian Leadership Award 2025
           </p>
         </div>
       </div>
       
-      <main className="py-12">
-        {/* Nomination Process */}
+      <main className="py-12 md:py-16">
         <section className="container mx-auto px-4 mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen text-center">Nomination Process</h2>
-            
-            <div className="bg-white rounded-lg shadow-md p-8 mb-12">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto">1</div>
-                  <h3 className="text-lg font-bold">Submit Nomination</h3>
-                  <p className="text-gray-600 text-sm">Complete the nomination form with all required information about the nominee.</p>
+          {isNominationOpen ? (
+            <NominationFormWrapper />
+          ) : (
+            // This part is kept for when nominations are truly closed based on date
+            <div className="max-w-3xl mx-auto bg-tpahla-darkgreen/70 p-8 rounded-lg shadow-xl border border-tpahla-gold/30">
+              <Alert className="bg-tpahla-purple/20 border-tpahla-purple mb-6 text-tpahla-purple-light">
+                <AlertCircle className="h-5 w-5" />
+                <AlertTitle className="font-bold">Nominations Closed</AlertTitle>
+                <AlertDescription>
+                  The nomination period for the 2025 awards is currently not active. It will open in June 2025.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="text-center p-8">
+                <div className="w-24 h-24 bg-tpahla-neutral-dark rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <CalendarIcon className="h-12 w-12 text-tpahla-purple" />
                 </div>
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto">2</div>
-                  <h3 className="text-lg font-bold">Evaluation</h3>
-                  <p className="text-gray-600 text-sm">Our panel of judges reviews all nominations based on the established criteria.</p>
+                <h3 className="text-2xl font-bold mb-3 text-tpahla-gold">Nominations Opening Soon</h3>
+                <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                  We are excited for your participation! Please check back to submit your nominations.
+                </p>
+                
+                <div className="py-6 px-8 bg-tpahla-neutral-dark rounded-lg inline-block shadow-md border border-tpahla-gold/20">
+                  <div className="flex items-center justify-center">
+                    <CalendarIcon className="h-6 w-6 text-tpahla-green mr-3" />
+                    <span className="font-medium text-lg">Nominations Open: <span className="text-tpahla-green font-semibold">June 1, 2025</span></span>
+                  </div>
+                  <div className="flex items-center justify-center mt-3">
+                    <CalendarIcon className="h-6 w-6 text-tpahla-red mr-3" />
+                    <span className="font-medium text-lg">Nominations Close: <span className="text-tpahla-red font-semibold">August 15, 2025</span></span>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-tpahla-darkgreen rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto">3</div>
-                  <h3 className="text-lg font-bold">Selection</h3>
-                  <p className="text-gray-600 text-sm">Finalists are selected and winners are chosen in each category.</p>
+                
+                <div className="mt-10">
+                  <Button variant="tpahla-secondary" size="lg" className="px-10 py-3">
+                    <InfoIcon className="mr-2 h-5 w-5" />
+                    Get Notified When Nominations Open
+                  </Button>
                 </div>
               </div>
               
-              <div className="mt-10 p-4 bg-yellow-50 border-l-4 border-tpahla-gold rounded">
-                <p className="font-medium text-tpahla-darkgreen">Nominations Deadline: August 15, 2025</p>
-                <p className="text-sm text-gray-600">All nominations must be submitted by this date to be considered for the 2025 awards.</p>
-              </div>
-            </div>
-            
-            <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen text-center">Eligibility Criteria</h2>
-            
-            <div className="bg-white rounded-lg shadow-md p-8 mb-12">
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-tpahla-gold flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Nominees must be individuals, organizations, or institutions that have made significant contributions to humanitarian service in Africa.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-tpahla-gold flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Contributions must have been made within the past five years (2020-2025).</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-tpahla-gold flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Nominees must demonstrate tangible impact and results from their humanitarian efforts.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-tpahla-gold flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Self-nominations are accepted, but must include references from at least two independent sources.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-tpahla-gold flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">All required documentation must be submitted along with the nomination form.</span>
-                </li>
-              </ul>
-            </div>
-            
-            {/* Nomination Form or Notice */}
-            <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen text-center">Nomination Form</h2>
-            
-            {isNominationOpen ? (
-              <form className="bg-white rounded-lg shadow-md p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label htmlFor="nomineeName" className="block text-gray-700 font-medium mb-2">Nominee Name*</label>
-                    <input type="text" id="nomineeName" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
-                  </div>
-                  <div>
-                    <label htmlFor="nomineeType" className="block text-gray-700 font-medium mb-2">Nominee Type*</label>
-                    <select id="nomineeType" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required>
-                      <option value="">Select an option</option>
-                      <option value="individual">Individual</option>
-                      <option value="organization">Organization</option>
-                      <option value="institution">Institution</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="awardCategory" className="block text-gray-700 font-medium mb-2">Award Category*</label>
-                  <select id="awardCategory" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required>
-                    <option value="">Select a category</option>
-                    <option value="leadership">Humanitarian Leadership & Legacy</option>
-                    <option value="youth">Youth Empowerment & Gender Equality</option>
-                    <option value="disaster">Disaster Relief & Crisis Management</option>
-                    <option value="health">Health & Wellbeing</option>
-                    <option value="environment">Environmental Sustainability</option>
-                    <option value="education">Education & Capacity Building</option>
-                  </select>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="achievement" className="block text-gray-700 font-medium mb-2">Summary of Achievement*</label>
-                  <textarea id="achievement" rows={4} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required></textarea>
-                  <p className="text-sm text-gray-500 mt-1">Briefly describe the nominee's contributions and impact (max 500 words).</p>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="evidence" className="block text-gray-700 font-medium mb-2">Supporting Evidence*</label>
-                  <input type="file" id="evidence" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
-                  <p className="text-sm text-gray-500 mt-1">Upload documents, photos, or other evidence supporting the nomination (PDF, JPG, PNG formats, max 10MB).</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label htmlFor="nominator" className="block text-gray-700 font-medium mb-2">Your Name*</label>
-                    <input type="text" id="nominator" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Your Email*</label>
-                    <input type="email" id="email" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
-                  </div>
-                </div>
-                
-                <div className="flex items-center mb-6">
-                  <input type="checkbox" id="terms" className="h-4 w-4 text-tpahla-darkgreen focus:ring-tpahla-darkgreen border-gray-300 rounded" required />
-                  <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                    I confirm that all information provided is accurate and complete.
-                  </label>
-                </div>
-                
-                <button type="submit" className="w-full py-3 px-4 bg-tpahla-darkgreen text-white font-medium rounded-md hover:bg-tpahla-brightgreen transition-colors">
-                  Submit Nomination
-                </button>
-                
-                <p className="text-center text-sm text-gray-500 mt-4">
-                  * Required fields
+              <div className="mt-12 border-t border-tpahla-gold/20 pt-8">
+                <h4 className="text-xl font-bold mb-4 text-tpahla-gold">Prepare for Nominations</h4>
+                <p className="text-gray-400 mb-4">
+                  While you wait for nominations to open, you can prepare by:
                 </p>
-              </form>
-            ) : (
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <Alert className="bg-tpahla-purple/10 border-tpahla-purple mb-6">
-                  <AlertCircle className="h-4 w-4 text-tpahla-purple" />
-                  <AlertDescription>
-                    <span className="font-medium">Nominations are not yet open.</span> The nomination period will begin in June 2025.
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="text-center p-8">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CalendarIcon className="h-10 w-10 text-tpahla-purple" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Nominations Opening Soon</h3>
-                  <p className="text-gray-600 mb-6">
-                    The nomination period for the 2025 Pan-African Humanitarian Leadership Awards will open in June 2025.
-                    Please check back then to submit your nominations.
-                  </p>
-                  
-                  <div className="py-4 px-6 bg-gray-50 rounded-lg inline-block">
-                    <div className="flex items-center">
-                      <CalendarIcon className="h-5 w-5 text-tpahla-darkgreen mr-2" />
-                      <span className="font-medium">Nominations Open: <span className="text-tpahla-darkgreen">June 1, 2025</span></span>
-                    </div>
-                    <div className="flex items-center mt-2">
-                      <CalendarIcon className="h-5 w-5 text-tpahla-red mr-2" />
-                      <span className="font-medium">Nominations Close: <span className="text-tpahla-red">August 15, 2025</span></span>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8">
-                    <Button variant="tpahla-secondary" className="px-8">
-                      Get Notified When Nominations Open
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="mt-10 border-t border-gray-200 pt-6">
-                  <h4 className="text-lg font-bold mb-4">Prepare for Nominations</h4>
-                  <p className="text-gray-600 mb-4">
-                    While you wait for nominations to open, you can prepare by:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                    <li>Researching potential nominees' humanitarian contributions</li>
-                    <li>Gathering supporting documentation and evidence</li>
-                    <li>Reviewing the award categories and eligibility criteria</li>
-                    <li>Reaching out to potential referees for your nomination</li>
-                  </ul>
-                </div>
+                <ul className="list-disc list-inside pl-5 space-y-2 text-gray-300 marker:text-tpahla-gold">
+                  <li>Researching potential nominees' humanitarian contributions</li>
+                  <li>Gathering supporting documentation and evidence</li>
+                  <li>Reviewing the award categories and eligibility criteria</li>
+                  <li>Reaching out to potential referees for your nomination</li>
+                </ul>
               </div>
-            )}
+            </div>
+          )}
+        </section>
+        
+        {/* Eligibility Criteria and Process Overview - Can be styled with dark theme */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="max-w-4xl mx-auto bg-tpahla-darkgreen/70 p-8 md:p-10 rounded-xl shadow-xl border border-tpahla-gold/30">
+            <h2 className="text-3xl font-serif font-bold mb-8 text-tpahla-gold text-center">Eligibility & Process</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-tpahla-gold-light">Eligibility Criteria</h3>
+                <ul className="space-y-3 text-gray-300">
+                  {[
+                    "Nominees must be individuals, organizations, or institutions that have made significant contributions to humanitarian service in Africa.",
+                    "Contributions must have been made within the past five years (2020-2025).",
+                    "Nominees must demonstrate tangible impact and results from their humanitarian efforts.",
+                    "Self-nominations are accepted, but must include references from at least two independent sources.",
+                    "All required documentation must be submitted along with the nomination form."
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <svg className="h-5 w-5 text-tpahla-gold flex-shrink-0 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-tpahla-gold-light">Nomination Process Overview</h3>
+                 <div className="space-y-4">
+                    {[
+                      {step: 1, title: "Submit Nomination", desc: "Complete the multi-step nomination form with all required information."},
+                      {step: 2, title: "Evaluation", desc: "Our panel of judges reviews all nominations based on the established criteria."},
+                      {step: 3, title: "Selection", desc: "Finalists are selected and winners are chosen in each category."}
+                    ].map(item => (
+                      <div key={item.step} className="flex items-start">
+                        <div className="w-8 h-8 bg-tpahla-gold rounded-full flex items-center justify-center text-tpahla-darkgreen font-bold text-sm mr-3 flex-shrink-0">{item.step}</div>
+                        <div>
+                          <h4 className="font-semibold text-gray-200">{item.title}</h4>
+                          <p className="text-sm text-gray-400">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                 </div>
+                 <div className="mt-6 p-4 bg-tpahla-purple/20 border-l-4 border-tpahla-purple rounded">
+                    <p className="font-medium text-tpahla-purple-light">Nominations Deadline: <span className="font-bold">August 15, 2025</span></p>
+                    <p className="text-sm text-gray-400">All nominations must be submitted by this date to be considered.</p>
+                 </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -227,6 +151,15 @@ const Nominations = () => {
       <Footer />
     </div>
   );
-};
+}
+
+// Wrap NominationsContent with NominationProvider
+const Nominations = () => (
+  <NominationProvider>
+    <NominationsContent />
+  </NominationProvider>
+);
+
 
 export default Nominations;
+
