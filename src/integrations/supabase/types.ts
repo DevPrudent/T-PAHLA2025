@@ -42,145 +42,6 @@ export type Database = {
         }
         Relationships: []
       }
-      contact_messages: {
-        Row: {
-          created_at: string
-          email: string
-          first_name: string | null
-          id: string
-          last_name: string | null
-          message: string
-          phone: string | null
-          subject: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          message: string
-          phone?: string | null
-          subject?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          message?: string
-          phone?: string | null
-          subject?: string | null
-        }
-        Relationships: []
-      }
-      nomination_documents: {
-        Row: {
-          file_name: string
-          file_type: Database["public"]["Enums"]["document_type_enum"] | null
-          id: string
-          nomination_id: string
-          storage_path: string
-          uploaded_at: string
-          user_id: string | null
-        }
-        Insert: {
-          file_name: string
-          file_type?: Database["public"]["Enums"]["document_type_enum"] | null
-          id?: string
-          nomination_id: string
-          storage_path: string
-          uploaded_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          file_name?: string
-          file_type?: Database["public"]["Enums"]["document_type_enum"] | null
-          id?: string
-          nomination_id?: string
-          storage_path?: string
-          uploaded_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nomination_documents_nomination_id_fkey"
-            columns: ["nomination_id"]
-            isOneToOne: false
-            referencedRelation: "nominations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      nominations: {
-        Row: {
-          award_category_id: string | null
-          created_at: string
-          form_section_a: Json | null
-          form_section_b: Json | null
-          form_section_c_notes: string | null
-          form_section_d: Json | null
-          form_section_e: Json | null
-          id: string
-          nominator_email: string | null
-          nominator_name: string | null
-          nominee_name: string
-          nominee_type: Database["public"]["Enums"]["nominee_type_enum"] | null
-          status: Database["public"]["Enums"]["nomination_status_enum"] | null
-          submitted_at: string | null
-          summary_of_achievement: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          award_category_id?: string | null
-          created_at?: string
-          form_section_a?: Json | null
-          form_section_b?: Json | null
-          form_section_c_notes?: string | null
-          form_section_d?: Json | null
-          form_section_e?: Json | null
-          id?: string
-          nominator_email?: string | null
-          nominator_name?: string | null
-          nominee_name: string
-          nominee_type?: Database["public"]["Enums"]["nominee_type_enum"] | null
-          status?: Database["public"]["Enums"]["nomination_status_enum"] | null
-          submitted_at?: string | null
-          summary_of_achievement?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          award_category_id?: string | null
-          created_at?: string
-          form_section_a?: Json | null
-          form_section_b?: Json | null
-          form_section_c_notes?: string | null
-          form_section_d?: Json | null
-          form_section_e?: Json | null
-          id?: string
-          nominator_email?: string | null
-          nominator_name?: string | null
-          nominee_name?: string
-          nominee_type?: Database["public"]["Enums"]["nominee_type_enum"] | null
-          status?: Database["public"]["Enums"]["nomination_status_enum"] | null
-          submitted_at?: string | null
-          summary_of_achievement?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nominations_award_category_id_fkey"
-            columns: ["award_category_id"]
-            isOneToOne: false
-            referencedRelation: "award_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -189,14 +50,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      document_type_enum: "cv_resume" | "photo_media" | "additional_document"
-      nomination_status_enum:
-        | "draft"
-        | "submitted"
-        | "approved"
-        | "rejected"
-        | "incomplete"
-      nominee_type_enum: "individual" | "organization" | "institution"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -311,16 +165,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      document_type_enum: ["cv_resume", "photo_media", "additional_document"],
-      nomination_status_enum: [
-        "draft",
-        "submitted",
-        "approved",
-        "rejected",
-        "incomplete",
-      ],
-      nominee_type_enum: ["individual", "organization", "institution"],
-    },
+    Enums: {},
   },
 } as const

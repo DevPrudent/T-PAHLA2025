@@ -15,7 +15,7 @@ const Footer = () => {
                   alt="TPAHLA Logo White" 
                   className="h-16" 
                 />
-                 <span className="text-2xl font-serif font-bold text-tpahla-gold">TPAHLA 2025</span>
+                 {/* "TPAHLA 2025" text removed here */}
               </Link>
             </div>
             <p className="mb-4 text-sm">The Pan-African Humanitarian Leadership Award (TPAHLA) honors outstanding leaders, organizations, and institutions contributing to humanitarian service across Africa.</p>

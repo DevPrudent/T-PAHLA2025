@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,7 +9,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
+      if (window.scrollY > 10) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -38,12 +37,11 @@ const Navbar = () => {
   };
 
   return (
-    <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-background shadow-lg py-2 border-b border-tpahla-gold/20' : 'bg-transparent py-4'}`}>
+    <header className={`sticky top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-background shadow-lg py-2 border-b border-tpahla-gold/20' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
             <img alt="TPAHLA Logo" className="h-12 md:h-16" src="/lovable-uploads/62fe4193-0108-4af1-94b9-a45993de1c9d.png" />
-            <span className="text-xl font-serif font-bold text-tpahla-gold hidden sm:inline">TPAHLA 2025</span>
           </Link>
         </div>
 
