@@ -77,20 +77,15 @@ const NominationFormArea = () => {
   const [isNominationPeriodOpen, setIsNominationPeriodOpen] = useState(false);
 
   useEffect(() => {
-    const currentDate = new Date();
-    // Note: Current date is 2025-05-22 as per system settings.
-    // Nominations open June 1, 2025 and close August 15, 2025.
-    // So, isNominationPeriodOpen should be false.
-    const nominationsOpenDate = new Date("2025-06-01T00:00:00Z"); 
-    const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
+    // FOR TESTING: Set to true to always open nominations
+    setIsNominationPeriodOpen(true); 
     
-    // console.log("Current Date:", currentDate.toISOString());
-    // console.log("Nominations Open:", nominationsOpenDate.toISOString());
-    // console.log("Nominations Close:", nominationsCloseDate.toISOString());
-    
-    const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
-    // console.log("Is Nomination Period Open?", isOpen);
-    setIsNominationPeriodOpen(isOpen);
+    // Original logic (commented out for testing):
+    // const currentDate = new Date();
+    // const nominationsOpenDate = new Date("2025-06-01T00:00:00Z"); 
+    // const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
+    // const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
+    // setIsNominationPeriodOpen(isOpen);
   }, []);
 
   const renderStep = () => {

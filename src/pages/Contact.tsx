@@ -2,8 +2,64 @@
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Mail, MapPin, Phone } from 'lucide-react';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Button as ShadButton } from '@/components/ui/button'; // Renamed to avoid conflict
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+}
 
 const Contact = () => {
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+        });
+
+      if (error) {
+        throw error;
+      }
+      toast.success('Message sent successfully! We will get back to you soon.');
+      setFormData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' }); // Reset form
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast.error(`Failed to send message: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -101,32 +157,32 @@ const Contact = () => {
               {/* Contact Form */}
               <div>
                 <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-darkgreen">Send Us a Message</h2>
-                <form className="bg-white rounded-lg shadow-md p-8">
+                <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label htmlFor="firstName" className="block text-gray-700 font-medium mb-2">First Name*</label>
-                      <input type="text" id="firstName" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
+                      <input type="text" id="firstName" value={formData.firstName} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
                     </div>
                     <div>
                       <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">Last Name*</label>
-                      <input type="text" id="lastName" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
+                      <input type="text" id="lastName" value={formData.lastName} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email*</label>
-                      <input type="email" id="email" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
+                      <input type="email" id="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required />
                     </div>
                     <div>
                       <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Phone</label>
-                      <input type="tel" id="phone" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" />
+                      <input type="tel" id="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" />
                     </div>
                   </div>
                   
                   <div className="mb-6">
                     <label htmlFor="subject" className="block text-gray-700 font-medium mb-2">Subject*</label>
-                    <select id="subject" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required>
+                    <select id="subject" value={formData.subject} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required>
                       <option value="">Select a subject</option>
                       <option value="general">General Inquiry</option>
                       <option value="nominations">Nominations</option>
@@ -139,12 +195,12 @@ const Contact = () => {
                   
                   <div className="mb-6">
                     <label htmlFor="message" className="block text-gray-700 font-medium mb-2">Message*</label>
-                    <textarea id="message" rows={6} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required></textarea>
+                    <textarea id="message" rows={6} value={formData.message} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tpahla-darkgreen" required></textarea>
                   </div>
                   
-                  <button type="submit" className="w-full py-3 px-4 bg-tpahla-darkgreen text-white font-medium rounded-md hover:bg-tpahla-brightgreen transition-colors">
-                    Send Message
-                  </button>
+                  <ShadButton type="submit" className="w-full py-3 px-4 bg-tpahla-darkgreen text-white font-medium rounded-md hover:bg-tpahla-brightgreen transition-colors" disabled={isSubmitting}>
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </ShadButton>
                   
                   <p className="text-center text-sm text-gray-500 mt-4">
                     * Required fields

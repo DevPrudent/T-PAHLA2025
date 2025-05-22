@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +30,7 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
+import MessagesPage from "./pages/admin/MessagesPage"; // Import the new MessagesPage
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -73,6 +73,7 @@ const App = () => {
                 <Route path="categories" element={<CategoriesPage />} />
                 <Route path="nominees" element={<NomineesPage />} />
                 <Route path="transactions" element={<TransactionsPage />} />
+                <Route path="messages" element={<MessagesPage />} /> {/* Add route for MessagesPage */}
               </Route>
 
               <Route path="*" element={<NotFound />} />

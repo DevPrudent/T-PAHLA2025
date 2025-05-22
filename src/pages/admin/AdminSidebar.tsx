@@ -10,9 +10,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button"; // For logout button
-import { LayoutDashboard, Folder, Users, ListChecks, Settings, BarChart3, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Folder, Users, ListChecks, Settings, BarChart3, LogOut, MessageSquare } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const adminNavItems = [
@@ -20,6 +20,7 @@ const adminNavItems = [
   { href: "/admin/categories", label: "Categories", icon: Folder },
   { href: "/admin/nominees", label: "Nominees", icon: Users },
   { href: "/admin/transactions", label: "Transactions", icon: ListChecks },
+  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
 ];
 
 // Future items (can be added later)
