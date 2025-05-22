@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NominationProvider, useNomination } from "@/contexts/NominationContext";
 import NominationStepA from "@/components/nominations/NominationStepA";
+import NominationStepB from "@/components/nominations/NominationStepB"; // Import NominationStepB
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -92,8 +93,11 @@ const NominationFormArea = () => {
     switch (currentStep) {
       case 1:
         return <NominationStepA />;
+      case 2:
+        return <NominationStepB />; // Render NominationStepB for step 2
+      // Add cases for Step C, D, E later
       default:
-        return <NominationStepA />;
+        return <NominationStepA />; // Default to Step A if step is unknown
     }
   };
 

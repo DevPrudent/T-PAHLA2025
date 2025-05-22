@@ -2,9 +2,16 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { NominationStepAData } from '@/lib/validators/nominationValidators';
 // Import other step data types as they are created
 
+// Placeholder for Section B data type
+export interface NominationStepBData {
+  award_category?: string; // Or a more structured type later
+  // Add other fields from Section B if needed
+}
+
 interface NominationData {
   sectionA?: NominationStepAData;
-  // sectionB?: NominationStepBData;
+  sectionB?: NominationStepBData; // Add sectionB
+  // sectionC?: NominationStepCData;
   // ... other sections
 }
 
@@ -30,6 +37,9 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
       ...prevData,
       [section]: data,
     }));
+     // Log to see if context is updated
+    console.log(`NominationContext: Updated ${section}`, data);
+    console.log('NominationContext: Full data after update', { ...nominationData, [section]: data });
   };
 
   const resetNomination = () => {
