@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NominationProvider, useNomination } from "@/contexts/NominationContext";
 import NominationStepA from "@/components/nominations/NominationStepA";
 import { Button } from "@/components/ui/button";
@@ -78,9 +78,19 @@ const NominationFormArea = () => {
 
   useEffect(() => {
     const currentDate = new Date();
-    const nominationsOpenDate = new Date(2025, 5, 1); // Month is 0-indexed, so 5 is June
-    const nominationsCloseDate = new Date(2025, 7, 15, 23, 59, 59); // August 15th, end of day
-    setIsNominationPeriodOpen(currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate);
+    // Note: Current date is 2025-05-22 as per system settings.
+    // Nominations open June 1, 2025 and close August 15, 2025.
+    // So, isNominationPeriodOpen should be false.
+    const nominationsOpenDate = new Date("2025-06-01T00:00:00Z"); 
+    const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
+    
+    // console.log("Current Date:", currentDate.toISOString());
+    // console.log("Nominations Open:", nominationsOpenDate.toISOString());
+    // console.log("Nominations Close:", nominationsCloseDate.toISOString());
+    
+    const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
+    // console.log("Is Nomination Period Open?", isOpen);
+    setIsNominationPeriodOpen(isOpen);
   }, []);
 
   const renderStep = () => {
@@ -131,7 +141,7 @@ const NominationFormArea = () => {
               <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CalendarIcon className="h-10 w-10 text-tpahla-purple" />
               </div>
-              <h3 className="text-xl font-bold mb-2 text-tpahla-gold">Nominations Opening Soon / Closed</h3>
+              <h3 className="text-xl font-bold mb-2 text-tpahla-gold">Nominations Currently Closed</h3>
               <p className="text-gray-400 mb-6">
                 Please check back between June 1, 2025, and August 15, 2025, to submit your nominations.
               </p>

@@ -260,7 +260,7 @@ const NominationStepA = () => {
         />
         
         <div className="flex justify-end">
-          <Button type="submit" variant="tpahla" size="lg">
+          <Button type="submit" variant="tpahla-primary" size="lg">
             Save & Next
           </Button>
         </div>
