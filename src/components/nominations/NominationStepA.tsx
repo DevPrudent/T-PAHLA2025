@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,7 +56,7 @@ const NominationStepA = () => {
 
       if (currentNominationId) {
         // Update existing nomination
-        const { error }_ = await supabase
+        const { error } = await supabase
           .from('nominations')
           .update(nominationPayload)
           .eq('id', currentNominationId);
@@ -81,7 +80,7 @@ const NominationStepA = () => {
         if (error) throw error;
         if (newNomination) {
           setNominationId(newNomination.id);
-          currentNominationId = newNomination.id;
+          currentNominationId = newNomination.id; // Ensure currentNominationId is updated for subsequent logic if any
           toast.success('Section A saved!');
         }
       }
@@ -271,4 +270,3 @@ const NominationStepA = () => {
 };
 
 export default NominationStepA;
-
