@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database } from '@/integrations/supabase/types';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { Printer, Download } from 'lucide-react'; // Import Printer and Download icons
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
@@ -28,13 +29,12 @@ interface NominationDetailsModalProps {
   onClose: () => void;
 }
 
-// IMPORTANT: Confirm or change this bucket name to match your Supabase Storage setup.
 const NOMINATION_FILES_BUCKET = 'nomination-files'; 
 
 const DetailItem: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
-  <div className="mb-2">
-    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}:</p>
-    <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
+  <div className="mb-2 print:mb-1">
+    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 print:text-black">{label}:</p>
+    <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words print:text-black">
       {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value ?? 'N/A'}
     </div>
   </div>
@@ -45,13 +45,12 @@ const renderSection = (title: string, data: any | null) => {
     return <DetailItem label={title} value="No data provided for this section." />;
   }
   if (Array.isArray(data)) {
-    // If it's a simple array, stringify it (might need more specific handling if it's an array of complex objects not files)
     return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
   }
 
   return (
-    <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50">
-      <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold">{title}</h4>
+    <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+      <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">{title}</h4>
       {Object.entries(data).map(([key, value]) => {
         const formattedKey = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         
@@ -73,7 +72,6 @@ const renderSection = (title: string, data: any | null) => {
             </div>
           );
         } 
-        // Handle file uploads for specific keys in Section C
         else if (['cv_resume', 'photos_media', 'other_documents'].includes(key) && value) {
           const fileArray = Array.isArray(value) ? value : (value && typeof value === 'object' && (('file_name' in value && 'storage_path' in value) || ('name' in value && 'url' in value)) ? [value] : []);
           
@@ -93,7 +91,7 @@ const renderSection = (title: string, data: any | null) => {
                       let publicUrl = '#';
                       let fileName = 'Download/View File';
 
-                      if (fileData.storage_path && fileData.file_name) { // Assumes storage_path and file_name
+                      if (fileData.storage_path && fileData.file_name) {
                         fileName = fileData.file_name;
                         const publicUrlResult = supabase.storage.from(NOMINATION_FILES_BUCKET).getPublicUrl(fileData.storage_path);
                         
@@ -106,11 +104,10 @@ const renderSection = (title: string, data: any | null) => {
                           );
                         }
                         publicUrl = publicUrlResult.data.publicUrl;
-                      } else if (fileData.url && fileData.name) { // Assumes direct URL and name
+                      } else if (fileData.url && fileData.name) {
                          fileName = fileData.name;
                          publicUrl = fileData.url;
                       } else {
-                        // Fallback for unexpected structure
                          return (
                             <li key={index} className="text-sm text-gray-500">
                               Invalid file data for an item.
@@ -119,14 +116,25 @@ const renderSection = (title: string, data: any | null) => {
                       }
 
                       return (
-                        <li key={index} className="text-sm">
+                        <li key={index} className="text-sm flex items-center">
                           <a
                             href={publicUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                            download={fileName} // Add download attribute
+                            className="text-blue-600 dark:text-blue-400 hover:underline print:text-blue-600"
                           >
                             {fileName}
+                          </a>
+                          <a
+                            href={publicUrl}
+                            download={fileName}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 print:hidden"
+                            title={`Download ${fileName}`}
+                          >
+                            <Download size={16} />
                           </a>
                         </li>
                       );
@@ -136,13 +144,12 @@ const renderSection = (title: string, data: any | null) => {
               />
             );
           } else {
-            // If value was present but not in a recognized file format or empty array
             return <DetailItem key={key} label={formattedKey} value="No files uploaded or data is in an unexpected format." />;
           }
         }
         else if (key === 'date_signed' && value && typeof value === 'string') {
             try {
-              const dateValue = parseISO(value); // Use parseISO for ISO 8601 strings
+              const dateValue = parseISO(value); 
               if (!isNaN(dateValue.getTime())) {
                 return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
               } else {
@@ -173,10 +180,23 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
   const sectionD = nomination.form_section_d as NominationStepDData | null;
   const sectionE = nomination.form_section_e as NominationStepEData | null;
 
+  const handlePrint = () => {
+    // Temporarily hide non-printable elements for cleaner print
+    const modalContent = document.getElementById('nomination-details-modal-content');
+    if (modalContent) {
+        // Add a class to the modal content itself if further specific print styling is needed for the container
+        // For example, to ensure it expands fully or has specific margins for print.
+    }
+    window.print();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800">
-        <DialogHeader>
+      <DialogContent 
+        id="nomination-details-modal-content" 
+        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:shadow-none print:border-none print:max-w-full print:w-full print:h-full print:overflow-visible print:bg-white"
+      >
+        <DialogHeader className="print:hidden">
           <DialogTitle className="text-2xl font-serif text-tpahla-darkgreen dark:text-tpahla-gold">
             Nomination Details: {nomination.nominee_name}
           </DialogTitle>
@@ -185,46 +205,65 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="h-[60vh] pr-4">
-          <div className="space-y-4 py-4">
-            <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50">
-                <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold">General Information</h4>
-                <DetailItem label="Nomination ID" value={nomination.id} />
-                <DetailItem label="Nominee Name" value={nomination.nominee_name} />
-                <DetailItem label="Nominee Type" value={nomination.nominee_type} />
-                <DetailItem label="Award Category ID" value={nomination.award_category_id} />
-                <DetailItem label="Nominator Name" value={nomination.nominator_name} />
-                <DetailItem label="Nominator Email" value={nomination.nominator_email} />
-                <DetailItem 
-                  label="Status" 
-                  value={
-                    <Badge variant={
-                        nomination.status === "approved" ? "success" : 
-                        nomination.status === "rejected" ? "destructive" :
-                        nomination.status === "submitted" ? "default" :
-                        "outline"
-                    }>
-                        {nomination.status}
-                    </Badge>
-                  } 
-                />
-                <DetailItem label="Summary of Achievement" value={nomination.summary_of_achievement} />
-                <DetailItem label="Created At" value={nomination.created_at ? format(parseISO(nomination.created_at), 'PPPp') : 'N/A'} />
-                <DetailItem label="Updated At" value={nomination.updated_at ? format(parseISO(nomination.updated_at), 'PPPp') : 'N/A'} />
-                <DetailItem label="Submitted At" value={nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'} />
+        {/* Content to be printed - apply print styling here or in children */}
+        <div className="print:text-black print:bg-white">
+            <div className="hidden print:block mb-4"> {/* Show only on print */}
+                <h1 className="text-2xl font-bold text-black">Nomination Details: {nomination.nominee_name}</h1>
+                <p className="text-sm text-gray-600">
+                  Submitted on: {nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'}
+                </p>
+                <hr className="my-2"/>
             </div>
 
-            {renderSection("Section A: Nominee Information", sectionA)}
-            {renderSection("Section B: Award Category", sectionB)}
-            {renderSection("Section C: Justification & Supporting Materials", sectionC)}
-            
-            {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
-            {renderSection("Section D: Nominator Information", sectionD)}
-            {renderSection("Section E: Declaration & Signature", sectionE)}
-          </div>
-        </ScrollArea>
+            <ScrollArea className="h-[60vh] pr-4 print:h-auto print:overflow-visible">
+              <div className="space-y-4 py-4">
+                <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+                    <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">General Information</h4>
+                    <DetailItem label="Nomination ID" value={nomination.id} />
+                    <DetailItem label="Nominee Name" value={nomination.nominee_name} />
+                    <DetailItem label="Nominee Type" value={nomination.nominee_type} />
+                    <DetailItem label="Award Category ID" value={nomination.award_category_id} />
+                    <DetailItem label="Nominator Name" value={nomination.nominator_name} />
+                    <DetailItem label="Nominator Email" value={nomination.nominator_email} />
+                    <DetailItem 
+                      label="Status" 
+                      value={
+                        <Badge 
+                            variant={
+                                nomination.status === "approved" ? "success" : 
+                                nomination.status === "rejected" ? "destructive" :
+                                nomination.status === "submitted" ? "default" :
+                                "outline"
+                            }
+                            className="print:border print:border-gray-400 print:text-black print:bg-gray-100"
+                        >
+                            {nomination.status}
+                        </Badge>
+                      } 
+                    />
+                    <DetailItem label="Summary of Achievement" value={nomination.summary_of_achievement} />
+                    <DetailItem label="Created At" value={nomination.created_at ? format(parseISO(nomination.created_at), 'PPPp') : 'N/A'} />
+                    <DetailItem label="Updated At" value={nomination.updated_at ? format(parseISO(nomination.updated_at), 'PPPp') : 'N/A'} />
+                    <DetailItem label="Submitted At" value={nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'} />
+                </div>
 
-        <DialogFooter className="sm:justify-end">
+                {renderSection("Section A: Nominee Information", sectionA)}
+                {renderSection("Section B: Award Category", sectionB)}
+                {renderSection("Section C: Justification & Supporting Materials", sectionC)}
+                
+                {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
+                {renderSection("Section D: Nominator Information", sectionD)}
+                {renderSection("Section E: Declaration & Signature", sectionE)}
+              </div>
+            </ScrollArea>
+        </div>
+
+
+        <DialogFooter className="sm:justify-end print:hidden">
+           <Button type="button" variant="outline" onClick={handlePrint}>
+            <Printer size={16} className="mr-2" />
+            Print
+          </Button>
           <DialogClose asChild>
             <Button type="button" variant="outline">
               Close
