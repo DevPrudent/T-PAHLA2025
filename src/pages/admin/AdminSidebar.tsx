@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -9,16 +10,33 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Folder, Users, ListChecks, Settings, BarChart3, LogOut, MessageSquare } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Folder, 
+  Users, 
+  ListChecks, 
+  Settings, 
+  BarChart3, 
+  LogOut, 
+  MessageSquare,
+  FileText,
+  FileCheck2,
+  FileClock,
+  ChevronDown,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/categories", label: "Categories", icon: Folder },
-  { href: "/admin/nominees", label: "Nominees", icon: Users },
+  { href: "/admin/nominees", label: "All Nominees", icon: Users },
   { href: "/admin/transactions", label: "Transactions", icon: ListChecks },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
 ];
@@ -34,6 +52,7 @@ export function AdminSidebar() {
   const location = useLocation();
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [isNominationsOpen, setIsNominationsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -45,6 +64,11 @@ export function AdminSidebar() {
       console.error("Logout error:", error);
     }
   };
+
+  // Check if current path is under /admin/nominations/* for active state of parent
+  const isNominationsPathActive = location.pathname.startsWith("/admin/nominations");
+  const isCompletedNominationsActive = location.pathname === "/admin/nominations/completed";
+  const isIncompleteNominationsActive = location.pathname === "/admin/nominations/incomplete";
 
   return (
     <Sidebar>
@@ -63,7 +87,7 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(item.href))}
+                    isActive={location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(item.href) && item.href !== "/admin/nominees")}
                   >
                     <Link to={item.href}>
                       <item.icon className="h-5 w-5" />
@@ -72,29 +96,53 @@ export function AdminSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setIsNominationsOpen(!isNominationsOpen)}
+                  isActive={isNominationsPathActive}
+                  className="w-full justify-between"
+                  data-state={isNominationsOpen ? 'open' : 'closed'}
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    <span>Nominations</span>
+                  </div>
+                  <ChevronDown 
+                    className={cn(
+                      "h-4 w-4 transition-transform duration-200",
+                      isNominationsOpen && "rotate-180"
+                    )} 
+                  />
+                </SidebarMenuButton>
+                {isNominationsOpen && (
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild 
+                        isActive={isCompletedNominationsActive}
+                      >
+                        <Link to="/admin/nominations/completed">
+                          <FileCheck2 className="h-4 w-4 mr-2" />
+                          Completed
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton 
+                        asChild 
+                        isActive={isIncompleteNominationsActive}
+                      >
+                        <Link to="/admin/nominations/incomplete">
+                          <FileClock className="h-4 w-4 mr-2" />
+                          Incomplete
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-          {/* Placeholder for future items if needed
-          <SidebarGroup>
-            <SidebarGroupLabel>Future</SidebarGroupLabel>
-            <SidebarMenu>
-              {futureAdminNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.href}
-                    disabled // Disabled for now
-                  >
-                    <Link to={item.href}>
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-          */}
         </div>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t">

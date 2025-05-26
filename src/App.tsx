@@ -30,8 +30,10 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
-import MessagesPage from "./pages/admin/MessagesPage"; // Import the new MessagesPage
-import NominationFormPage from "./pages/NominationFormPage"; // Import the new NominationFormPage
+import MessagesPage from "./pages/admin/MessagesPage";
+import NominationFormPage from "./pages/NominationFormPage";
+import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
+import IncompleteNominationsPage from "./pages/admin/IncompleteNominationsPage";
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -73,9 +75,11 @@ const App = () => {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
-                <Route path="nominees" element={<NomineesPage />} />
+                <Route path="nominees" element={<NomineesPage />} /> {/* This is for ALL nominees */}
+                <Route path="nominations/completed" element={<CompletedNominationsPage />} /> {/* New */}
+                <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} /> {/* New */}
                 <Route path="transactions" element={<TransactionsPage />} />
-                <Route path="messages" element={<MessagesPage />} /> {/* Add route for MessagesPage */}
+                <Route path="messages" element={<MessagesPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
