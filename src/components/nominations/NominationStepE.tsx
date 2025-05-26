@@ -41,7 +41,8 @@ const NominationStepE = () => {
     setIsSubmittingNomination(true);
     updateSectionData('sectionE', data);
     console.log('NominationStepE Data:', data);
-    console.log('Full Nomination Data before final submission:', {...nominationData, sectionE: data});
+    const fullNominationDataForSubmission = {...nominationData, sectionE: data};
+    console.log('Full Nomination Data before final submission:', fullNominationDataForSubmission);
 
     if (!nominationId) {
       toast.error('Critical error: Nomination ID is missing. Cannot submit.');
@@ -51,39 +52,82 @@ const NominationStepE = () => {
 
     try {
       // Update the nomination with section E data and set status to 'submitted'
-      const { error } = await supabase
+      const { error: submissionError } = await supabase
         .from('nominations')
         .update({
-          form_section_e: data as any, // Cast as any if type issues persist after schema update
+          form_section_e: data as any, 
           status: 'submitted',
           submitted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', nominationId);
 
-      if (error) throw error;
+      if (submissionError) throw submissionError;
 
       toast.success('Nomination Submitted Successfully!', {
-        description: `Thank you for your nomination. Your Nomination ID is ${nominationId}. You will receive a confirmation email shortly. Please also submit supporting documents via email.`,
-        duration: 10000, // Keep toast longer
+        description: `Thank you for your nomination. Your Nomination ID is ${nominationId}. We are now sending a confirmation email. Please also submit supporting documents via email if you haven't uploaded them.`,
+        duration: 10000,
       });
       
-      // Here you would typically trigger email notifications. We'll do this in a later step.
-      // For now, we just reset.
-      
-      // Reset form and go to a thank you/confirmation state (or back to step 1)
-      // setCurrentStep(6); // Or a dedicated "Thank You" step/page
-      // For now, just log and potentially reset
       console.log("Nomination submitted successfully to Supabase with ID:", nominationId);
-      // resetNomination(); // Optionally reset everything
-      // Or navigate to a success page, or disable form further
-      // For now, we'll keep the user on this step but show submitted state.
+
+      // Attempt to send email notification
+      try {
+        const nominatorEmail = fullNominationDataForSubmission.sectionA?.nominator_email;
+        const nominatorFirstName = fullNominationDataForSubmission.sectionA?.nominator_first_name || '';
+        const nominatorLastName = fullNominationDataForSubmission.sectionA?.nominator_last_name || '';
+        const nominatorName = `${nominatorFirstName} ${nominatorLastName}`.trim();
+        const nomineeName = fullNominationDataForSubmission.sectionA?.nominee_name || fullNominationDataForSubmission.sectionA?.organisation_name || 'The Nominee';
+        
+        if (!nominatorEmail || !nominatorName || !nomineeName) {
+          throw new Error("Missing nominator/nominee details for email.");
+        }
+
+        console.log('Attempting to send email with payload:', {
+          nominatorEmail,
+          nominatorName,
+          nomineeName,
+          nominationId,
+          siteUrl: window.location.origin,
+        });
+        
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('send-nomination-email', {
+          body: {
+            nominatorEmail,
+            nominatorName,
+            nomineeName,
+            nominationId,
+            siteUrl: window.location.origin, // Or a more specific URL to your awards page
+          },
+        });
+
+        if (emailError) {
+          console.error('Error invoking send-nomination-email function:', emailError);
+          toast.error('Nomination submitted, but failed to send confirmation email.', {
+            description: `Details: ${emailError.message}. Please contact support if this persists.`,
+            duration: 10000,
+          });
+        } else {
+          console.log('send-nomination-email function invoked successfully:', emailData);
+          toast.success('Confirmation email process initiated.', {
+            description: 'You should receive an email shortly.',
+            duration: 5000,
+          });
+        }
+      } catch (emailInvocationError: any) {
+        console.error('Client-side error preparing or calling email function:', emailInvocationError);
+        toast.error('Nomination submitted, but an issue occurred with email notification.', {
+          description: `Details: ${emailInvocationError.message}.`,
+          duration: 10000,
+        });
+      }
 
     } catch (error: any) {
       toast.error(`Error submitting nomination: ${error.message}`);
       console.error('Supabase final submission error:', error);
     } finally {
       setIsSubmittingNomination(false);
+      // The component will re-render and show the "Submitted" state due to updated nominationData.sectionE
     }
   };
   
@@ -98,7 +142,7 @@ const NominationStepE = () => {
         <p className="text-lg mb-2">Thank you for your submission.</p>
         <p className="text-sm text-gray-400 mb-6">Your Nomination ID is: <span className="font-bold text-tpahla-gold">{nominationId}</span></p>
         <p className="text-gray-300 mb-4">
-          A confirmation email will be sent to you shortly. Remember to email the supporting documents to <a href="mailto:tpahla@ihsd-ng.org" className="text-tpahla-gold hover:underline">tpahla@ihsd-ng.org</a> with your Nominee's Name and Nomination ID in the subject line.
+          A confirmation email should be on its way. Remember to also email any remaining supporting documents to <a href="mailto:tpahla@ihsd-ng.org" className="text-tpahla-gold hover:underline">tpahla@ihsd-ng.org</a> with your Nominee's Name and Nomination ID in the subject line, if you haven't uploaded them directly.
         </p>
         <Button variant="tpahla-primary" onClick={resetNomination} className="px-8">
           Start New Nomination
