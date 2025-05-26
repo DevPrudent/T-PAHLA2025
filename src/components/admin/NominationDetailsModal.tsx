@@ -1,5 +1,4 @@
 
-```typescript
 import React from 'react';
 import {
   Dialog,
@@ -17,13 +16,12 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
-// Using the direct Json type from Supabase for form sections, as specific fields like cv_resume are not in Zod schema yet
+// Using the direct Json type from Supabase for form sections
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
 type NominationStepBData = Database['public']['Tables']['nominations']['Row']['form_section_b'];
 type NominationStepCData = Database['public']['Tables']['nominations']['Row']['form_section_c']; // This is Json | null
 type NominationStepDData = Database['public']['Tables']['nominations']['Row']['form_section_d'];
 type NominationStepEData = Database['public']['Tables']['nominations']['Row']['form_section_e'];
-
 
 interface NominationDetailsModalProps {
   nomination: NominationRow | null;
@@ -44,9 +42,7 @@ const renderSection = (title: string, data: any | null) => {
   if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
     return <DetailItem label={title} value="No data provided for this section." />;
   }
-  // Ensure data is not an array or primitive before mapping
   if (Array.isArray(data)) {
-    // If it's an array, pretty print it. This case might need more specific handling based on array content.
     return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
   }
 
@@ -54,7 +50,6 @@ const renderSection = (title: string, data: any | null) => {
     <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50">
       <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold">{title}</h4>
       {Object.entries(data).map(([key, value]) => {
-        // Pretty print keys
         const formattedKey = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         
         if (key === 'media_links' && Array.isArray(value)) {
@@ -63,7 +58,7 @@ const renderSection = (title: string, data: any | null) => {
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{formattedKey}:</p>
               {value.length > 0 ? (
                 <ul className="list-disc list-inside pl-4">
-                  {value.map((link: any, index: number) => ( // Assuming link is { value: string }
+                  {value.map((link: any, index: number) => (
                     link && typeof link.value === 'string' ? (
                       <li key={index} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
                         <a href={link.value} target="_blank" rel="noopener noreferrer">{link.value}</a>
@@ -78,23 +73,25 @@ const renderSection = (title: string, data: any | null) => {
         
         if (key === 'date_signed' && value) {
             try {
-              // Ensure value is a string or number that can be parsed by new Date()
               const dateValue = typeof value === 'string' || typeof value === 'number' ? new Date(value) : null;
               if (dateValue && !isNaN(dateValue.getTime())) {
                 return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
               } else {
+                // Fallback for unparseable dates, show original string value
                 return <DetailItem key={key} label={formattedKey} value={String(value)} />;
               }
             } catch (e) {
+              // Fallback in case of error during date parsing
               return <DetailItem key={key} label={formattedKey} value={String(value)} />;
             }
         }
-        // For other boolean values or general values
+        
         if (typeof value === 'boolean') {
           return <DetailItem key={key} label={formattedKey} value={value ? 'Yes' : 'No'} />;
         }
         
-        return <DetailItem key={key} label={formattedKey} value={String(value ?? 'N/A')} />;
+        // Ensure value is converted to string for DetailItem, handling null/undefined
+        return <DetailItem key={key} label={formattedKey} value={value !== null && value !== undefined ? String(value) : 'N/A'} />;
       })}
     </div>
   );
@@ -103,12 +100,26 @@ const renderSection = (title: string, data: any | null) => {
 const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nomination, isOpen, onClose }) => {
   if (!nomination) return null;
 
-  // These are Json | null types
   const sectionA = nomination.form_section_a as NominationStepAData | null;
   const sectionB = nomination.form_section_b as NominationStepBData | null;
   const sectionC = nomination.form_section_c as NominationStepCData | null; 
   const sectionD = nomination.form_section_d as NominationStepDData | null;
   const sectionE = nomination.form_section_e as NominationStepEData | null;
+
+  // Helper to safely access properties from Json object (like sectionC)
+  const getJsonValue = (jsonData: any, key: string, defaultValue: React.ReactNode = "File uploaded - link/preview to be implemented") => {
+    if (jsonData && typeof jsonData === 'object' && !Array.isArray(jsonData) && jsonData[key]) {
+      // If you need specific handling for file links, this is where it would go.
+      // For now, we just indicate a file was uploaded.
+      return defaultValue;
+    }
+    return null; // Or "N/A" or some other indicator if the key isn't present
+  };
+  
+  const cvResumeValue = getJsonValue(sectionC, 'cv_resume');
+  const photosMediaValue = getJsonValue(sectionC, 'photos_media');
+  const otherDocumentsValue = getJsonValue(sectionC, 'other_documents');
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -155,10 +166,9 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
             {renderSection("Section B: Award Category", sectionB)}
             {renderSection("Section C: Justification & Supporting Materials", sectionC)}
             
-            {/* Accessing potentially dynamic keys from sectionC (Json object) */}
-            {(sectionC && typeof sectionC === 'object' && (sectionC as any).cv_resume) && <DetailItem label="CV/Resume" value={"File uploaded - link/preview to be implemented"} />}
-            {(sectionC && typeof sectionC === 'object' && (sectionC as any).photos_media) && <DetailItem label="Photos/Media" value={"Files uploaded - link/preview to be implemented"} />}
-            {(sectionC && typeof sectionC === 'object' && (sectionC as any).other_documents) && <DetailItem label="Other Documents" value={"Files uploaded - link/preview to be implemented"} />}
+            {cvResumeValue && <DetailItem label="CV/Resume" value={cvResumeValue} />}
+            {photosMediaValue && <DetailItem label="Photos/Media" value={photosMediaValue} />}
+            {otherDocumentsValue && <DetailItem label="Other Documents" value={otherDocumentsValue} />}
             
             {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
             {renderSection("Section D: Nominator Information", sectionD)}
@@ -179,4 +189,3 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
 };
 
 export default NominationDetailsModal;
-```
