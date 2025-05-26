@@ -1,4 +1,5 @@
 
+```typescript
 import React from 'react';
 import {
   Dialog,
@@ -13,13 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database } from '@/integrations/supabase/types';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client'; // Added Supabase client
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
-// Using the direct Json type from Supabase for form sections
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
 type NominationStepBData = Database['public']['Tables']['nominations']['Row']['form_section_b'];
-type NominationStepCData = Database['public']['Tables']['nominations']['Row']['form_section_c']; // This is Json | null
+type NominationStepCData = Database['public']['Tables']['nominations']['Row']['form_section_c'];
 type NominationStepDData = Database['public']['Tables']['nominations']['Row']['form_section_d'];
 type NominationStepEData = Database['public']['Tables']['nominations']['Row']['form_section_e'];
 
@@ -29,10 +30,13 @@ interface NominationDetailsModalProps {
   onClose: () => void;
 }
 
+// IMPORTANT: Confirm or change this bucket name to match your Supabase Storage setup.
+const NOMINATION_FILES_BUCKET = 'nomination-files'; 
+
 const DetailItem: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <div className="mb-2">
     <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}:</p>
-    <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+    <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
       {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value ?? 'N/A'}
     </p>
   </div>
@@ -43,6 +47,7 @@ const renderSection = (title: string, data: any | null) => {
     return <DetailItem label={title} value="No data provided for this section." />;
   }
   if (Array.isArray(data)) {
+    // If it's a simple array, stringify it (might need more specific handling if it's an array of complex objects not files)
     return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
   }
 
@@ -69,33 +74,96 @@ const renderSection = (title: string, data: any | null) => {
               ) : <p className="text-sm text-gray-900 dark:text-gray-100">N/A</p>}
             </div>
           );
+        } 
+        // Handle file uploads for specific keys in Section C
+        else if (['cv_resume', 'photos_media', 'other_documents'].includes(key) && value) {
+          const fileArray = Array.isArray(value) ? value : (value && typeof value === 'object' && (('file_name' in value && 'storage_path' in value) || ('name' in value && 'url' in value)) ? [value] : []);
+          
+          const validFiles = fileArray.filter(
+            (file: any) => file && typeof file === 'object' && 
+                           (('file_name' in file && 'storage_path' in file) || ('name' in file && 'url' in file))
+          );
+
+          if (validFiles.length > 0) {
+            return (
+              <DetailItem
+                key={key}
+                label={formattedKey}
+                value={
+                  <ul className="list-disc list-inside pl-1">
+                    {validFiles.map((fileData: any, index: number) => {
+                      let publicUrl = '#';
+                      let fileName = 'Download/View File';
+
+                      if (fileData.storage_path && fileData.file_name) { // Assumes storage_path and file_name
+                        fileName = fileData.file_name;
+                        const publicUrlResult = supabase.storage.from(NOMINATION_FILES_BUCKET).getPublicUrl(fileData.storage_path);
+                        if (publicUrlResult.error || !publicUrlResult.data.publicUrl) {
+                          console.error(`Error getting public URL for ${fileData.storage_path}:`, publicUrlResult.error);
+                          return (
+                            <li key={index} className="text-sm text-red-500">
+                              Could not retrieve link for {fileName}.
+                            </li>
+                          );
+                        }
+                        publicUrl = publicUrlResult.data.publicUrl;
+                      } else if (fileData.url && fileData.name) { // Assumes direct URL and name
+                         fileName = fileData.name;
+                         publicUrl = fileData.url;
+                      } else {
+                        // Fallback for unexpected structure
+                         return (
+                            <li key={index} className="text-sm text-gray-500">
+                              Invalid file data for an item.
+                            </li>
+                          );
+                      }
+
+                      return (
+                        <li key={index} className="text-sm">
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {fileName}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                }
+              />
+            );
+          } else {
+            // If value was present but not in a recognized file format or empty array
+            return <DetailItem key={key} label={formattedKey} value="No files uploaded or data is in an unexpected format." />;
+          }
         }
-        
-        if (key === 'date_signed' && value) {
+        else if (key === 'date_signed' && value && typeof value === 'string') {
             try {
-              const dateValue = typeof value === 'string' || typeof value === 'number' ? new Date(value) : null;
-              if (dateValue && !isNaN(dateValue.getTime())) {
+              const dateValue = parseISO(value); // Use parseISO for ISO 8601 strings
+              if (!isNaN(dateValue.getTime())) {
                 return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
               } else {
-                // Fallback for unparseable dates, show original string value
                 return <DetailItem key={key} label={formattedKey} value={String(value)} />;
               }
             } catch (e) {
-              // Fallback in case of error during date parsing
               return <DetailItem key={key} label={formattedKey} value={String(value)} />;
             }
         }
         
-        if (typeof value === 'boolean') {
+        else if (typeof value === 'boolean') {
           return <DetailItem key={key} label={formattedKey} value={value ? 'Yes' : 'No'} />;
         }
         
-        // Ensure value is converted to string for DetailItem, handling null/undefined
         return <DetailItem key={key} label={formattedKey} value={value !== null && value !== undefined ? String(value) : 'N/A'} />;
       })}
     </div>
   );
 };
+
 
 const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nomination, isOpen, onClose }) => {
   if (!nomination) return null;
@@ -106,21 +174,6 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
   const sectionD = nomination.form_section_d as NominationStepDData | null;
   const sectionE = nomination.form_section_e as NominationStepEData | null;
 
-  // Helper to safely access properties from Json object (like sectionC)
-  const getJsonValue = (jsonData: any, key: string, defaultValue: React.ReactNode = "File uploaded - link/preview to be implemented") => {
-    if (jsonData && typeof jsonData === 'object' && !Array.isArray(jsonData) && jsonData[key]) {
-      // If you need specific handling for file links, this is where it would go.
-      // For now, we just indicate a file was uploaded.
-      return defaultValue;
-    }
-    return null; // Or "N/A" or some other indicator if the key isn't present
-  };
-  
-  const cvResumeValue = getJsonValue(sectionC, 'cv_resume');
-  const photosMediaValue = getJsonValue(sectionC, 'photos_media');
-  const otherDocumentsValue = getJsonValue(sectionC, 'other_documents');
-
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800">
@@ -129,7 +182,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
             Nomination Details: {nomination.nominee_name}
           </DialogTitle>
           <DialogDescription className="dark:text-gray-400">
-            Full details for the nomination submitted on {nomination.submitted_at ? format(new Date(nomination.submitted_at), 'PPPp') : 'N/A'}.
+            Full details for the nomination submitted on {nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'}.
           </DialogDescription>
         </DialogHeader>
         
@@ -157,18 +210,16 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
                   } 
                 />
                 <DetailItem label="Summary of Achievement" value={nomination.summary_of_achievement} />
-                <DetailItem label="Created At" value={nomination.created_at ? format(new Date(nomination.created_at), 'PPPp') : 'N/A'} />
-                <DetailItem label="Updated At" value={nomination.updated_at ? format(new Date(nomination.updated_at), 'PPPp') : 'N/A'} />
-                <DetailItem label="Submitted At" value={nomination.submitted_at ? format(new Date(nomination.submitted_at), 'PPPp') : 'N/A'} />
+                <DetailItem label="Created At" value={nomination.created_at ? format(parseISO(nomination.created_at), 'PPPp') : 'N/A'} />
+                <DetailItem label="Updated At" value={nomination.updated_at ? format(parseISO(nomination.updated_at), 'PPPp') : 'N/A'} />
+                <DetailItem label="Submitted At" value={nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'} />
             </div>
 
             {renderSection("Section A: Nominee Information", sectionA)}
             {renderSection("Section B: Award Category", sectionB)}
             {renderSection("Section C: Justification & Supporting Materials", sectionC)}
             
-            {cvResumeValue && <DetailItem label="CV/Resume" value={cvResumeValue} />}
-            {photosMediaValue && <DetailItem label="Photos/Media" value={photosMediaValue} />}
-            {otherDocumentsValue && <DetailItem label="Other Documents" value={otherDocumentsValue} />}
+            {/* Removed direct rendering of cvResumeValue etc. as renderSection now handles these file fields for Section C */}
             
             {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
             {renderSection("Section D: Nominator Information", sectionD)}
@@ -189,3 +240,5 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
 };
 
 export default NominationDetailsModal;
+```
+
