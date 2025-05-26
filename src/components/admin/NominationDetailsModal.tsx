@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database } from '@/integrations/supabase/types';
 import { format, parseISO } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client'; // Corrected import path
+import { supabase } from '@/integrations/supabase/client';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
@@ -34,9 +34,9 @@ const NOMINATION_FILES_BUCKET = 'nomination-files';
 const DetailItem: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <div className="mb-2">
     <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}:</p>
-    <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
+    <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
       {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value ?? 'N/A'}
-    </p>
+    </div>
   </div>
 );
 
