@@ -142,8 +142,8 @@ const CompletedNominationsPage = () => {
         {/* Updated table caption */}
         <TableCaption>List of nominations with 'submitted' status</TableCaption>
         <TableHeader>
-          {/* ... keep existing code (table header structure) */}
           <TableRow>
+            <TableHead>Nomination ID</TableHead> {/* Added Nomination ID header */}
             <TableHead>Nominee Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Category ID</TableHead>
@@ -154,13 +154,13 @@ const CompletedNominationsPage = () => {
         </TableHeader>
         <TableBody>
           {nominations.map((nomination) => {
-            // ... keep existing code (nomination mapping and cell rendering logic)
             const sectionAData = nomination.form_section_a as FormSectionAData | null;
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
             const submissionDate = nomination.submitted_at || nomination.created_at;
 
             return (
               <TableRow key={nomination.id}>
+                <TableCell className="truncate max-w-xs text-xs">{nomination.id}</TableCell> {/* Added Nomination ID cell */}
                 <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
                 <TableCell>{nomineeEmail}</TableCell>
                 <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>
