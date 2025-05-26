@@ -1,3 +1,4 @@
+
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -73,14 +74,19 @@ const NominationStepE = () => {
 
       // Attempt to send email notification
       try {
-        const nominatorEmail = fullNominationDataForSubmission.sectionA?.nominator_email;
-        const nominatorFirstName = fullNominationDataForSubmission.sectionA?.nominator_first_name || '';
-        const nominatorLastName = fullNominationDataForSubmission.sectionA?.nominator_last_name || '';
-        const nominatorName = `${nominatorFirstName} ${nominatorLastName}`.trim();
-        const nomineeName = fullNominationDataForSubmission.sectionA?.nominee_name || fullNominationDataForSubmission.sectionA?.organisation_name || 'The Nominee';
+        const nominatorEmail = fullNominationDataForSubmission.sectionD?.nominator_email;
+        const nominatorName = fullNominationDataForSubmission.sectionD?.nominator_full_name || 'Nominator';
+        const nomineeName = fullNominationDataForSubmission.sectionA?.nominee_full_name || fullNominationDataForSubmission.sectionA?.nominee_organization || 'The Nominee';
         
         if (!nominatorEmail || !nominatorName || !nomineeName) {
-          throw new Error("Missing nominator/nominee details for email.");
+          // Log details if any crucial info is missing, but still attempt if some are present.
+          // The edge function itself will also validate.
+          console.warn("Potentially missing nominator/nominee details for email. Proceeding with available info.", {
+            nominatorEmail, nominatorName, nomineeName
+          });
+          if (!nominatorEmail) { // Nominator email is critical
+             throw new Error("Nominator email is missing for email notification.");
+          }
         }
 
         console.log('Attempting to send email with payload:', {
@@ -313,3 +319,4 @@ const NominationStepE = () => {
 };
 
 export default NominationStepE;
+
