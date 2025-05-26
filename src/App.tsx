@@ -63,7 +63,8 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/awards" element={<Awards />} />
                 <Route path="/nominations" element={<Nominations />} />
-                <Route path="/nomination-form" element={<NominationFormPage />} /> {/* New route */}
+                <Route path="/nomination-form" element={<NominationFormPage />} />
+                <Route path="/nominate/edit/:nominationId" element={<NominationFormPage />} />
                 <Route path="/event" element={<EventDetails />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
@@ -75,9 +76,9 @@ const App = () => {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
-                <Route path="nominees" element={<NomineesPage />} /> {/* This is for ALL nominees */}
-                <Route path="nominations/completed" element={<CompletedNominationsPage />} /> {/* New */}
-                <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} /> {/* New */}
+                <Route path="nominees" element={<NomineesPage />} />
+                <Route path="nominations/completed" element={<CompletedNominationsPage />} />
+                <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
                 <Route path="transactions" element={<TransactionsPage />} />
                 <Route path="messages" element={<MessagesPage />} />
               </Route>
