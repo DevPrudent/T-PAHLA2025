@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon, ChevronLeft, ChevronRight, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon, ChevronLeft, ChevronRight, Edit, Search as SearchIcon } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -34,16 +35,22 @@ interface FetchNominationsResult {
   count: number | null;
 }
 
-const fetchIncompleteNominations = async (page: number): Promise<FetchNominationsResult> => {
+const fetchIncompleteNominations = async (page: number, searchTerm: string): Promise<FetchNominationsResult> => {
   const from = (page - 1) * ITEMS_PER_PAGE;
   const to = page * ITEMS_PER_PAGE - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from('nominations')
     .select('*', { count: 'exact' })
     .or(`form_section_a.is.null,form_section_a.eq.{},form_section_b.is.null,form_section_b.eq.{},form_section_c.is.null,form_section_c.eq.{},form_section_d.is.null,form_section_d.eq.{},form_section_e.is.null,form_section_e.eq.{}`)
     .order('created_at', { ascending: false })
     .range(from, to);
+
+  if (searchTerm) {
+    query = query.ilike('nominee_name', `%${searchTerm}%`);
+  }
+
+  const { data, error, count } = await query;
 
   if (error) {
     console.error('Error fetching incomplete nominations:', error);
@@ -57,10 +64,23 @@ const IncompleteNominationsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  const { data: paginatedData, isLoading, error } = useQuery<FetchNominationsResult, Error>({
-    queryKey: ['incompleteNominations', currentPage, ITEMS_PER_PAGE], 
-    queryFn: () => fetchIncompleteNominations(currentPage),
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page on new search
+    }, 500); // 500ms debounce
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  const { data: paginatedData, isLoading, error, isPlaceholderData } = useQuery<FetchNominationsResult, Error>({
+    queryKey: ['incompleteNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm], 
+    queryFn: () => fetchIncompleteNominations(currentPage, debouncedSearchTerm),
     placeholderData: keepPreviousData,
   });
   
@@ -108,7 +128,7 @@ const IncompleteNominationsPage = () => {
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
+    if (!isPlaceholderData && currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -119,7 +139,7 @@ const IncompleteNominationsPage = () => {
     }
   };
 
-  if (isLoading && paginatedData === undefined) {
+  if (isLoading && paginatedData === undefined && !isPlaceholderData) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -138,12 +158,29 @@ const IncompleteNominationsPage = () => {
     );
   }
 
-  if (totalCount === 0) {
+  if (totalCount === 0 && !isLoading) {
     return (
-      <div className="text-center py-10">
-        <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-        <p className="mt-4 text-muted-foreground">No incomplete nominations found.</p>
-        <p className="text-sm text-muted-foreground">Nominations with any missing sections (A-E) will appear here.</p>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+           <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-orange-500" />Incomplete Nominations</h1>
+           <div className="relative w-full max-w-sm">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by Nominee Name..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="text-center py-10">
+          <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="mt-4 text-muted-foreground">
+            {debouncedSearchTerm ? `No incomplete nominations found for "${debouncedSearchTerm}".` : "No incomplete nominations found."}
+          </p>
+          {!debouncedSearchTerm && <p className="text-sm text-muted-foreground">Nominations with any missing sections (A-E) will appear here.</p>}
+        </div>
       </div>
     );
   }
@@ -152,10 +189,22 @@ const IncompleteNominationsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
          <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-orange-500" />Incomplete Nominations</h1>
+         <div className="relative w-full max-w-sm">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by Nominee Name..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
       
       <p className="text-muted-foreground">
-        Review nominations that have one or more sections (A-E) incomplete. Displaying {nominations.length} of {totalCount} nominations.
+        Review nominations that have one or more sections (A-E) incomplete. 
+        {totalCount > 0 ? ` Displaying ${nominations.length} of ${totalCount} nominations.` : ""}
+        {debouncedSearchTerm && ` (Filtered by "${debouncedSearchTerm}")`}
       </p>
       
       <Table>
@@ -246,7 +295,7 @@ const IncompleteNominationsPage = () => {
             variant="outline"
             size="sm"
             onClick={handlePreviousPage}
-            disabled={currentPage === 1 || isLoading}
+            disabled={currentPage === 1 || isLoading || isPlaceholderData}
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
             Previous
@@ -258,7 +307,7 @@ const IncompleteNominationsPage = () => {
             variant="outline"
             size="sm"
             onClick={handleNextPage}
-            disabled={currentPage === totalPages || isLoading}
+            disabled={currentPage === totalPages || isLoading || isPlaceholderData}
           >
             Next
             <ChevronRight className="ml-1 h-4 w-4" />
