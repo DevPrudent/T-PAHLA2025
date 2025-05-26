@@ -72,7 +72,7 @@ const IncompleteNominationsPage = () => {
     },
     onSuccess: (updatedNomination) => {
       queryClient.invalidateQueries({ queryKey: ['incompleteNominations'] });
-      queryClient.invalidateQueries({ queryKey: ['nominations'] }); 
+      queryClient.invalidateQueries({ queryKey: ['approvedNominations'] }); // Changed 'nominations' to 'approvedNominations'
       queryClient.invalidateQueries({ queryKey: ['completedNominations'] });
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
     },

@@ -1,5 +1,6 @@
-import React, { useState } from 'react'; // Ensure React is imported
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query'; // Removed useMutation, useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
@@ -13,77 +14,44 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox } from "lucide-react";
-import { toast } from 'sonner';
+import { Eye, Loader2, AlertCircle, Inbox, Users as PageIcon } from "lucide-react"; // Removed CheckCircle, XCircle
+// Removed toast import as it's not used after removing mutation
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
-type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
+// Removed NominationStatusEnum as it's not used for status updates here anymore
 
-// Helper type for form_section_a for easier access
 type FormSectionAData = {
   nominee_email?: string;
-  // Add other fields from section A if needed for display, e.g., nominee_full_name
-  // This example focuses on email as per current table structure.
-  // The top-level `nominee_name` is used for the name column.
 };
 
-const fetchNominations = async (): Promise<NominationRow[]> => {
+const fetchApprovedNominations = async (): Promise<NominationRow[]> => {
   const { data, error } = await supabase
     .from('nominations')
     .select('*')
+    .eq('status', 'approved') // Filter for approved nominations
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching nominations:', error);
+    console.error('Error fetching approved nominations:', error);
     throw new Error(error.message);
   }
   return data || [];
 };
 
 const NomineesPage = () => {
-  const queryClient = useQueryClient();
+  // Removed queryClient as it's not used after removing mutation
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
 
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['nominations'],
-    queryFn: fetchNominations,
+    queryKey: ['approvedNominations'], // Updated queryKey
+    queryFn: fetchApprovedNominations,
   });
 
-  const updateStatusMutation = useMutation<
-    NominationRow | null, // Supabase returns the updated row or null
-    Error,
-    { nominationId: string; status: NominationStatusEnum }
-  >({
-    mutationFn: async ({ nominationId, status }) => {
-      const { data, error: updateError } = await supabase
-        .from('nominations')
-        .update({ status: status, updated_at: new Date().toISOString() })
-        .eq('id', nominationId)
-        .select()
-        .single(); // Assuming we want the updated row back
-
-      if (updateError) {
-        console.error('Error updating nomination status:', updateError);
-        throw updateError;
-      }
-      return data;
-    },
-    onSuccess: (updatedNomination) => {
-      queryClient.invalidateQueries({ queryKey: ['nominations'] });
-      toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
-    },
-    onError: (err) => {
-      toast.error(`Failed to update status: ${err.message}`);
-    },
-  });
-
-  const handleUpdateStatus = (nominationId: string, status: NominationStatusEnum) => {
-    updateStatusMutation.mutate({ nominationId, status });
-  };
+  // Removed updateStatusMutation and handleUpdateStatus as actions are removed
 
   const handleViewDetails = (nomination: NominationRow) => {
     setSelectedNomination(nomination);
@@ -94,7 +62,7 @@ const NomineesPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-2">Loading nominations...</p>
+        <p className="ml-2">Loading approved nominations...</p>
       </div>
     );
   }
@@ -103,7 +71,7 @@ const NomineesPage = () => {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Loading Nominations</AlertTitle>
+        <AlertTitle>Error Loading Approved Nominations</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
@@ -113,8 +81,8 @@ const NomineesPage = () => {
     return (
       <div className="text-center py-10">
         <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-        <p className="mt-4 text-muted-foreground">No nominations found yet.</p>
-        <p className="text-sm text-muted-foreground">Once nominations are submitted, they will appear here.</p>
+        <p className="mt-4 text-muted-foreground">No approved nominations found.</p>
+        <p className="text-sm text-muted-foreground">Nominations with 'approved' status will appear here.</p>
       </div>
     );
   }
@@ -122,25 +90,19 @@ const NomineesPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Manage Nominees</h1>
-        <div className="space-x-2">
-          {/* Filter and Bulk Actions buttons can be implemented later */}
-          <Button variant="outline" disabled>Filter</Button>
-          <Button variant="secondary" disabled>Bulk Actions</Button>
-        </div>
+        <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-green-600" />Approved Nominations</h1> {/* Updated title */}
+        {/* Filter and Bulk Actions buttons can be implemented later if needed for this specific view */}
       </div>
       
       <p className="text-muted-foreground">
-        Review and manage all nominees. You can view entries, approve/reject nominees.
+        Review all nominations that have been marked as 'approved'.
       </p>
       
       <Table>
-        <TableCaption>List of all submitted nominations</TableCaption>
+        <TableCaption>List of approved nominations</TableCaption> {/* Updated caption */}
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px]">
-              <input type="checkbox" className="rounded" aria-label="Select all nominees" />
-            </TableHead>
+            {/* Removed checkbox column as bulk actions are not implemented yet and may not apply here */}
             <TableHead>Nominee Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Category ID</TableHead>
@@ -157,21 +119,14 @@ const NomineesPage = () => {
 
             return (
               <TableRow key={nomination.id}>
-                <TableCell>
-                  <input type="checkbox" className="rounded" aria-label={`Select nominee ${nomination.nominee_name}`} />
-                </TableCell>
+                {/* Removed checkbox cell */}
                 <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
                 <TableCell>{nomineeEmail}</TableCell>
                 <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>
                 <TableCell>{submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'}</TableCell>
                 <TableCell>
-                  <Badge variant={
-                    nomination.status === "approved" ? "success" : 
-                    nomination.status === "rejected" ? "destructive" :
-                    nomination.status === "submitted" ? "default" : // "submitted" often default
-                    "outline" // for "draft", "incomplete"
-                  }>
-                    {nomination.status || 'N/A'}
+                  <Badge variant="success"> {/* Status will always be 'approved' here */}
+                    {nomination.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -179,30 +134,7 @@ const NomineesPage = () => {
                     <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
-                    {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
-                      <>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-green-600 hover:text-green-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'approved')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
-                           Approve
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
-                           Reject
-                        </Button>
-                      </>
-                    )}
+                    {/* Approve/Reject buttons removed as this page only shows approved nominations */}
                   </div>
                 </TableCell>
               </TableRow>

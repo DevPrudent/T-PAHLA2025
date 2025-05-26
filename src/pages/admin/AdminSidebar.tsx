@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -28,6 +29,7 @@ import {
   FileCheck2,
   FileClock,
   ChevronDown,
+  CheckBadge // Example, assuming you might want a different icon for "Approved"
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -36,7 +38,7 @@ import { cn } from "@/lib/utils";
 const adminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/categories", label: "Categories", icon: Folder },
-  { href: "/admin/nominees", label: "All Nominees", icon: Users },
+  { href: "/admin/nominees", label: "Approved Nominees", icon: Users }, // Changed label
   { href: "/admin/transactions", label: "Transactions", icon: ListChecks },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
 ];
@@ -69,6 +71,8 @@ export function AdminSidebar() {
   const isNominationsPathActive = location.pathname.startsWith("/admin/nominations");
   const isCompletedNominationsActive = location.pathname === "/admin/nominations/completed";
   const isIncompleteNominationsActive = location.pathname === "/admin/nominations/incomplete";
+  const isApprovedNominationsActive = location.pathname === "/admin/nominees";
+
 
   return (
     <Sidebar>
@@ -87,7 +91,11 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(item.href) && item.href !== "/admin/nominees")}
+                    isActive={
+                        location.pathname === item.href || 
+                        (item.href === "/admin/nominees" && isApprovedNominationsActive) ||
+                        (item.href !== "/admin" && item.href !== "/admin/nominees" && location.pathname.startsWith(item.href))
+                    }
                   >
                     <Link to={item.href}>
                       <item.icon className="h-5 w-5" />
