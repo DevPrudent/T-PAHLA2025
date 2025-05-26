@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { Database } from '@/integrations/supabase/types';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { Printer, Download } from 'lucide-react';
+import { getCategoryTitleById, getAwardNameByValue } from '@/lib/awardCategories';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
@@ -52,6 +54,26 @@ const renderSection = (title: string, data: any | null) => {
     } else {
         return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
     }
+  }
+
+  // Special handling for Section B to show category and award names instead of IDs
+  if (title === "Section B: Award Category" && data.award_category) {
+    // Enhanced rendering for Section B
+    return (
+      <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+        <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">{title}</h4>
+        <DetailItem 
+          label="Award Category" 
+          value={getCategoryTitleById(data.award_category) || data.award_category} 
+        />
+        {data.specific_award && (
+          <DetailItem 
+            label="Specific Award" 
+            value={getAwardNameByValue(data.award_category, data.specific_award) || data.specific_award} 
+          />
+        )}
+      </div>
+    );
   }
 
   return (
@@ -194,6 +216,9 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
     window.print();
   };
 
+  // Debug section B data
+  console.log('Section B data:', sectionB);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
