@@ -96,8 +96,9 @@ const renderSection = (title: string, data: any | null) => {
                       if (fileData.storage_path && fileData.file_name) { // Assumes storage_path and file_name
                         fileName = fileData.file_name;
                         const publicUrlResult = supabase.storage.from(NOMINATION_FILES_BUCKET).getPublicUrl(fileData.storage_path);
-                        if (publicUrlResult.error || !publicUrlResult.data.publicUrl) {
-                          console.error(`Error getting public URL for ${fileData.storage_path}:`, publicUrlResult.error); // Corrected console.error
+                        
+                        if (!publicUrlResult.data.publicUrl) {
+                          console.error(`Could not retrieve public URL for ${fileData.storage_path}`);
                           return (
                             <li key={index} className="text-sm text-red-500">
                               Could not retrieve link for {fileName}.
