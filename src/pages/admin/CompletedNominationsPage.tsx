@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
@@ -55,7 +54,7 @@ const CompletedNominationsPage = () => {
   const { data: paginatedData, isLoading, error } = useQuery<FetchNominationsResult, Error>({
     queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE], 
     queryFn: () => fetchNominations(currentPage),
-    keepPreviousData: true, // Useful for smoother pagination UX
+    placeholderData: keepPreviousData, // Updated from keepPreviousData: true
   });
 
   const nominations = paginatedData?.data ?? [];
@@ -84,10 +83,10 @@ const CompletedNominationsPage = () => {
     onSuccess: (updatedNomination) => {
       queryClient.invalidateQueries({ queryKey: ['submittedNominations'] });
       queryClient.invalidateQueries({ queryKey: ['approvedNominations'] });
-      queryClient.invalidateQueries({ queryKey: ['nominations'] });
+      queryClient.invalidateQueries({ queryKey: ['nominations'] }); // General invalidation
+      // Also invalidate specific page if a more granular approach is desired for other lists
+      // queryClient.invalidateQueries({ queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE] }); 
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
-      // Potentially refetch current page or handle optimistic updates more gracefully
-      // For simplicity, we invalidate all, which will refetch the current page.
     },
     onError: (err) => {
       toast.error(`Failed to update status: ${err.message}`);
@@ -115,8 +114,7 @@ const CompletedNominationsPage = () => {
     }
   };
 
-
-  if (isLoading && !paginatedData?.data) { // Show loader only on initial load or if data is truly not there yet
+  if (isLoading && !paginatedData?.data) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -176,7 +174,11 @@ const CompletedNominationsPage = () => {
               onViewDetails={handleViewDetails}
               onUpdateStatus={handleUpdateStatus}
               isProcessingAction={(action: 'approve' | 'reject') => {
-                const targetStatus: NominationStatusEnum = action === 'approve' ? 'approved' : 'rejected';
+                const targetStatusMap = {
+                  approve: 'approved' as NominationStatusEnum,
+                  reject: 'rejected' as NominationStatusEnum,
+                };
+                const targetStatus = targetStatusMap[action];
                 return (
                   updateStatusMutation.isPending &&
                   updateStatusMutation.variables?.nominationId === nomination.id &&
@@ -228,4 +230,3 @@ const CompletedNominationsPage = () => {
 };
 
 export default CompletedNominationsPage;
-
