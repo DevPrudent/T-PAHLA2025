@@ -198,7 +198,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         id="nomination-details-modal-content" 
-        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:shadow-none print:border-none print:max-w-full print:w-full print:h-auto print:overflow-visible print:bg-white print:static print:inset-auto print:translate-x-0 print:translate-y-0"
+        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:block print:static print:inset-auto print:translate-x-0 print:translate-y-0 print:shadow-none print:border-none print:max-w-full print:w-full print:h-auto print:overflow-visible print:bg-white"
       >
         <DialogHeader className="print:hidden">
           <DialogTitle className="text-2xl font-serif text-tpahla-darkgreen dark:text-tpahla-gold">
@@ -218,8 +218,8 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
                 <hr className="my-2"/>
             </div>
 
-            <ScrollArea className="h-[60vh] pr-4 print:h-auto print:overflow-visible">
-              <div className="space-y-4 py-4 print:h-auto print:overflow-visible">
+            <ScrollArea className="h-[60vh] pr-4 print:h-auto print:overflow-visible print:border-none print:shadow-none">
+              <div className="space-y-4 py-4 print:h-auto print:overflow-visible print:p-0 print:m-0">
                 <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
                     <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">General Information</h4>
                     <DetailItem label="Nomination ID" value={nomination.id} />
@@ -250,13 +250,13 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
                     <DetailItem label="Submitted At" value={nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'} />
                 </div>
 
-                {renderSection("Section A: Nominee Information", sectionA)}
-                {renderSection("Section B: Award Category", sectionB)}
-                {renderSection("Section C: Justification & Supporting Materials", sectionC)}
+                {renderSection("Section A: Nominee Information", nomination.form_section_a as NominationStepAData | null)}
+                {renderSection("Section B: Award Category", nomination.form_section_b as NominationStepBData | null)}
+                {renderSection("Section C: Justification & Supporting Materials", nomination.form_section_c as NominationStepCData | null)}
                 
                 {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
-                {renderSection("Section D: Nominator Information", sectionD)}
-                {renderSection("Section E: Declaration & Signature", sectionE)}
+                {renderSection("Section D: Nominator Information", nomination.form_section_d as NominationStepDData | null)}
+                {renderSection("Section E: Declaration & Signature", nomination.form_section_e as NominationStepEData | null)}
               </div>
             </ScrollArea>
         </div>
