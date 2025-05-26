@@ -1,4 +1,5 @@
 
+```typescript
 import React from 'react';
 import {
   Dialog,
@@ -16,11 +17,10 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
-// Assuming these types are correctly defined in your validators or elsewhere
-// If not, they would need to be defined or imported
+// Using the direct Json type from Supabase for form sections, as specific fields like cv_resume are not in Zod schema yet
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
 type NominationStepBData = Database['public']['Tables']['nominations']['Row']['form_section_b'];
-type NominationStepCData = Database['public']['Tables']['nominations']['Row']['form_section_c'];
+type NominationStepCData = Database['public']['Tables']['nominations']['Row']['form_section_c']; // This is Json | null
 type NominationStepDData = Database['public']['Tables']['nominations']['Row']['form_section_d'];
 type NominationStepEData = Database['public']['Tables']['nominations']['Row']['form_section_e'];
 
@@ -46,6 +46,7 @@ const renderSection = (title: string, data: any | null) => {
   }
   // Ensure data is not an array or primitive before mapping
   if (Array.isArray(data)) {
+    // If it's an array, pretty print it. This case might need more specific handling based on array content.
     return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
   }
 
@@ -55,30 +56,45 @@ const renderSection = (title: string, data: any | null) => {
       {Object.entries(data).map(([key, value]) => {
         // Pretty print keys
         const formattedKey = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        
         if (key === 'media_links' && Array.isArray(value)) {
           return (
             <div key={key} className="mb-2">
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{formattedKey}:</p>
               {value.length > 0 ? (
                 <ul className="list-disc list-inside pl-4">
-                  {value.map((link: any, index: number) => (
-                    <li key={index} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                      <a href={link.value} target="_blank" rel="noopener noreferrer">{link.value}</a>
-                    </li>
+                  {value.map((link: any, index: number) => ( // Assuming link is { value: string }
+                    link && typeof link.value === 'string' ? (
+                      <li key={index} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                        <a href={link.value} target="_blank" rel="noopener noreferrer">{link.value}</a>
+                      </li>
+                    ) : null
                   ))}
                 </ul>
               ) : <p className="text-sm text-gray-900 dark:text-gray-100">N/A</p>}
             </div>
           );
         }
-         if (key === 'date_signed' && value) {
+        
+        if (key === 'date_signed' && value) {
             try {
-              return <DetailItem key={key} label={formattedKey} value={format(new Date(value as string), 'PPP')} />;
+              // Ensure value is a string or number that can be parsed by new Date()
+              const dateValue = typeof value === 'string' || typeof value === 'number' ? new Date(value) : null;
+              if (dateValue && !isNaN(dateValue.getTime())) {
+                return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
+              } else {
+                return <DetailItem key={key} label={formattedKey} value={String(value)} />;
+              }
             } catch (e) {
               return <DetailItem key={key} label={formattedKey} value={String(value)} />;
             }
         }
-        return <DetailItem key={key} label={formattedKey} value={String(value)} />;
+        // For other boolean values or general values
+        if (typeof value === 'boolean') {
+          return <DetailItem key={key} label={formattedKey} value={value ? 'Yes' : 'No'} />;
+        }
+        
+        return <DetailItem key={key} label={formattedKey} value={String(value ?? 'N/A')} />;
       })}
     </div>
   );
@@ -87,9 +103,10 @@ const renderSection = (title: string, data: any | null) => {
 const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nomination, isOpen, onClose }) => {
   if (!nomination) return null;
 
+  // These are Json | null types
   const sectionA = nomination.form_section_a as NominationStepAData | null;
   const sectionB = nomination.form_section_b as NominationStepBData | null;
-  const sectionC = nomination.form_section_c as NominationStepCData | null;
+  const sectionC = nomination.form_section_c as NominationStepCData | null; 
   const sectionD = nomination.form_section_d as NominationStepDData | null;
   const sectionE = nomination.form_section_e as NominationStepEData | null;
 
@@ -115,7 +132,9 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
                 <DetailItem label="Award Category ID" value={nomination.award_category_id} />
                 <DetailItem label="Nominator Name" value={nomination.nominator_name} />
                 <DetailItem label="Nominator Email" value={nomination.nominator_email} />
-                <DetailItem label="Status">
+                <DetailItem 
+                  label="Status" 
+                  value={
                     <Badge variant={
                         nomination.status === "approved" ? "success" : 
                         nomination.status === "rejected" ? "destructive" :
@@ -124,7 +143,8 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
                     }>
                         {nomination.status}
                     </Badge>
-                </DetailItem>
+                  } 
+                />
                 <DetailItem label="Summary of Achievement" value={nomination.summary_of_achievement} />
                 <DetailItem label="Created At" value={nomination.created_at ? format(new Date(nomination.created_at), 'PPPp') : 'N/A'} />
                 <DetailItem label="Updated At" value={nomination.updated_at ? format(new Date(nomination.updated_at), 'PPPp') : 'N/A'} />
@@ -134,9 +154,12 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
             {renderSection("Section A: Nominee Information", sectionA)}
             {renderSection("Section B: Award Category", sectionB)}
             {renderSection("Section C: Justification & Supporting Materials", sectionC)}
-            {sectionC?.cv_resume && <DetailItem label="CV/Resume" value={"File uploaded - link/preview to be implemented"} />}
-            {sectionC?.photos_media && <DetailItem label="Photos/Media" value={"Files uploaded - link/preview to be implemented"} />}
-            {sectionC?.other_documents && <DetailItem label="Other Documents" value={"Files uploaded - link/preview to be implemented"} />}
+            
+            {/* Accessing potentially dynamic keys from sectionC (Json object) */}
+            {(sectionC && typeof sectionC === 'object' && (sectionC as any).cv_resume) && <DetailItem label="CV/Resume" value={"File uploaded - link/preview to be implemented"} />}
+            {(sectionC && typeof sectionC === 'object' && (sectionC as any).photos_media) && <DetailItem label="Photos/Media" value={"Files uploaded - link/preview to be implemented"} />}
+            {(sectionC && typeof sectionC === 'object' && (sectionC as any).other_documents) && <DetailItem label="Other Documents" value={"Files uploaded - link/preview to be implemented"} />}
+            
             {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
             {renderSection("Section D: Nominator Information", sectionD)}
             {renderSection("Section E: Declaration & Signature", sectionE)}
@@ -156,3 +179,4 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
 };
 
 export default NominationDetailsModal;
+```
