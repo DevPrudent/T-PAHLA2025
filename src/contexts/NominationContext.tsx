@@ -2,15 +2,9 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { NominationStepAData, NominationStepBData } from '@/lib/validators/nominationValidators';
 // Import other step data types as they are created
 
-// Placeholder for Section B data type
-export interface NominationStepBData {
-  award_category?: string; // Or a more structured type later
-  // Add other fields from Section B if needed
-}
-
 interface NominationData {
   sectionA?: NominationStepAData;
-  sectionB?: NominationStepBData; // Updated to use imported type
+  sectionB?: NominationStepBData; // This will now correctly use the imported type
   // sectionC?: NominationStepCData;
   // ... other sections
 }
