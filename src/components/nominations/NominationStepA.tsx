@@ -1,7 +1,12 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+
 import { nominationStepASchema, NominationStepAData } from '@/lib/validators/nominationValidators';
+import { africanCountries, getCountryNameByCode } from '@/lib/africanCountries';
 import { useNomination } from '@/contexts/NominationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,6 +14,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
@@ -26,7 +35,7 @@ const NominationStepA = () => {
     defaultValues: nominationData.sectionA || {
       nominee_full_name: '',
       nominee_gender: undefined,
-      nominee_dob: '',
+      nominee_dob: '', // Will be YYYY-MM-DD
       nominee_nationality: '',
       nominee_country_of_residence: '',
       nominee_organization: '',
@@ -45,17 +54,13 @@ const NominationStepA = () => {
       let currentNominationId = nominationId;
 
       const nominationPayload: Partial<NominationInsert> = {
-        form_section_a: data as any, // Cast to any because Supabase types expect Json
+        form_section_a: data as any, 
         user_id: user?.id,
         status: 'draft',
-        // Ensure required fields like 'nominee_name' are handled correctly
-        // If 'nominee_name' is top-level in DB, extract it from 'data'
-        nominee_name: data.nominee_full_name, // Assuming nominee_full_name maps to the DB's nominee_name
+        nominee_name: data.nominee_full_name,
       };
 
-
       if (currentNominationId) {
-        // Update existing nomination
         const { error } = await supabase
           .from('nominations')
           .update(nominationPayload)
@@ -63,14 +68,11 @@ const NominationStepA = () => {
         if (error) throw error;
         toast.success('Section A updated!');
       } else {
-        // Create new nomination
-        // Ensure all *required* fields for insert are present or have defaults in DB
         const insertPayload: NominationInsert = {
-            nominee_name: data.nominee_full_name, // This is a required field in the 'nominations' table
+            nominee_name: data.nominee_full_name,
             form_section_a: data as any,
             user_id: user?.id,
             status: 'draft',
-            // Add any other non-nullable fields that don't have defaults if necessary
         };
         const { data: newNomination, error } = await supabase
           .from('nominations')
@@ -80,11 +82,10 @@ const NominationStepA = () => {
         if (error) throw error;
         if (newNomination) {
           setNominationId(newNomination.id);
-          currentNominationId = newNomination.id; // Ensure currentNominationId is updated for subsequent logic if any
           toast.success('Section A saved!');
         }
       }
-      setCurrentStep(2); // Move to next step
+      setCurrentStep(2);
     } catch (error: any) {
       console.error('Error saving Section A:', error);
       toast.error(`Failed to save Section A: ${error.message}`);
@@ -151,11 +152,40 @@ const NominationStepA = () => {
           control={form.control}
           name="nominee_dob"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>3. Date of Birth (DD/MM/YYYY)</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
-              </FormControl>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal bg-gray-700 border-gray-600 hover:bg-gray-600 text-white hover:text-white",
+                        !field.value && "text-gray-400"
+                      )}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP") // Using new Date() in case field.value is just YYYY-MM-DD string
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : '')}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                    className="text-white [&_button]:text-white [&_button:hover]:bg-tpahla-gold [&_button[aria-selected]]:bg-tpahla-gold [&_button[aria-selected]]:text-tpahla-darkgreen"
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
@@ -166,10 +196,21 @@ const NominationStepA = () => {
           name="nominee_nationality"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>4. Nationality</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter nationality" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
-              </FormControl>
+              <FormLabel>4. Nationality *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white">
+                    <SelectValue placeholder="Select nationality" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  {africanCountries.map((country) => (
+                    <SelectItem key={country.code} value={country.code} className="hover:bg-gray-700 focus:bg-gray-700">
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -180,10 +221,21 @@ const NominationStepA = () => {
           name="nominee_country_of_residence"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>5. Country of Residence</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter country of residence" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
-              </FormControl>
+              <FormLabel>5. Country of Residence *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white">
+                    <SelectValue placeholder="Select country of residence" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  {africanCountries.map((country) => (
+                    <SelectItem key={country.code} value={country.code} className="hover:bg-gray-700 focus:bg-gray-700">
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -208,7 +260,7 @@ const NominationStepA = () => {
           name="nominee_title_position"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>7. Title/Position Held</FormLabel>
+              <FormLabel>7. Title/Position Held *</FormLabel>
               <FormControl>
                 <Input placeholder="Enter title/position" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
               </FormControl>
@@ -222,7 +274,7 @@ const NominationStepA = () => {
           name="nominee_email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>8. Email Address of Nominee</FormLabel>
+              <FormLabel>8. Email Address of Nominee *</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="Enter nominee's email" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
               </FormControl>
@@ -236,7 +288,7 @@ const NominationStepA = () => {
           name="nominee_phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>9. Phone Number of Nominee (include country code)</FormLabel>
+              <FormLabel>9. Phone Number of Nominee (include country code) *</FormLabel>
               <FormControl>
                 <Input type="tel" placeholder="e.g. +234 123 456 7890" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
               </FormControl>
@@ -259,7 +311,10 @@ const NominationStepA = () => {
           )}
         />
         
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+           <Button type="button" variant="tpahla-outline" size="lg" onClick={() => setCurrentStep(1)} disabled={true} className="opacity-0 pointer-events-none">
+            Previous
+          </Button>
           <Button type="submit" variant="tpahla-primary" size="lg">
             Save & Next
           </Button>

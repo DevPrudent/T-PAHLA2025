@@ -1,0 +1,71 @@
+
+export interface AfricanCountry {
+  code: string;
+  name: string;
+}
+
+export const africanCountries: AfricanCountry[] = [
+  { code: "DZ", name: "Algeria" },
+  { code: "AO", name: "Angola" },
+  { code: "BJ", name: "Benin" },
+  { code: "BW", name: "Botswana" },
+  { code: "BF", name: "Burkina Faso" },
+  { code: "BI", name: "Burundi" },
+  { code: "CV", name: "Cabo Verde" },
+  { code: "CM", name: "Cameroon" },
+  { code: "CF", name: "Central African Republic" },
+  { code: "TD", name: "Chad" },
+  { code: "KM", name: "Comoros" },
+  { code: "CG", name: "Congo, Republic of the" },
+  { code: "CD", name: "Congo, Democratic Republic of the" },
+  { code: "CI", name: "Cote d'Ivoire" },
+  { code: "DJ", name: "Djibouti" },
+  { code: "EG", name: "Egypt" },
+  { code: "GQ", name: "Equatorial Guinea" },
+  { code: "ER", name: "Eritrea" },
+  { code: "SZ", name: "Eswatini" },
+  { code: "ET", name: "Ethiopia" },
+  { code: "GA", name: "Gabon" },
+  { code: "GM", name: "Gambia" },
+  { code: "GH", name: "Ghana" },
+  { code: "GN", name: "Guinea" },
+  { code: "GW", name: "Guinea-Bissau" },
+  { code: "KE", name: "Kenya" },
+  { code: "LS", name: "Lesotho" },
+  { code: "LR", name: "Liberia" },
+  { code: "LY", name: "Libya" },
+  { code: "MG", name: "Madagascar" },
+  { code: "MW", name: "Malawi" },
+  { code: "ML", name: "Mali" },
+  { code: "MR", name: "Mauritania" },
+  { code: "MU", name: "Mauritius" },
+  { code: "YT", name: "Mayotte" },
+  { code: "MA", name: "Morocco" },
+  { code: "MZ", name: "Mozambique" },
+  { code: "NA", name: "Namibia" },
+  { code: "NE", name: "Niger" },
+  { code: "NG", name: "Nigeria" },
+  { code: "RE", name: "Reunion" },
+  { code: "RW", name: "Rwanda" },
+  { code: "SH", name: "Saint Helena" },
+  { code: "ST", name: "Sao Tome and Principe" },
+  { code: "SN", name: "Senegal" },
+  { code: "SC", name: "Seychelles" },
+  { code: "SL", name: "Sierra Leone" },
+  { code: "SO", name: "Somalia" },
+  { code: "ZA", name: "South Africa" },
+  { code: "SS", name: "South Sudan" },
+  { code: "SD", name: "Sudan" },
+  { code: "TZ", name: "Tanzania" },
+  { code: "TG", name: "Togo" },
+  { code: "TN", name: "Tunisia" },
+  { code: "UG", name: "Uganda" },
+  { code: "EH", name: "Western Sahara" },
+  { code: "ZM", name: "Zambia" },
+  { code: "ZW", name: "Zimbabwe" },
+];
+
+export const getCountryNameByCode = (code: string): string | undefined => {
+  const country = africanCountries.find(c => c.code === code);
+  return country?.name;
+};
