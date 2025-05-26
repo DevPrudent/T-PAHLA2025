@@ -129,17 +129,17 @@ const renderSection = (title: string, data: any | null) => {
                         <li key={index} className="text-sm flex items-center">
                           <a
                             href={publicUrl}
-                            target="_blank" // Opens in new tab, download attribute might still work depending on browser/headers
+                            target="_blank" 
                             rel="noopener noreferrer"
-                            download={fileName} // Instruct browser to download
+                            download={fileName} 
                             className="text-blue-600 dark:text-blue-400 hover:underline print:text-blue-600"
                           >
                             {fileName}
                           </a>
                           <a
                             href={publicUrl}
-                            download={fileName} // Reinforce download instruction
-                            target="_blank" // Helps avoid navigation issues if direct click doesn't download
+                            download={fileName} 
+                            target="_blank" 
                             rel="noopener noreferrer"
                             className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 print:hidden"
                             title={`Download ${fileName}`}
@@ -163,11 +163,9 @@ const renderSection = (title: string, data: any | null) => {
               if (!isNaN(dateValue.getTime())) {
                 return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
               } else {
-                // Fallback for dates not parsable by parseISO but still provided as strings
                 return <DetailItem key={key} label={formattedKey} value={String(value)} />;
               }
             } catch (e) {
-              // Fallback if parseISO throws an error
               return <DetailItem key={key} label={formattedKey} value={String(value)} />;
             }
         }
@@ -176,7 +174,6 @@ const renderSection = (title: string, data: any | null) => {
           return <DetailItem key={key} label={formattedKey} value={value ? 'Yes' : 'No'} />;
         }
         
-        // Default rendering for other value types
         return <DetailItem key={key} label={formattedKey} value={value !== null && value !== undefined ? String(value) : 'N/A'} />;
       })}
     </div>
@@ -194,8 +191,6 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
   const sectionE = nomination.form_section_e as NominationStepEData | null;
 
   const handlePrint = () => {
-    // CSS print styles handle hiding/showing elements.
-    // No dynamic style changes needed here usually.
     window.print();
   };
 
@@ -214,7 +209,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
           </DialogDescription>
         </DialogHeader>
         
-        <div className="print:text-black print:bg-white print:h-auto"> {/* Ensure this wrapper also allows auto height */}
+        <div className="print:text-black print:bg-white print:h-auto">
             <div className="hidden print:block mb-4">
                 <h1 className="text-2xl font-bold text-black">Nomination Details: {nomination.nominee_name}</h1>
                 <p className="text-sm text-gray-600">
@@ -224,7 +219,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
             </div>
 
             <ScrollArea className="h-[60vh] pr-4 print:h-auto print:overflow-visible">
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4 print:h-auto print:overflow-visible">
                 <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
                     <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">General Information</h4>
                     <DetailItem label="Nomination ID" value={nomination.id} />
