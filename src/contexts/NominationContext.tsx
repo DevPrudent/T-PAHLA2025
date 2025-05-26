@@ -1,12 +1,12 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { NominationStepAData, NominationStepBData, NominationStepCData } from '@/lib/validators/nominationValidators';
+import { NominationStepAData, NominationStepBData, NominationStepCData, NominationStepDData } from '@/lib/validators/nominationValidators';
 // Import other step data types as they are created
 
 interface NominationData {
   sectionA?: NominationStepAData;
   sectionB?: NominationStepBData;
   sectionC?: NominationStepCData;
-  // sectionD?: NominationStepDData;
+  sectionD?: NominationStepDData;
   // ... other sections
 }
 
@@ -28,13 +28,15 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
   const [nominationData, setNominationData] = useState<NominationData>({});
 
   const updateSectionData = (section: keyof NominationData, data: any) => {
-    setNominationData(prevData => ({
-      ...prevData,
-      [section]: data,
-    }));
-     // Log to see if context is updated
-    console.log(`NominationContext: Updated ${section}`, data);
-    console.log('NominationContext: Full data after update', { ...nominationData, [section]: data });
+    setNominationData(prevData => {
+      const updatedData = {
+        ...prevData,
+        [section]: data,
+      };
+      console.log(`NominationContext: Updated ${section}`, data);
+      console.log('NominationContext: Full data after update', updatedData);
+      return updatedData;
+    });
   };
 
   const resetNomination = () => {

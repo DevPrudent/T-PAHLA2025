@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNomination } from "@/contexts/NominationContext";
 import NominationStepA from "@/components/nominations/NominationStepA";
 import NominationStepB from "@/components/nominations/NominationStepB";
-import NominationStepC from "@/components/nominations/NominationStepC"; // Import Step C
-// Import other steps D, E as they are created
+import NominationStepC from "@/components/nominations/NominationStepC";
+import NominationStepD from "@/components/nominations/NominationStepD"; // Import Step D
+// Import other steps E as they are created
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,8 +31,9 @@ const NominationFormArea = () => {
       case 2:
         return <NominationStepB />;
       case 3:
-        return <NominationStepC />; // Add case for Step C
-      // case 4: return <NominationStepD />;
+        return <NominationStepC />;
+      case 4:
+        return <NominationStepD />; // Add case for Step D
       // case 5: return <NominationStepE />;
       default:
         return <NominationStepA />;

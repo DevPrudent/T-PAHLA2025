@@ -39,6 +39,18 @@ export const nominationStepCSchema = z.object({
 
 export type NominationStepCData = z.infer<typeof nominationStepCSchema>;
 
+export const nominationStepDSchema = z.object({
+  nominator_full_name: z.string().min(1, "Full name is required"),
+  nominator_relationship_to_nominee: z.string().min(1, "Relationship to nominee is required"),
+  nominator_organization: z.string().optional(),
+  nominator_email: z.string().email("Invalid email address").min(1, "Email is required"),
+  nominator_phone: z.string().min(1, "Phone number is required")
+    .regex(/^\+?[0-9\s\-()]+$/, "Invalid phone number format. Include country code e.g., +234..."),
+  nominator_reason: z.string().min(1, "Reason for nomination is required.").max(500, "Reason should be concise (approx. 100 words)."), // Max length as proxy for word count
+});
+
+export type NominationStepDData = z.infer<typeof nominationStepDSchema>;
+
 // Add other step schemas here as we build them
-// export const nominationStepDSchema = z.object({...});
-// export type NominationStepDData = z.infer<typeof nominationStepDSchema>;
+// export const nominationStepESchema = z.object({...});
+// export type NominationStepEData = z.infer<typeof nominationStepESchema>;

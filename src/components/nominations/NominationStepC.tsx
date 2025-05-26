@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,9 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { PlusCircle, Trash2, FileText, Image, FileUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
+
+type NominationUpdate = Partial<Database['public']['Tables']['nominations']['Update']>;
 
 const NominationStepC = () => {
-  const { setCurrentStep, nominationData, updateSectionData } = useNomination();
+  const { setCurrentStep, nominationData, updateSectionData, nominationId } = useNomination();
 
   const form = useForm<NominationStepCData>({
     resolver: zodResolver(nominationStepCSchema),
@@ -28,10 +32,38 @@ const NominationStepC = () => {
     name: "media_links"
   });
 
-  const onSubmit = (data: NominationStepCData) => {
-    updateSectionData('sectionC', data);
-    console.log("Section C data submitted:", data);
-    setCurrentStep(4); // Move to Section D
+  const onSubmit = async (data: NominationStepCData) => {
+    // Filter out empty media links before saving
+    const processedData = {
+      ...data,
+      media_links: data.media_links?.filter(link => link.value.trim() !== '') || [],
+    };
+    updateSectionData('sectionC', processedData);
+    console.log("Section C data submitted:", processedData);
+
+    if (!nominationId) {
+      toast.error("Nomination ID is missing. Please complete previous steps.");
+      setCurrentStep(1); 
+      return;
+    }
+
+    try {
+      const nominationPayload: NominationUpdate = {
+        form_section_c: processedData as any,
+      };
+
+      const { error } = await supabase
+        .from('nominations')
+        .update(nominationPayload)
+        .eq('id', nominationId);
+
+      if (error) throw error;
+      toast.success('Section C saved!');
+      setCurrentStep(4); // Move to Section D
+    } catch (error: any) {
+      console.error('Error saving Section C:', error);
+      toast.error(`Failed to save Section C: ${error.message}`);
+    }
   };
 
   const handlePrevious = () => {
@@ -104,7 +136,8 @@ const NominationStepC = () => {
                     </FormItem>
                   )}
                 />
-                {fields.length > 1 && (
+                {/* Show remove button only if there's more than one link or if it's not the only link and it's not empty */}
+                {(fields.length > 1 || (fields.length === 1 && form.getValues(`media_links.${index}.value`) !== '')) && (
                   <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)} className="text-red-500 hover:text-red-400">
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -120,6 +153,9 @@ const NominationStepC = () => {
             >
               <PlusCircle className="mr-2 h-4 w-4" /> Add Media Link
             </Button>
+             <FormDescription className="text-gray-400 mt-1">
+                Add links to articles, videos, or other online media supporting the nomination.
+            </FormDescription>
           </div>
 
           {/* Placeholder for File Uploads */}
