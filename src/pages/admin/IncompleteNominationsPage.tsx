@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon, ChevronLeft, ChevronRight, Edit } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
+import { Link } from 'react-router-dom';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
@@ -89,7 +90,7 @@ const IncompleteNominationsPage = () => {
     onSuccess: (updatedNomination) => {
       queryClient.invalidateQueries({ queryKey: ['incompleteNominations'] });
       queryClient.invalidateQueries({ queryKey: ['approvedNominations'] }); 
-      queryClient.invalidateQueries({ queryKey: ['submittedNominations'] }); // Use 'submittedNominations'
+      queryClient.invalidateQueries({ queryKey: ['submittedNominations'] }); 
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
     },
     onError: (err) => {
@@ -174,8 +175,8 @@ const IncompleteNominationsPage = () => {
           {nominations.map((nomination) => {
             const sectionAData = nomination.form_section_a as FormSectionAData | null;
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
-            // Using created_at as submitted_at might be null for incomplete
             const creationDate = nomination.created_at;
+            const isEditable = nomination.status === 'incomplete' || nomination.status === 'draft';
 
             return (
               <TableRow key={nomination.id}>
@@ -189,18 +190,25 @@ const IncompleteNominationsPage = () => {
                     nomination.status === "approved" ? "success" : 
                     nomination.status === "rejected" ? "destructive" :
                     nomination.status === "submitted" ? "default" :
-                    "outline" // "incomplete" or "draft" could get "outline"
+                    "outline" 
                   }>
                     {nomination.status || 'N/A'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-1">
                     <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)} disabled={updateStatusMutation.isPending}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
-                    {/* Actions for incomplete might be different, e.g. notify user, or admin can complete/reject */}
-                    {/* Keeping approve/reject for now if status allows */}
+                    
+                    {isEditable && (
+                      <Button asChild size="sm" variant="ghost" disabled={updateStatusMutation.isPending}>
+                        <Link to={`/nominate/edit/${nomination.id}`}>
+                          <Edit size={16} className="mr-1" /> Edit
+                        </Link>
+                      </Button>
+                    )}
+
                     {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
                       <>
                         <Button 
