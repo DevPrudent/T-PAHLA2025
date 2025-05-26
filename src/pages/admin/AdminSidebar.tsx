@@ -28,8 +28,8 @@ import {
   FileText,
   FileCheck2,
   FileClock,
-  ChevronDown,
-  CheckBadge // Example, assuming you might want a different icon for "Approved"
+  ChevronDown
+  // Removed CheckBadge as it's not a valid export and was unused
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
