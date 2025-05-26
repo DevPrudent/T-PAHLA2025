@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const nominationStepASchema = z.object({
@@ -21,6 +20,13 @@ export const nominationStepASchema = z.object({
 
 export type NominationStepAData = z.infer<typeof nominationStepASchema>;
 
+export const nominationStepBSchema = z.object({
+  award_category: z.string().min(1, "Award category is required."),
+  specific_award: z.string().min(1, "Specific award is required."),
+});
+
+export type NominationStepBData = z.infer<typeof nominationStepBSchema>;
+
 // Add other step schemas here as we build them
-// export const nominationStepBSchema = z.object({...});
-// export type NominationStepBData = z.infer<typeof nominationStepBSchema>;
+// export const nominationStepCSchema = z.object({...});
+// export type NominationStepCData = z.infer<typeof nominationStepCSchema>;
