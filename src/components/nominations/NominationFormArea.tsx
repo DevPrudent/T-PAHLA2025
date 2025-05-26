@@ -25,11 +25,8 @@ const NominationFormArea = () => {
   }, []);
 
   const renderStep = () => {
-    // If already submitted (section E has data and signature exists), show Step E in its submitted state.
-    if (nominationData.sectionE && nominationData.sectionE.nominator_signature) {
-        return <NominationStepE />;
-    }
-
+    // NominationStepE will handle its own display logic (form or submitted view)
+    // based on nominationData and its internal state.
     switch (currentStep) {
       case 1:
         return <NominationStepA />;
@@ -40,9 +37,9 @@ const NominationFormArea = () => {
       case 4:
         return <NominationStepD />;
       case 5: 
-        return <NominationStepE />; // Add case for Step E
+        return <NominationStepE />;
       default:
-        return <NominationStepA />;
+        return <NominationStepA />; // Default to Step A if currentStep is unexpected
     }
   };
 
@@ -67,7 +64,12 @@ const NominationFormArea = () => {
           
           {renderStep()}
 
-          {nominationId && !isEffectivelySubmitted && currentStep !== 5 && ( // Only show if not on step 5 and not fully submitted
+          {/* This "Start New Nomination" button is for the overall form, 
+              NominationStepE handles its own once submitted.
+              It should not show if on step 5 AND submitted, or just on step 5 as StepE has back/submit.
+              Effectively, it shows if there's an ID, it's not fully submitted yet, AND we are not on the final step.
+          */}
+          {nominationId && !isEffectivelySubmitted && currentStep !== 5 && (
             <div className="mt-8 text-center">
               <Button variant="link" onClick={resetNomination} className="text-tpahla-gold hover:text-yellow-400">
                 Start New Nomination
