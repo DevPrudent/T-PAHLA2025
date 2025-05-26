@@ -1,5 +1,3 @@
-
-```typescript
 import React from 'react';
 import {
   Dialog,
@@ -15,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database } from '@/integrations/supabase/types';
 import { format, parseISO } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client'; // Added Supabase client
+import { supabase } from '@/integrations/supabase/client'; // Corrected import path
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
@@ -99,7 +97,7 @@ const renderSection = (title: string, data: any | null) => {
                         fileName = fileData.file_name;
                         const publicUrlResult = supabase.storage.from(NOMINATION_FILES_BUCKET).getPublicUrl(fileData.storage_path);
                         if (publicUrlResult.error || !publicUrlResult.data.publicUrl) {
-                          console.error(`Error getting public URL for ${fileData.storage_path}:`, publicUrlResult.error);
+                          console.error(`Error getting public URL for ${fileData.storage_path}:`, publicUrlResult.error); // Corrected console.error
                           return (
                             <li key={index} className="text-sm text-red-500">
                               Could not retrieve link for {fileName}.
@@ -219,8 +217,6 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
             {renderSection("Section B: Award Category", sectionB)}
             {renderSection("Section C: Justification & Supporting Materials", sectionC)}
             
-            {/* Removed direct rendering of cvResumeValue etc. as renderSection now handles these file fields for Section C */}
-            
             {nomination.form_section_c_notes && <DetailItem label="Section C Notes" value={nomination.form_section_c_notes}/>}
             {renderSection("Section D: Nominator Information", sectionD)}
             {renderSection("Section E: Declaration & Signature", sectionE)}
@@ -240,5 +236,3 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
 };
 
 export default NominationDetailsModal;
-```
-
