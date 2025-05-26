@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -47,8 +46,6 @@ const renderSection = (title: string, data: any | null) => {
     return <DetailItem label={title} value="No data provided for this section." />;
   }
   if (Array.isArray(data)) {
-    // For arrays that are not files or media_links, stringify them.
-    // This avoids issues if an unexpected array structure is encountered.
     if (title.toLowerCase().includes("media links") || title.toLowerCase().includes("files")) {
         // Handle specific array types below if necessary, otherwise this is a generic array.
     } else {
@@ -56,11 +53,9 @@ const renderSection = (title: string, data: any | null) => {
     }
   }
 
-  // Special handling for Section B to show category and award names instead of IDs
   if (title === "Section B: Award Category" && data.award_category) {
-    // Enhanced rendering for Section B
     return (
-      <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+      <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white print:p-0 print:border-none print:shadow-none print:mb-2">
         <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">{title}</h4>
         <DetailItem 
           label="Award Category" 
@@ -77,7 +72,7 @@ const renderSection = (title: string, data: any | null) => {
   }
 
   return (
-    <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+    <div className="mb-4 p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white print:p-0 print:border-none print:shadow-none print:mb-2">
       <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">{title}</h4>
       {Object.entries(data).map(([key, value]) => {
         const formattedKey = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -121,10 +116,9 @@ const renderSection = (title: string, data: any | null) => {
 
                       if (fileData.storage_path && fileData.file_name) {
                         fileName = fileData.file_name;
-                        // Use { download: fileName } to suggest filename and force Content-Disposition header
                         const { data: publicUrlData } = supabase.storage
                           .from(NOMINATION_FILES_BUCKET)
-                          .getPublicUrl(fileData.storage_path, { download: fileData.file_name });
+                          .getPublicUrl(fileData.storage_path, { download: fileName });
                         
                         if (!publicUrlData || !publicUrlData.publicUrl) {
                           console.error(`Could not retrieve public URL for ${fileData.storage_path}`);
@@ -138,7 +132,6 @@ const renderSection = (title: string, data: any | null) => {
                       } else if (fileData.url && fileData.name) {
                          fileName = fileData.name;
                          publicUrl = fileData.url;
-                         // For external URLs or URLs not from Supabase Storage, we rely on the 'download' attribute on <a>
                       } else {
                          return (
                             <li key={index} className="text-sm text-gray-500">
@@ -216,8 +209,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
     window.print();
   };
 
-  // Debug section B data
-  console.log('Section B data:', sectionB);
+  console.log('Section B data in Modal:', sectionB);
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -235,17 +227,17 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
         </DialogHeader>
         
         <div className="print:text-black print:bg-white print:h-auto">
-            <div className="hidden print:block mb-4">
+            <div className="hidden print:block mb-4 print:mb-2">
                 <h1 className="text-2xl font-bold text-black">Nomination Details: {nomination.nominee_name}</h1>
                 <p className="text-sm text-gray-600">
                   Submitted on: {nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'}
                 </p>
-                <hr className="my-2"/>
+                <hr className="my-2 print:my-1"/>
             </div>
 
             <ScrollArea className="h-[60vh] pr-4 print:h-auto print:overflow-visible print:border-none print:shadow-none">
               <div className="space-y-4 py-4 print:h-auto print:overflow-visible print:p-0 print:m-0">
-                <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white">
+                <div className="p-3 border rounded-md bg-gray-50 dark:bg-gray-700/50 print:border-gray-300 print:bg-white print:p-0 print:border-none print:shadow-none print:mb-2">
                     <h4 className="text-md font-semibold mb-2 text-tpahla-darkgreen dark:text-tpahla-gold print:text-black">General Information</h4>
                     <DetailItem label="Nomination ID" value={nomination.id} />
                     <DetailItem label="Nominee Name" value={nomination.nominee_name} />
@@ -285,7 +277,6 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
               </div>
             </ScrollArea>
         </div>
-
 
         <DialogFooter className="sm:justify-end print:hidden">
            <Button type="button" variant="outline" onClick={handlePrint}>
