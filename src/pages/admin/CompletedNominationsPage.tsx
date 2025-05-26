@@ -26,25 +26,16 @@ type FormSectionAData = {
   nominee_email?: string;
 };
 
+// Updated to fetch nominations with 'submitted' status
 const fetchNominations = async (): Promise<NominationRow[]> => {
-  // A nomination is complete if form_section_a, b, c, d, e are all non-null and not empty JSON objects.
   const { data, error } = await supabase
     .from('nominations')
     .select('*')
-    .not('form_section_a', 'is', null)
-    .neq('form_section_a', '{}')
-    .not('form_section_b', 'is', null)
-    .neq('form_section_b', '{}')
-    .not('form_section_c', 'is', null)
-    .neq('form_section_c', '{}')
-    .not('form_section_d', 'is', null)
-    .neq('form_section_d', '{}')
-    .not('form_section_e', 'is', null)
-    .neq('form_section_e', '{}')
+    .eq('status', 'submitted') // Filter by status 'submitted'
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching completed nominations:', error);
+    console.error('Error fetching submitted nominations:', error);
     throw new Error(error.message);
   }
   return data || [];
@@ -55,8 +46,9 @@ const CompletedNominationsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
 
+  // Updated queryKey
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['completedNominations'], 
+    queryKey: ['submittedNominations'], 
     queryFn: fetchNominations,
   });
 
@@ -80,9 +72,11 @@ const CompletedNominationsPage = () => {
       return data;
     },
     onSuccess: (updatedNomination) => {
-      queryClient.invalidateQueries({ queryKey: ['completedNominations'] });
-      queryClient.invalidateQueries({ queryKey: ['nominations'] }); 
-      queryClient.invalidateQueries({ queryKey: ['incompleteNominations'] });
+      // Updated query invalidations
+      queryClient.invalidateQueries({ queryKey: ['submittedNominations'] });
+      queryClient.invalidateQueries({ queryKey: ['approvedNominations'] }); // For when an item is approved
+      queryClient.invalidateQueries({ queryKey: ['nominations'] }); // General list
+      // Removed invalidateQueries for 'incompleteNominations' as actions here (approve/reject) don't make items incomplete.
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
     },
     onError: (err) => {
@@ -103,7 +97,8 @@ const CompletedNominationsPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-2">Loading completed nominations...</p>
+        {/* Updated loading message */}
+        <p className="ml-2">Loading submitted nominations...</p>
       </div>
     );
   }
@@ -112,7 +107,8 @@ const CompletedNominationsPage = () => {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Loading Completed Nominations</AlertTitle>
+        {/* Updated error title */}
+        <AlertTitle>Error Loading Submitted Nominations</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
@@ -122,8 +118,9 @@ const CompletedNominationsPage = () => {
     return (
       <div className="text-center py-10">
         <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-        <p className="mt-4 text-muted-foreground">No completed nominations found.</p>
-        <p className="text-sm text-muted-foreground">Nominations that have all sections A-E filled will appear here.</p>
+        {/* Updated empty state messages */}
+        <p className="mt-4 text-muted-foreground">No Submitted Nominations Found</p>
+        <p className="text-sm text-muted-foreground">Nominations with 'submitted' status will appear here.</p>
       </div>
     );
   }
@@ -131,17 +128,21 @@ const CompletedNominationsPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
+        {/* Title remains "Completed Nominations" as per user's phrasing of "completed nomination section" */}
         <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-green-600" />Completed Nominations</h1>
         {/* Filter and Bulk Actions buttons can be added later */}
       </div>
       
+      {/* Updated page description */}
       <p className="text-muted-foreground">
-        Review nominations that have all sections (A-E) completed.
+        Review nominations that have the 'submitted' status and are awaiting approval or rejection.
       </p>
       
       <Table>
-        <TableCaption>List of completed nominations</TableCaption>
+        {/* Updated table caption */}
+        <TableCaption>List of nominations with 'submitted' status</TableCaption>
         <TableHeader>
+          {/* ... keep existing code (table header structure) */}
           <TableRow>
             <TableHead>Nominee Name</TableHead>
             <TableHead>Email</TableHead>
@@ -153,6 +154,7 @@ const CompletedNominationsPage = () => {
         </TableHeader>
         <TableBody>
           {nominations.map((nomination) => {
+            // ... keep existing code (nomination mapping and cell rendering logic)
             const sectionAData = nomination.form_section_a as FormSectionAData | null;
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
             const submissionDate = nomination.submitted_at || nomination.created_at;
@@ -178,7 +180,8 @@ const CompletedNominationsPage = () => {
                     <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
-                    {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
+                    {/* Actions are relevant for 'submitted' items */}
+                    {(nomination.status === "submitted") && ( // Simplified condition, as this page now only shows 'submitted'
                       <>
                         <Button 
                           size="sm" 
