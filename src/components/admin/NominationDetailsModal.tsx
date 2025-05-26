@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database } from '@/integrations/supabase/types';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { Printer, Download } from 'lucide-react'; // Import Printer and Download icons
+import { Printer, Download } from 'lucide-react';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStepAData = Database['public']['Tables']['nominations']['Row']['form_section_a'];
@@ -45,7 +45,13 @@ const renderSection = (title: string, data: any | null) => {
     return <DetailItem label={title} value="No data provided for this section." />;
   }
   if (Array.isArray(data)) {
-    return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
+    // For arrays that are not files or media_links, stringify them.
+    // This avoids issues if an unexpected array structure is encountered.
+    if (title.toLowerCase().includes("media links") || title.toLowerCase().includes("files")) {
+        // Handle specific array types below if necessary, otherwise this is a generic array.
+    } else {
+        return <DetailItem label={title} value={JSON.stringify(data, null, 2)} />;
+    }
   }
 
   return (
@@ -93,9 +99,12 @@ const renderSection = (title: string, data: any | null) => {
 
                       if (fileData.storage_path && fileData.file_name) {
                         fileName = fileData.file_name;
-                        const publicUrlResult = supabase.storage.from(NOMINATION_FILES_BUCKET).getPublicUrl(fileData.storage_path);
+                        // Use { download: fileName } to suggest filename and force Content-Disposition header
+                        const { data: publicUrlData } = supabase.storage
+                          .from(NOMINATION_FILES_BUCKET)
+                          .getPublicUrl(fileData.storage_path, { download: fileData.file_name });
                         
-                        if (!publicUrlResult.data.publicUrl) {
+                        if (!publicUrlData || !publicUrlData.publicUrl) {
                           console.error(`Could not retrieve public URL for ${fileData.storage_path}`);
                           return (
                             <li key={index} className="text-sm text-red-500">
@@ -103,10 +112,11 @@ const renderSection = (title: string, data: any | null) => {
                             </li>
                           );
                         }
-                        publicUrl = publicUrlResult.data.publicUrl;
+                        publicUrl = publicUrlData.publicUrl;
                       } else if (fileData.url && fileData.name) {
                          fileName = fileData.name;
                          publicUrl = fileData.url;
+                         // For external URLs or URLs not from Supabase Storage, we rely on the 'download' attribute on <a>
                       } else {
                          return (
                             <li key={index} className="text-sm text-gray-500">
@@ -119,17 +129,17 @@ const renderSection = (title: string, data: any | null) => {
                         <li key={index} className="text-sm flex items-center">
                           <a
                             href={publicUrl}
-                            target="_blank"
+                            target="_blank" // Opens in new tab, download attribute might still work depending on browser/headers
                             rel="noopener noreferrer"
-                            download={fileName} // Add download attribute
+                            download={fileName} // Instruct browser to download
                             className="text-blue-600 dark:text-blue-400 hover:underline print:text-blue-600"
                           >
                             {fileName}
                           </a>
                           <a
                             href={publicUrl}
-                            download={fileName}
-                            target="_blank"
+                            download={fileName} // Reinforce download instruction
+                            target="_blank" // Helps avoid navigation issues if direct click doesn't download
                             rel="noopener noreferrer"
                             className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 print:hidden"
                             title={`Download ${fileName}`}
@@ -153,9 +163,11 @@ const renderSection = (title: string, data: any | null) => {
               if (!isNaN(dateValue.getTime())) {
                 return <DetailItem key={key} label={formattedKey} value={format(dateValue, 'PPP')} />;
               } else {
+                // Fallback for dates not parsable by parseISO but still provided as strings
                 return <DetailItem key={key} label={formattedKey} value={String(value)} />;
               }
             } catch (e) {
+              // Fallback if parseISO throws an error
               return <DetailItem key={key} label={formattedKey} value={String(value)} />;
             }
         }
@@ -164,6 +176,7 @@ const renderSection = (title: string, data: any | null) => {
           return <DetailItem key={key} label={formattedKey} value={value ? 'Yes' : 'No'} />;
         }
         
+        // Default rendering for other value types
         return <DetailItem key={key} label={formattedKey} value={value !== null && value !== undefined ? String(value) : 'N/A'} />;
       })}
     </div>
@@ -181,12 +194,8 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
   const sectionE = nomination.form_section_e as NominationStepEData | null;
 
   const handlePrint = () => {
-    // Temporarily hide non-printable elements for cleaner print
-    const modalContent = document.getElementById('nomination-details-modal-content');
-    if (modalContent) {
-        // Add a class to the modal content itself if further specific print styling is needed for the container
-        // For example, to ensure it expands fully or has specific margins for print.
-    }
+    // CSS print styles handle hiding/showing elements.
+    // No dynamic style changes needed here usually.
     window.print();
   };
 
@@ -194,7 +203,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         id="nomination-details-modal-content" 
-        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:shadow-none print:border-none print:max-w-full print:w-full print:h-full print:overflow-visible print:bg-white"
+        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:shadow-none print:border-none print:max-w-full print:w-full print:h-auto print:overflow-visible print:bg-white print:static print:inset-auto print:translate-x-0 print:translate-y-0"
       >
         <DialogHeader className="print:hidden">
           <DialogTitle className="text-2xl font-serif text-tpahla-darkgreen dark:text-tpahla-gold">
@@ -205,9 +214,8 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
           </DialogDescription>
         </DialogHeader>
         
-        {/* Content to be printed - apply print styling here or in children */}
-        <div className="print:text-black print:bg-white">
-            <div className="hidden print:block mb-4"> {/* Show only on print */}
+        <div className="print:text-black print:bg-white print:h-auto"> {/* Ensure this wrapper also allows auto height */}
+            <div className="hidden print:block mb-4">
                 <h1 className="text-2xl font-bold text-black">Nomination Details: {nomination.nominee_name}</h1>
                 <p className="text-sm text-gray-600">
                   Submitted on: {nomination.submitted_at ? format(parseISO(nomination.submitted_at), 'PPPp') : 'N/A'}
