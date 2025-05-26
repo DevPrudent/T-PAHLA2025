@@ -31,6 +31,7 @@ import CategoriesPage from "./pages/admin/CategoriesPage";
 import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
 import MessagesPage from "./pages/admin/MessagesPage"; // Import the new MessagesPage
+import NominationFormPage from "./pages/NominationFormPage"; // Import the new NominationFormPage
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -60,6 +61,7 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/awards" element={<Awards />} />
                 <Route path="/nominations" element={<Nominations />} />
+                <Route path="/nomination-form" element={<NominationFormPage />} /> {/* New route */}
                 <Route path="/event" element={<EventDetails />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
