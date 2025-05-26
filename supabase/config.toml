@@ -1,1 +1,5 @@
-project_id = "zrutcdhfqahfduxppudv"
+
+# Supabase Project Configuration
+
+[functions.send-nomination-email]
+# verify_jwt = false # Set to true if you need to check for a valid Supabase JWT
