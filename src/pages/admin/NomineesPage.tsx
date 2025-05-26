@@ -28,7 +28,7 @@ type FormSectionAData = {
 const ITEMS_PER_PAGE = 10;
 
 // Define SortableColumn and SortConfig
-type SortableColumn = 'nominee_name' | 'submitted_at' | 'award_category_id';
+type SortableColumn = 'id' | 'nominee_name' | 'submitted_at' | 'award_category_id'; // Added 'id'
 interface SortConfig {
   key: SortableColumn;
   direction: 'asc' | 'desc';
@@ -204,14 +204,19 @@ const NomineesPage = () => {
         <TableCaption>List of approved nominations. Page {currentPage} of {totalPages}.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[150px]">Nomination ID</TableHead>
+            <TableHead 
+              className="w-[150px] cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('id')}
+            >
+              Nomination ID {renderSortIcon('id')}
+            </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-muted/80"
               onClick={() => handleSort('nominee_name')}
             >
               Nominee Name {renderSortIcon('nominee_name')}
             </TableHead>
-            <TableHead>Email</TableHead> {/* Email sorting not implemented due to nested data */}
+            <TableHead>Email</TableHead> 
             <TableHead 
               className="cursor-pointer hover:bg-muted/80"
               onClick={() => handleSort('award_category_id')}

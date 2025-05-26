@@ -32,7 +32,7 @@ type FormSectionAData = {
 };
 
 const ITEMS_PER_PAGE = 10;
-type SortableColumn = 'nominee_name' | 'created_at' | 'status' | 'award_category_id';
+type SortableColumn = 'id' | 'nominee_name' | 'created_at' | 'status' | 'award_category_id'; // Added 'id'
 interface SortConfig {
   key: SortableColumn;
   direction: 'asc' | 'desc';
@@ -55,7 +55,7 @@ const fetchIncompleteNominations = async (
     .from('nominations')
     .select('*', { count: 'exact' })
     .or(`form_section_a.is.null,form_section_a.eq.{},form_section_b.is.null,form_section_b.eq.{},form_section_c.is.null,form_section_c.eq.{},form_section_d.is.null,form_section_d.eq.{},form_section_e.is.null,form_section_e.eq.{}`)
-    .order(sortConfig.key, { ascending: sortConfig.direction === 'asc', nullsFirst: false }) // Added nullsFirst for consistency
+    .order(sortConfig.key, { ascending: sortConfig.direction === 'asc', nullsFirst: false }) 
     .range(from, to);
 
   if (searchTerm) {
@@ -209,7 +209,7 @@ const IncompleteNominationsPage = () => {
 
   const renderSortIcon = (columnKey: SortableColumn) => {
     if (sortConfig.key !== columnKey) {
-      return null; // Or a generic sort icon like ArrowsUpDown if preferred and available
+      return null; 
     }
     return sortConfig.direction === 'asc' 
       ? <SortAsc className="inline ml-1 h-4 w-4" /> 
@@ -242,7 +242,12 @@ const IncompleteNominationsPage = () => {
         <TableCaption>List of incomplete nominations. Page {currentPage} of {totalPages}.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[150px]">Nomination ID</TableHead>
+            <TableHead 
+              className="w-[150px] cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('id')}
+            >
+              Nomination ID {renderSortIcon('id')}
+            </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-muted/80"
               onClick={() => handleSort('nominee_name')}

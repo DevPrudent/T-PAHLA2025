@@ -22,7 +22,7 @@ type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
 
 const ITEMS_PER_PAGE = 10;
-type SortableColumn = 'nominee_name' | 'created_at' | 'award_category_id' | 'submitted_at'; // Added submitted_at for completed
+type SortableColumn = 'id' | 'nominee_name' | 'created_at' | 'award_category_id' | 'submitted_at'; // Added 'id'
 interface SortConfig {
   key: SortableColumn;
   direction: 'asc' | 'desc';
@@ -228,7 +228,12 @@ const CompletedNominationsPage = () => {
         <TableCaption>List of nominations with 'submitted' status. Page {currentPage} of {totalPages}.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Nomination ID</TableHead>
+            <TableHead 
+              className="w-[150px] cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('id')}
+            >
+              Nomination ID {renderSortIcon('id')}
+            </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-muted/80"
               onClick={() => handleSort('nominee_name')}
