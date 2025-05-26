@@ -3,14 +3,14 @@ import { useNomination } from "@/contexts/NominationContext";
 import NominationStepA from "@/components/nominations/NominationStepA";
 import NominationStepB from "@/components/nominations/NominationStepB";
 import NominationStepC from "@/components/nominations/NominationStepC";
-import NominationStepD from "@/components/nominations/NominationStepD"; // Import Step D
-// Import other steps E as they are created
+import NominationStepD from "@/components/nominations/NominationStepD";
+import NominationStepE from "@/components/nominations/NominationStepE"; // Import Step E
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const NominationFormArea = () => {
-  const { currentStep, nominationId, resetNomination } = useNomination();
+  const { currentStep, nominationId, resetNomination, nominationData } = useNomination();
   const [isNominationPeriodOpen, setIsNominationPeriodOpen] = useState(true); // Default to true for now
 
   useEffect(() => {
@@ -25,6 +25,11 @@ const NominationFormArea = () => {
   }, []);
 
   const renderStep = () => {
+    // If already submitted (section E has data and signature exists), show Step E in its submitted state.
+    if (nominationData.sectionE && nominationData.sectionE.nominator_signature) {
+        return <NominationStepE />;
+    }
+
     switch (currentStep) {
       case 1:
         return <NominationStepA />;
@@ -33,12 +38,16 @@ const NominationFormArea = () => {
       case 3:
         return <NominationStepC />;
       case 4:
-        return <NominationStepD />; // Add case for Step D
-      // case 5: return <NominationStepE />;
+        return <NominationStepD />;
+      case 5: 
+        return <NominationStepE />; // Add case for Step E
       default:
         return <NominationStepA />;
     }
   };
+
+  // Check if the nomination has been effectively submitted to control display of "Start New Nomination"
+  const isEffectivelySubmitted = nominationData.sectionE && nominationData.sectionE.nominator_signature && nominationData.sectionE.confirm_accuracy;
 
   return (
     <div className="bg-gray-900 rounded-lg shadow-xl p-6 md:p-10">
@@ -58,7 +67,7 @@ const NominationFormArea = () => {
           
           {renderStep()}
 
-          {nominationId && (
+          {nominationId && !isEffectivelySubmitted && currentStep !== 5 && ( // Only show if not on step 5 and not fully submitted
             <div className="mt-8 text-center">
               <Button variant="link" onClick={resetNomination} className="text-tpahla-gold hover:text-yellow-400">
                 Start New Nomination

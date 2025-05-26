@@ -1,23 +1,19 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNomination } from '@/contexts/NominationContext';
-import { NominationStepDData, nominationStepDSchema } from '@/lib/validators/nominationValidators';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useNomination } from '@/contexts/NominationContext';
+import { nominationStepDSchema, NominationStepDData } from '@/lib/validators/nominationValidators';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { Database } from '@/integrations/supabase/types';
-
-type NominationUpdate = Partial<Database['public']['Tables']['nominations']['Update']>;
+import { useEffect } from 'react';
 
 const NominationStepD = () => {
-  const { user } = useAuth();
-  const { setCurrentStep, nominationData, updateSectionData, nominationId } = useNomination();
+  const { nominationData, updateSectionData, setCurrentStep, nominationId } = useNomination();
 
   const form = useForm<NominationStepDData>({
     resolver: zodResolver(nominationStepDSchema),
@@ -31,149 +27,162 @@ const NominationStepD = () => {
     },
   });
 
+  useEffect(() => {
+    if (nominationData.sectionD) {
+      form.reset(nominationData.sectionD);
+    }
+  }, [nominationData.sectionD, form]);
+
   const onSubmit = async (data: NominationStepDData) => {
     updateSectionData('sectionD', data);
-    console.log("Section D data submitted:", data);
+    console.log('NominationStepD Data:', data);
 
-    if (!nominationId) {
-      toast.error("Nomination ID is missing. Please complete previous steps.");
-      setCurrentStep(1); // Or the step where nominationId is created
-      return;
+    if (nominationId) {
+      try {
+        const { error } = await supabase
+          .from('nominations')
+          .update({
+            form_section_d: data as any, // Casting as any if type issue persists
+            nominator_name: data.nominator_full_name, // Also update top-level nominator_name
+            nominator_email: data.nominator_email, // Also update top-level nominator_email
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', nominationId);
+
+        if (error) throw error;
+        toast.success('Section D saved!');
+        setCurrentStep(5); // Proceed to Next Step (Section E)
+      } catch (error: any) {
+        toast.error(`Error saving Section D: ${error.message}`);
+        console.error('Supabase update error (Section D):', error);
+      }
+    } else {
+      toast.error('Nomination ID is missing. Please go back to Section A.');
     }
-
-    try {
-      const nominationPayload: NominationUpdate = {
-        form_section_d: data as any,
-        // user_id and status are set in Step A or updated if needed
-      };
-
-      const { error } = await supabase
-        .from('nominations')
-        .update(nominationPayload)
-        .eq('id', nominationId);
-
-      if (error) throw error;
-      toast.success('Section D saved!');
-      setCurrentStep(5); // Move to Section E
-    } catch (error: any) {
-      console.error('Error saving Section D:', error);
-      toast.error(`Failed to save Section D: ${error.message}`);
-    }
-  };
-
-  const handlePrevious = () => {
-    // updateSectionData('sectionD', form.getValues()); // Optionally save before going back
-    setCurrentStep(3); // Go back to Section C
   };
 
   return (
-    <div className="space-y-8 text-gray-100">
-      <h2 className="text-2xl font-semibold text-tpahla-gold mb-6">SECTION D: NOMINATOR INFORMATION</h2>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="nominator_full_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">1. Full Name of Nominator *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your full name" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-gray-100">
+        <h2 className="text-2xl font-semibold text-tpahla-gold border-b border-tpahla-gold/50 pb-2">
+          Section D: Nominator Information
+        </h2>
 
-          <FormField
-            control={form.control}
-            name="nominator_relationship_to_nominee"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">2. Relationship to Nominee *</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Colleague, Mentor, Community Member" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="nominator_full_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Nominator's Full Name</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., Dr. Jane Smith" className="bg-gray-800 border-gray-700 focus:border-tpahla-gold" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="nominator_relationship_to_nominee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Relationship to Nominee</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., Colleague, Mentor, Community Leader" className="bg-gray-800 border-gray-700 focus:border-tpahla-gold" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="nominator_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">3. Your Organization/Institution (if applicable)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your organization" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="nominator_email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">4. Your Email Address *</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="Enter your email" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="nominator_organization"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Nominator's Organization (If applicable)</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., Acme Corp, XYZ Foundation" className="bg-gray-800 border-gray-700 focus:border-tpahla-gold" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="nominator_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">5. Your Phone Number (include country code) *</FormLabel>
-                <FormControl>
-                  <Input type="tel" placeholder="e.g., +234 123 456 7890" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="nominator_email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Nominator's Email Address</FormLabel>
+              <FormControl>
+                <Input type="email" {...field} placeholder="e.g., nominator@example.com" className="bg-gray-800 border-gray-700 focus:border-tpahla-gold" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="nominator_reason"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">6. Reason for Nomination (Max 100 words) *</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Briefly state why you are nominating this individual."
-                    className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-tpahla-gold focus:border-tpahla-gold min-h-[100px]"
-                    {...field}
-                  />
-                </FormControl>
-                 <FormDescription className="text-gray-400">
-                  A concise summary of your motivation.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="nominator_phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Nominator's Phone Number</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., +234 800 000 0000" className="bg-gray-800 border-gray-700 focus:border-tpahla-gold" />
+              </FormControl>
+               <FormDescription className="text-gray-400">
+                Please include country code.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <div className="flex justify-between mt-8">
-            <Button type="button" variant="outline" onClick={handlePrevious}>
-              Previous (to Section C)
-            </Button>
-            <Button type="submit" variant="tpahla-primary">
-              Save & Next (to Section E)
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+        <FormField
+          control={form.control}
+          name="nominator_reason"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-lg">Brief Reason for Nomination</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  rows={5}
+                  className="bg-gray-800 border-gray-700 focus:border-tpahla-gold"
+                  placeholder="Briefly state why you are nominating this individual/organization (approx. 100 words)."
+                />
+              </FormControl>
+              <FormDescription className="text-gray-400">
+                Maximum 500 characters (approx. 100 words).
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-between items-center pt-4">
+          <Button type="button" variant="tpahla-outline" onClick={() => setCurrentStep(3)} className="px-6">
+            Back
+          </Button>
+          <Button 
+            type="submit" 
+            variant="tpahla-primary" 
+            disabled={form.formState.isSubmitting} 
+            className="px-8"
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin mr-2" /> 
+            ) : (
+              <ArrowRight className="mr-2" />
+            )}
+            Save & Next
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const nominationStepASchema = z.object({
@@ -51,6 +52,22 @@ export const nominationStepDSchema = z.object({
 
 export type NominationStepDData = z.infer<typeof nominationStepDSchema>;
 
-// Add other step schemas here as we build them
-// export const nominationStepESchema = z.object({...});
-// export type NominationStepEData = z.infer<typeof nominationStepESchema>;
+export const nominationStepESchema = z.object({
+  confirm_accuracy: z.boolean().refine(val => val === true, {
+    message: "You must confirm the accuracy of the information.",
+  }),
+  confirm_nominee_contact: z.boolean().refine(val => val === true, {
+    message: "You must confirm understanding that the nominee may be contacted.",
+  }),
+  confirm_data_use: z.boolean().refine(val => val === true, {
+    message: "You must give permission for TPAHLA to use this data.",
+  }),
+  nominator_signature: z.string().min(1, "Signature is required. Please type your full name."),
+  date_signed: z.date({
+    required_error: "Date of signature is required.",
+    invalid_type_error: "That's not a valid date!",
+  }),
+});
+
+export type NominationStepEData = z.infer<typeof nominationStepESchema>;
+

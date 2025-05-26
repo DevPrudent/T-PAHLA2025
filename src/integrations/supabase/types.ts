@@ -119,6 +119,7 @@ export type Database = {
           created_at: string
           form_section_a: Json | null
           form_section_b: Json | null
+          form_section_c: Json | null
           form_section_c_notes: string | null
           form_section_d: Json | null
           form_section_e: Json | null
@@ -138,6 +139,7 @@ export type Database = {
           created_at?: string
           form_section_a?: Json | null
           form_section_b?: Json | null
+          form_section_c?: Json | null
           form_section_c_notes?: string | null
           form_section_d?: Json | null
           form_section_e?: Json | null
@@ -157,6 +159,7 @@ export type Database = {
           created_at?: string
           form_section_a?: Json | null
           form_section_b?: Json | null
+          form_section_c?: Json | null
           form_section_c_notes?: string | null
           form_section_d?: Json | null
           form_section_e?: Json | null

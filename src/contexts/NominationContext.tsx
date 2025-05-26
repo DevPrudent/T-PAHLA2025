@@ -1,13 +1,13 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { NominationStepAData, NominationStepBData, NominationStepCData, NominationStepDData } from '@/lib/validators/nominationValidators';
-// Import other step data types as they are created
+import { NominationStepAData, NominationStepBData, NominationStepCData, NominationStepDData, NominationStepEData } from '@/lib/validators/nominationValidators';
 
 interface NominationData {
   sectionA?: NominationStepAData;
   sectionB?: NominationStepBData;
   sectionC?: NominationStepCData;
   sectionD?: NominationStepDData;
-  // ... other sections
+  sectionE?: NominationStepEData; 
 }
 
 interface NominationContextType {
@@ -18,6 +18,8 @@ interface NominationContextType {
   nominationData: NominationData;
   updateSectionData: (section: keyof NominationData, data: any) => void;
   resetNomination: () => void;
+  isSubmittingNomination: boolean; // Added for global submission state
+  setIsSubmittingNomination: (isSubmitting: boolean) => void; // Added
 }
 
 const NominationContext = createContext<NominationContextType | undefined>(undefined);
@@ -26,6 +28,8 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
   const [nominationId, setNominationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [nominationData, setNominationData] = useState<NominationData>({});
+  const [isSubmittingNomination, setIsSubmittingNomination] = useState(false);
+
 
   const updateSectionData = (section: keyof NominationData, data: any) => {
     setNominationData(prevData => {
@@ -43,6 +47,7 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
     setNominationId(null);
     setCurrentStep(1);
     setNominationData({});
+    setIsSubmittingNomination(false);
     // Potentially clear localStorage if used for persistence
   };
 
@@ -54,7 +59,9 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
       setCurrentStep,
       nominationData,
       updateSectionData,
-      resetNomination
+      resetNomination,
+      isSubmittingNomination,
+      setIsSubmittingNomination,
     }}>
       {children}
     </NominationContext.Provider>
