@@ -54,7 +54,7 @@ const CompletedNominationsPage = () => {
   const { data: paginatedData, isLoading, error } = useQuery<FetchNominationsResult, Error>({
     queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE], 
     queryFn: () => fetchNominations(currentPage),
-    placeholderData: keepPreviousData, // Updated from keepPreviousData: true
+    placeholderData: keepPreviousData,
   });
 
   const nominations = paginatedData?.data ?? [];
@@ -114,7 +114,7 @@ const CompletedNominationsPage = () => {
     }
   };
 
-  if (isLoading && !paginatedData?.data) {
+  if (isLoading && paginatedData === undefined) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

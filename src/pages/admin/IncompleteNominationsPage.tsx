@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, FileClock as PageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -26,30 +26,46 @@ type FormSectionAData = {
   nominee_email?: string;
 };
 
-const fetchNominations = async (): Promise<NominationRow[]> => {
-  // A nomination is incomplete if any of form_section_a, b, c, d, e are null or empty JSON objects.
-  const { data, error } = await supabase
+const ITEMS_PER_PAGE = 10;
+
+interface FetchNominationsResult {
+  data: NominationRow[];
+  count: number | null;
+}
+
+const fetchIncompleteNominations = async (page: number): Promise<FetchNominationsResult> => {
+  const from = (page - 1) * ITEMS_PER_PAGE;
+  const to = page * ITEMS_PER_PAGE - 1;
+
+  const { data, error, count } = await supabase
     .from('nominations')
-    .select('*')
+    .select('*', { count: 'exact' })
     .or(`form_section_a.is.null,form_section_a.eq.{},form_section_b.is.null,form_section_b.eq.{},form_section_c.is.null,form_section_c.eq.{},form_section_d.is.null,form_section_d.eq.{},form_section_e.is.null,form_section_e.eq.{}`)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (error) {
     console.error('Error fetching incomplete nominations:', error);
     throw new Error(error.message);
   }
-  return data || [];
+  return { data: data || [], count };
 };
 
 const IncompleteNominationsPage = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['incompleteNominations'], 
-    queryFn: fetchNominations,
+  const { data: paginatedData, isLoading, error } = useQuery<FetchNominationsResult, Error>({
+    queryKey: ['incompleteNominations', currentPage, ITEMS_PER_PAGE], 
+    queryFn: () => fetchIncompleteNominations(currentPage),
+    placeholderData: keepPreviousData,
   });
+  
+  const nominations = paginatedData?.data ?? [];
+  const totalCount = paginatedData?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const updateStatusMutation = useMutation<
     NominationRow | null,
@@ -72,8 +88,8 @@ const IncompleteNominationsPage = () => {
     },
     onSuccess: (updatedNomination) => {
       queryClient.invalidateQueries({ queryKey: ['incompleteNominations'] });
-      queryClient.invalidateQueries({ queryKey: ['approvedNominations'] }); // Changed 'nominations' to 'approvedNominations'
-      queryClient.invalidateQueries({ queryKey: ['completedNominations'] });
+      queryClient.invalidateQueries({ queryKey: ['approvedNominations'] }); 
+      queryClient.invalidateQueries({ queryKey: ['submittedNominations'] }); // Use 'submittedNominations'
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
     },
     onError: (err) => {
@@ -90,7 +106,19 @@ const IncompleteNominationsPage = () => {
     setIsModalOpen(true);
   };
 
-  if (isLoading) {
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  if (isLoading && paginatedData === undefined) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -109,7 +137,7 @@ const IncompleteNominationsPage = () => {
     );
   }
 
-  if (!nominations || nominations.length === 0) {
+  if (totalCount === 0) {
     return (
       <div className="text-center py-10">
         <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -123,21 +151,21 @@ const IncompleteNominationsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
          <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-orange-500" />Incomplete Nominations</h1>
-        {/* Filter and Bulk Actions buttons can be added later */}
       </div>
       
       <p className="text-muted-foreground">
-        Review nominations that have one or more sections (A-E) incomplete.
+        Review nominations that have one or more sections (A-E) incomplete. Displaying {nominations.length} of {totalCount} nominations.
       </p>
       
       <Table>
-        <TableCaption>List of incomplete nominations</TableCaption>
+        <TableCaption>List of incomplete nominations. Page {currentPage} of {totalPages}.</TableCaption>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[150px]">Nomination ID</TableHead>
             <TableHead>Nominee Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Category ID</TableHead>
-            <TableHead>Date Submitted</TableHead>
+            <TableHead>Date Created</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -146,29 +174,33 @@ const IncompleteNominationsPage = () => {
           {nominations.map((nomination) => {
             const sectionAData = nomination.form_section_a as FormSectionAData | null;
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
-            const submissionDate = nomination.submitted_at || nomination.created_at;
+            // Using created_at as submitted_at might be null for incomplete
+            const creationDate = nomination.created_at;
 
             return (
               <TableRow key={nomination.id}>
+                <TableCell className="font-mono text-xs truncate max-w-[150px]">{nomination.id}</TableCell>
                 <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
                 <TableCell>{nomineeEmail}</TableCell>
                 <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>
-                <TableCell>{submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'}</TableCell>
+                <TableCell>{creationDate ? format(new Date(creationDate), 'PPpp') : 'N/A'}</TableCell>
                 <TableCell>
                   <Badge variant={
                     nomination.status === "approved" ? "success" : 
                     nomination.status === "rejected" ? "destructive" :
                     nomination.status === "submitted" ? "default" :
-                    "outline"
+                    "outline" // "incomplete" or "draft" could get "outline"
                   }>
                     {nomination.status || 'N/A'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
+                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)} disabled={updateStatusMutation.isPending}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
+                    {/* Actions for incomplete might be different, e.g. notify user, or admin can complete/reject */}
+                    {/* Keeping approve/reject for now if status allows */}
                     {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
                       <>
                         <Button 
@@ -200,6 +232,31 @@ const IncompleteNominationsPage = () => {
           })}
         </TableBody>
       </Table>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1 || isLoading}
+          >
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
+          >
+            Next
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
       <NominationDetailsModal
         nomination={selectedNomination}
         isOpen={isModalOpen}
