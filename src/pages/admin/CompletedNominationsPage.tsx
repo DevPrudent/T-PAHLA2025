@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, AlertCircle, Inbox, FileCheck2 as PageIcon, ChevronLeft, ChevronRight, Search as SearchIcon } from "lucide-react";
+import { Loader2, AlertCircle, Inbox, FileCheck2 as PageIcon, ChevronLeft, ChevronRight, Search as SearchIcon, SortAsc, SortDesc } from "lucide-react";
 import { toast } from 'sonner';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
@@ -22,13 +22,18 @@ type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
 
 const ITEMS_PER_PAGE = 10;
+type SortableColumn = 'nominee_name' | 'created_at' | 'award_category_id' | 'submitted_at'; // Added submitted_at for completed
+interface SortConfig {
+  key: SortableColumn;
+  direction: 'asc' | 'desc';
+}
 
 interface FetchNominationsResult {
   data: NominationRow[];
   count: number | null;
 }
 
-const fetchNominations = async (page: number, searchTerm: string): Promise<FetchNominationsResult> => {
+const fetchNominations = async (page: number, searchTerm: string, sortConfig: SortConfig): Promise<FetchNominationsResult> => {
   const from = (page - 1) * ITEMS_PER_PAGE;
   const to = page * ITEMS_PER_PAGE - 1;
 
@@ -36,7 +41,7 @@ const fetchNominations = async (page: number, searchTerm: string): Promise<Fetch
     .from('nominations')
     .select('*', { count: 'exact' })
     .eq('status', 'submitted')
-    .order('created_at', { ascending: false })
+    .order(sortConfig.key, { ascending: sortConfig.direction === 'asc', nullsFirst: false })
     .range(from, to);
 
   if (searchTerm) {
@@ -59,12 +64,13 @@ const CompletedNominationsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'submitted_at', direction: 'desc' });
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Reset to first page on new search
-    }, 500); // 500ms debounce
+      setCurrentPage(1); 
+    }, 500); 
 
     return () => {
       clearTimeout(handler);
@@ -72,8 +78,8 @@ const CompletedNominationsPage = () => {
   }, [searchTerm]);
 
   const { data: paginatedData, isLoading, error, isPlaceholderData } = useQuery<FetchNominationsResult, Error>({
-    queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm], 
-    queryFn: () => fetchNominations(currentPage, debouncedSearchTerm),
+    queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm, sortConfig.key, sortConfig.direction], 
+    queryFn: () => fetchNominations(currentPage, debouncedSearchTerm, sortConfig),
     placeholderData: keepPreviousData,
   });
 
@@ -118,6 +124,15 @@ const CompletedNominationsPage = () => {
   const handleViewDetails = (nomination: NominationRow) => {
     setSelectedNomination(nomination);
     setIsModalOpen(true);
+  };
+  
+  const handleSort = (key: SortableColumn) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+    setCurrentPage(1); // Reset to first page on new sort
   };
 
   const handleNextPage = () => {
@@ -178,6 +193,15 @@ const CompletedNominationsPage = () => {
     );
   }
 
+  const renderSortIcon = (columnKey: SortableColumn) => {
+    if (sortConfig.key !== columnKey) {
+      return null; 
+    }
+    return sortConfig.direction === 'asc' 
+      ? <SortAsc className="inline ml-1 h-4 w-4" /> 
+      : <SortDesc className="inline ml-1 h-4 w-4" />;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -205,10 +229,25 @@ const CompletedNominationsPage = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Nomination ID</TableHead>
-            <TableHead>Nominee Name</TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('nominee_name')}
+            >
+              Nominee Name {renderSortIcon('nominee_name')}
+            </TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Category ID</TableHead>
-            <TableHead>Date Submitted</TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('award_category_id')}
+            >
+              Category ID {renderSortIcon('award_category_id')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('submitted_at')}
+            >
+              Date Submitted {renderSortIcon('submitted_at')}
+            </TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
