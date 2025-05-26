@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,34 +27,27 @@ type FormSectionAData = {
 };
 
 const fetchNominations = async (): Promise<NominationRow[]> => {
-  // TODO: Implement filtering for COMPLETED nominations
   // A nomination is complete if form_section_a, b, c, d, e are all non-null and not empty JSON objects.
-  // Example pseudo-filter:
-  // .filter('form_section_a', 'isnot', null)
-  // .filter('form_section_a', 'cs', '{}') // This would need to be "not contains" or similar for empty object
-  // .neq('form_section_a', '{}') // Check Supabase docs for correct empty JSON object filtering
-  // and similarly for b, c, d, e.
   const { data, error } = await supabase
     .from('nominations')
     .select('*')
+    .not('form_section_a', 'is', null)
+    .neq('form_section_a', '{}')
+    .not('form_section_b', 'is', null)
+    .neq('form_section_b', '{}')
+    .not('form_section_c', 'is', null)
+    .neq('form_section_c', '{}')
+    .not('form_section_d', 'is', null)
+    .neq('form_section_d', '{}')
+    .not('form_section_e', 'is', null)
+    .neq('form_section_e', '{}')
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching nominations:', error);
+    console.error('Error fetching completed nominations:', error);
     throw new Error(error.message);
   }
-  // For now, returning all, filtering logic to be added.
-  // Example client-side filter (move to Supabase query for performance):
-  return (data || []).filter(nom => {
-    const { form_section_a, form_section_b, form_section_c, form_section_d, form_section_e } = nom;
-    const isComplete = 
-      form_section_a && typeof form_section_a === 'object' && Object.keys(form_section_a).length > 0 &&
-      form_section_b && typeof form_section_b === 'object' && Object.keys(form_section_b).length > 0 &&
-      form_section_c && typeof form_section_c === 'object' && Object.keys(form_section_c).length > 0 &&
-      form_section_d && typeof form_section_d === 'object' && Object.keys(form_section_d).length > 0 &&
-      form_section_e && typeof form_section_e === 'object' && Object.keys(form_section_e).length > 0;
-    return isComplete;
-  });
+  return data || [];
 };
 
 const CompletedNominationsPage = () => {
@@ -64,7 +56,7 @@ const CompletedNominationsPage = () => {
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
 
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['completedNominations'], // Changed queryKey
+    queryKey: ['completedNominations'], 
     queryFn: fetchNominations,
   });
 
@@ -89,7 +81,7 @@ const CompletedNominationsPage = () => {
     },
     onSuccess: (updatedNomination) => {
       queryClient.invalidateQueries({ queryKey: ['completedNominations'] });
-      queryClient.invalidateQueries({ queryKey: ['nominations'] }); // Invalidate all as well
+      queryClient.invalidateQueries({ queryKey: ['nominations'] }); 
       queryClient.invalidateQueries({ queryKey: ['incompleteNominations'] });
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
     },
@@ -227,4 +219,3 @@ const CompletedNominationsPage = () => {
 };
 
 export default CompletedNominationsPage;
-

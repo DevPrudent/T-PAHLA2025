@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,29 +27,18 @@ type FormSectionAData = {
 };
 
 const fetchNominations = async (): Promise<NominationRow[]> => {
-  // TODO: Implement filtering for INCOMPLETE nominations
   // A nomination is incomplete if any of form_section_a, b, c, d, e are null or empty JSON objects.
   const { data, error } = await supabase
     .from('nominations')
     .select('*')
+    .or(`form_section_a.is.null,form_section_a.eq.{},form_section_b.is.null,form_section_b.eq.{},form_section_c.is.null,form_section_c.eq.{},form_section_d.is.null,form_section_d.eq.{},form_section_e.is.null,form_section_e.eq.{}`)
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching nominations:', error);
+    console.error('Error fetching incomplete nominations:', error);
     throw new Error(error.message);
   }
-  // For now, returning all, filtering logic to be added.
-  // Example client-side filter (move to Supabase query for performance):
-  return (data || []).filter(nom => {
-    const { form_section_a, form_section_b, form_section_c, form_section_d, form_section_e } = nom;
-    const isIncomplete = 
-      !(form_section_a && typeof form_section_a === 'object' && Object.keys(form_section_a).length > 0) ||
-      !(form_section_b && typeof form_section_b === 'object' && Object.keys(form_section_b).length > 0) ||
-      !(form_section_c && typeof form_section_c === 'object' && Object.keys(form_section_c).length > 0) ||
-      !(form_section_d && typeof form_section_d === 'object' && Object.keys(form_section_d).length > 0) ||
-      !(form_section_e && typeof form_section_e === 'object' && Object.keys(form_section_e).length > 0);
-    return isIncomplete;
-  });
+  return data || [];
 };
 
 const IncompleteNominationsPage = () => {
@@ -59,7 +47,7 @@ const IncompleteNominationsPage = () => {
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
 
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['incompleteNominations'], // Changed queryKey
+    queryKey: ['incompleteNominations'], 
     queryFn: fetchNominations,
   });
 
@@ -222,4 +210,3 @@ const IncompleteNominationsPage = () => {
 };
 
 export default IncompleteNominationsPage;
-
