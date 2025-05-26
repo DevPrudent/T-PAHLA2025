@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +11,8 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Loader2, AlertCircle, Inbox, FileCheck2 as PageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, AlertCircle, Inbox, FileCheck2 as PageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from 'sonner';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
@@ -19,29 +21,46 @@ import NominationTableRow from '@/components/admin/NominationTableRow';
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
 
-const fetchNominations = async (): Promise<NominationRow[]> => {
-  const { data, error } = await supabase
+const ITEMS_PER_PAGE = 10;
+
+interface FetchNominationsResult {
+  data: NominationRow[];
+  count: number | null;
+}
+
+const fetchNominations = async (page: number): Promise<FetchNominationsResult> => {
+  const from = (page - 1) * ITEMS_PER_PAGE;
+  const to = page * ITEMS_PER_PAGE - 1;
+
+  const { data, error, count } = await supabase
     .from('nominations')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('status', 'submitted')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (error) {
     console.error('Error fetching submitted nominations:', error);
     throw new Error(error.message);
   }
-  return data || [];
+  return { data: data || [], count };
 };
 
 const CompletedNominationsPage = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['submittedNominations'], 
-    queryFn: fetchNominations,
+  const { data: paginatedData, isLoading, error } = useQuery<FetchNominationsResult, Error>({
+    queryKey: ['submittedNominations', currentPage, ITEMS_PER_PAGE], 
+    queryFn: () => fetchNominations(currentPage),
+    keepPreviousData: true, // Useful for smoother pagination UX
   });
+
+  const nominations = paginatedData?.data ?? [];
+  const totalCount = paginatedData?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const updateStatusMutation = useMutation<
     NominationRow | null,
@@ -67,6 +86,8 @@ const CompletedNominationsPage = () => {
       queryClient.invalidateQueries({ queryKey: ['approvedNominations'] });
       queryClient.invalidateQueries({ queryKey: ['nominations'] });
       toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
+      // Potentially refetch current page or handle optimistic updates more gracefully
+      // For simplicity, we invalidate all, which will refetch the current page.
     },
     onError: (err) => {
       toast.error(`Failed to update status: ${err.message}`);
@@ -82,7 +103,20 @@ const CompletedNominationsPage = () => {
     setIsModalOpen(true);
   };
 
-  if (isLoading) {
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+
+  if (isLoading && !paginatedData?.data) { // Show loader only on initial load or if data is truly not there yet
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -101,7 +135,7 @@ const CompletedNominationsPage = () => {
     );
   }
 
-  if (!nominations || nominations.length === 0) {
+  if (totalCount === 0) {
     return (
       <div className="text-center py-10">
         <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -118,11 +152,11 @@ const CompletedNominationsPage = () => {
       </div>
       
       <p className="text-muted-foreground">
-        Review nominations that have the 'submitted' status and are awaiting approval or rejection.
+        Review nominations that have the 'submitted' status and are awaiting approval or rejection. Displaying {nominations.length} of {totalCount} nominations.
       </p>
       
       <Table>
-        <TableCaption>List of nominations with 'submitted' status</TableCaption>
+        <TableCaption>List of nominations with 'submitted' status. Page {currentPage} of {totalPages}.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Nomination ID</TableHead>
@@ -157,6 +191,33 @@ const CompletedNominationsPage = () => {
           ))}
         </TableBody>
       </Table>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1 || isLoading}
+          >
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
+          >
+            Next
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       <NominationDetailsModal
         nomination={selectedNomination}
         isOpen={isModalOpen}
@@ -167,3 +228,4 @@ const CompletedNominationsPage = () => {
 };
 
 export default CompletedNominationsPage;
+
