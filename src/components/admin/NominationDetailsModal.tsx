@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -21,6 +22,13 @@ import { getCountryNameByCode } from '@/lib/africanCountries';
 import { useNavigate } from 'react-router-dom';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
+
+// Define the props interface for NominationDetailsModal
+interface NominationDetailsModalProps {
+  nomination: NominationRow | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 // Define interfaces for the expected structure of each section's data
 // These allow for properties to be optional, as data might be incomplete.
