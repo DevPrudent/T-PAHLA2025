@@ -198,7 +198,7 @@ const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nominat
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         id="nomination-details-modal-content" 
-        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:block print:static print:inset-auto print:translate-x-0 print:translate-y-0 print:shadow-none print:border-none print:max-w-full print:w-full print:h-auto print:overflow-visible print:bg-white"
+        className="sm:max-w-2xl md:max-w-3xl dark:bg-gray-800 print:block print:static print:inset-auto print:translate-x-0 print:translate-y-0 print:shadow-none print:border-none print:max-w-full print:w-full print:h-auto print:overflow-visible print:bg-white print:p-0"
       >
         <DialogHeader className="print:hidden">
           <DialogTitle className="text-2xl font-serif text-tpahla-darkgreen dark:text-tpahla-gold">
