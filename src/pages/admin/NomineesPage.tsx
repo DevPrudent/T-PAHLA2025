@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, Loader2, AlertCircle, Inbox, Users as PageIcon, ChevronLeft, ChevronRight, Search as SearchIcon } from "lucide-react";
+import { Eye, Loader2, AlertCircle, Inbox, Users as PageIcon, ChevronLeft, ChevronRight, Search as SearchIcon, SortAsc, SortDesc } from "lucide-react";
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
@@ -27,12 +27,20 @@ type FormSectionAData = {
 
 const ITEMS_PER_PAGE = 10;
 
+// Define SortableColumn and SortConfig
+type SortableColumn = 'nominee_name' | 'submitted_at' | 'award_category_id';
+interface SortConfig {
+  key: SortableColumn;
+  direction: 'asc' | 'desc';
+}
+
 interface FetchApprovedNominationsResult {
   data: NominationRow[];
   count: number | null;
 }
 
-const fetchApprovedNominations = async (page: number, searchTerm: string): Promise<FetchApprovedNominationsResult> => {
+// Update fetchApprovedNominations to include sortConfig
+const fetchApprovedNominations = async (page: number, searchTerm: string, sortConfig: SortConfig): Promise<FetchApprovedNominationsResult> => {
   const from = (page - 1) * ITEMS_PER_PAGE;
   const to = page * ITEMS_PER_PAGE - 1;
 
@@ -40,7 +48,7 @@ const fetchApprovedNominations = async (page: number, searchTerm: string): Promi
     .from('nominations')
     .select('*', { count: 'exact' })
     .eq('status', 'approved')
-    .order('submitted_at', { ascending: false, nullsFirst: false })
+    .order(sortConfig.key, { ascending: sortConfig.direction === 'asc', nullsFirst: false }) // Use sortConfig
     .range(from, to);
 
   if (searchTerm) {
@@ -62,21 +70,24 @@ const NomineesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  // Add sortConfig state, default to submitted_at desc
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'submitted_at', direction: 'desc' });
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Reset to first page on new search
-    }, 500); // 500ms debounce
+      setCurrentPage(1); 
+    }, 500); 
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchTerm]);
 
+  // Update useQuery to include sortConfig
   const { data: paginatedData, isLoading, error, isPlaceholderData } = useQuery<FetchApprovedNominationsResult, Error>({
-    queryKey: ['approvedNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm],
-    queryFn: () => fetchApprovedNominations(currentPage, debouncedSearchTerm),
+    queryKey: ['approvedNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm, sortConfig.key, sortConfig.direction],
+    queryFn: () => fetchApprovedNominations(currentPage, debouncedSearchTerm, sortConfig),
     placeholderData: keepPreviousData,
   });
 
@@ -87,6 +98,16 @@ const NomineesPage = () => {
   const handleViewDetails = (nomination: NominationRow) => {
     setSelectedNomination(nomination);
     setIsModalOpen(true);
+  };
+
+  // Add handleSort function
+  const handleSort = (key: SortableColumn) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+    setCurrentPage(1); // Reset to first page on new sort
   };
 
   const handleNextPage = () => {
@@ -147,6 +168,16 @@ const NomineesPage = () => {
     );
   }
 
+  // Add renderSortIcon function
+  const renderSortIcon = (columnKey: SortableColumn) => {
+    if (sortConfig.key !== columnKey) {
+      return null; 
+    }
+    return sortConfig.direction === 'asc' 
+      ? <SortAsc className="inline ml-1 h-4 w-4" /> 
+      : <SortDesc className="inline ml-1 h-4 w-4" />;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -174,10 +205,25 @@ const NomineesPage = () => {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[150px]">Nomination ID</TableHead>
-            <TableHead>Nominee Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Category ID</TableHead>
-            <TableHead>Date Submitted</TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('nominee_name')}
+            >
+              Nominee Name {renderSortIcon('nominee_name')}
+            </TableHead>
+            <TableHead>Email</TableHead> {/* Email sorting not implemented due to nested data */}
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('award_category_id')}
+            >
+              Category ID {renderSortIcon('award_category_id')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('submitted_at')}
+            >
+              Date Submitted {renderSortIcon('submitted_at')}
+            </TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
