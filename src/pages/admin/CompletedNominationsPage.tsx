@@ -141,11 +141,14 @@ const CompletedNominationsPage = () => {
               nomination={nomination}
               onViewDetails={handleViewDetails}
               onUpdateStatus={handleUpdateStatus}
-              isProcessingAction={(action: 'approve' | 'reject') =>
-                updateStatusMutation.isPending &&
-                updateStatusMutation.variables?.nominationId === nomination.id &&
-                updateStatusMutation.variables?.status === action
-              }
+              isProcessingAction={(action: 'approve' | 'reject') => {
+                const targetStatus: NominationStatusEnum = action === 'approve' ? 'approved' : 'rejected';
+                return (
+                  updateStatusMutation.isPending &&
+                  updateStatusMutation.variables?.nominationId === nomination.id &&
+                  updateStatusMutation.variables?.status === targetStatus
+                );
+              }}
               isAnyActionProcessing={
                 updateStatusMutation.isPending &&
                 updateStatusMutation.variables?.nominationId === nomination.id
