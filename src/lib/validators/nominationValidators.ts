@@ -27,6 +27,18 @@ export const nominationStepBSchema = z.object({
 
 export type NominationStepBData = z.infer<typeof nominationStepBSchema>;
 
+export const nominationStepCSchema = z.object({
+  justification: z.string().min(1, "Justification is required.").max(2500, "Justification should be concise (approx. 400-500 words)."), // Max length as proxy for word count
+  notable_recognitions: z.string().optional(),
+  media_links: z.array(z.object({ value: z.string().url("Please enter a valid URL.").min(1, "Link cannot be empty.") })).optional(),
+  // Placeholder for file uploads - will be handled later
+  // cv_resume: z.any().optional(), 
+  // photos_media: z.any().optional(),
+  // other_documents: z.any().optional(),
+});
+
+export type NominationStepCData = z.infer<typeof nominationStepCSchema>;
+
 // Add other step schemas here as we build them
-// export const nominationStepCSchema = z.object({...});
-// export type NominationStepCData = z.infer<typeof nominationStepCSchema>;
+// export const nominationStepDSchema = z.object({...});
+// export type NominationStepDData = z.infer<typeof nominationStepDSchema>;

@@ -1,11 +1,12 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { NominationStepAData, NominationStepBData } from '@/lib/validators/nominationValidators';
+import { NominationStepAData, NominationStepBData, NominationStepCData } from '@/lib/validators/nominationValidators';
 // Import other step data types as they are created
 
 interface NominationData {
   sectionA?: NominationStepAData;
-  sectionB?: NominationStepBData; // This will now correctly use the imported type
-  // sectionC?: NominationStepCData;
+  sectionB?: NominationStepBData;
+  sectionC?: NominationStepCData;
+  // sectionD?: NominationStepDData;
   // ... other sections
 }
 
