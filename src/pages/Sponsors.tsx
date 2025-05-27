@@ -1,12 +1,13 @@
-
 // Navbar and Footer imports are removed
 import SponsorSection from "../components/home/SponsorSection";
 
 const Sponsors = () => {
+  const brochureUrl = "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents/TPAHLA%202025%20BROCHURE%2033";
+
   return (
     <>
-      {/* Page Header: Removed pt-24 as PublicLayout's main handles navbar spacing */}
-      <div className="pb-12 bg-tpahla-darkgreen text-white">
+      {/* Page Header: Adjusted pb-8 from pb-12 */}
+      <div className="pb-8 bg-tpahla-darkgreen text-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-serif font-bold mb-4">Sponsorship Opportunities</h1>
           <p className="text-lg max-w-3xl mx-auto">
@@ -17,8 +18,8 @@ const Sponsors = () => {
       
       {/* Content area will now inherit bg-background from PublicLayout */}
       <div>
-        {/* Sponsorship Overview */}
-        <section className="container mx-auto px-4 py-12 mb-16">
+        {/* Sponsorship Overview: Adjusted pt-8 from py-12 */}
+        <section className="container mx-auto px-4 pt-8 pb-12 mb-16">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-gold">Why Sponsor TPAHLA?</h2>
             <p className="text-tpahla-text-secondary">
@@ -92,7 +93,13 @@ const Sponsors = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <a href="#" className="inline-block bg-tpahla-gold text-tpahla-darkgreen font-medium py-2 px-6 rounded-md hover:bg-opacity-80 hover:text-tpahla-darkgreen transition-colors">
+                <a 
+                  href={brochureUrl} 
+                  download="TPAHLA_2025_Sponsorship_Brochure.pdf" // Suggests a filename to the browser
+                  target="_blank" // Opens in a new tab, good for PDFs
+                  rel="noopener noreferrer" // Security best practice for target="_blank"
+                  className="inline-block bg-tpahla-gold text-tpahla-darkgreen font-medium py-2 px-6 rounded-md hover:bg-opacity-80 hover:text-tpahla-darkgreen transition-colors"
+                >
                   Download Sponsorship Brochure
                 </a>
               </div>

@@ -1,4 +1,3 @@
-
 const SponsorSection = () => {
   const sponsorTiers = [
     {
@@ -59,6 +58,14 @@ const SponsorSection = () => {
         "1 branded social media post"
       ]
     }
+  ];
+
+  // Placeholder logos. Replace these with your actual logo URLs.
+  const strategicCollaboratorLogos = [
+    { src: "https://via.placeholder.com/150x80?text=Collaborator+1", alt: "Collaborator 1 Logo" },
+    { src: "https://via.placeholder.com/150x80?text=Collaborator+2", alt: "Collaborator 2 Logo" },
+    { src: "https://via.placeholder.com/150x80?text=Collaborator+3", alt: "Collaborator 3 Logo" },
+    { src: "https://via.placeholder.com/150x80?text=Collaborator+4", alt: "Collaborator 4 Logo" },
   ];
 
   return (
@@ -137,13 +144,20 @@ const SponsorSection = () => {
       </div>
       
       <div className="mt-16">
-        <h3 className="text-2xl font-serif font-bold text-center mb-8">Current Sponsors</h3>
-        <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-          <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center">Logo 1</div>
-          <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center">Logo 2</div>
-          <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center">Logo 3</div>
-          <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center">Logo 4</div>
+        <h3 className="text-2xl font-serif font-bold text-center mb-8">Strategic Collaborators</h3>
+        <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
+          {strategicCollaboratorLogos.map((logo, index) => (
+            <img 
+              key={index}
+              src={logo.src} 
+              alt={logo.alt} 
+              className="h-16 object-contain" // Adjust height and object-fit as needed
+            />
+          ))}
         </div>
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Replace these with actual logos of your strategic collaborators.
+        </p>
       </div>
     </section>
   );
