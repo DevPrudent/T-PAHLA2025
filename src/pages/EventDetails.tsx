@@ -1,7 +1,6 @@
-
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { CalendarDays, Info, MapPinIcon, Users } from "lucide-react";
+import { CalendarDays, Info, MapPinIcon, Users, Hotel } from "lucide-react";
 
 const EventDetails = () => {
   const schedule = [{
@@ -80,7 +79,7 @@ const EventDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {/* Navbar removed, handled by PublicLayout */}
       
       <div className="pt-24 pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
         <div className="container mx-auto px-4 text-center">
@@ -112,7 +111,7 @@ const EventDetails = () => {
                 </div>
               </div>
               <div>
-                <img alt="Abuja Continental Hotel" className="rounded-lg shadow-xl border-2 border-tpahla-gold/30" src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" />
+                <img alt="Abuja Continental Hotel Overview" className="rounded-lg shadow-xl border-2 border-tpahla-gold/30" src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" />
               </div>
             </div>
             
@@ -120,30 +119,37 @@ const EventDetails = () => {
               <h3 className="text-2xl font-serif font-bold mb-6 text-tpahla-gold flex items-center">
                 <MapPinIcon size={24} className="mr-3 text-tpahla-emerald" /> Venue Information
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                 <div>
-                  <h4 className="font-bold text-tpahla-text-primary mb-2">Abuja Continental Hotel</h4>
-                  <p className="text-tpahla-text-secondary mb-4 text-sm">
-                    Plot 701 Ahmadu Bello Way<br />
-                    Cadastral Zone, Central Business District<br />
-                    Abuja, FCT<br />
-                    Nigeria
-                  </p>
-                  <p className="text-tpahla-text-secondary mb-2 text-sm">
-                    <span className="font-medium text-tpahla-text-primary">Phone:</span> +234 708 060 3000
-                  </p>
-                  <p className="text-tpahla-text-secondary text-sm">
-                    <span className="font-medium text-tpahla-text-primary">Email:</span> reservations@abujacontiental.com
-                  </p>
+                  <img alt="Abuja Continental Hotel Venue" className="rounded-lg shadow-md w-full h-auto object-cover mb-6 md:mb-0" src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-tpahla-text-primary mb-2">Accommodations</h4>
-                  <p className="text-tpahla-text-secondary mb-4 text-sm">
-                    Special rates are available for TPAHLA attendees. Use code "TPAHLA2025" when booking. Rooms should be reserved by September 15, 2025 to ensure availability and special pricing.
-                  </p>
-                  <a href="#" className="btn-outline-gold inline-block text-sm">
-                    Book Accommodation
-                  </a>
+                  <div>
+                    <h4 className="font-bold text-tpahla-text-primary mb-2">Abuja Continental Hotel</h4>
+                    <p className="text-tpahla-text-secondary mb-4 text-sm">
+                      Plot 701 Ahmadu Bello Way<br />
+                      Cadastral Zone, Central Business District<br />
+                      Abuja, FCT<br />
+                      Nigeria
+                    </p>
+                    <p className="text-tpahla-text-secondary mb-2 text-sm">
+                      <span className="font-medium text-tpahla-text-primary">Phone:</span> +234 708 060 3000
+                    </p>
+                    <p className="text-tpahla-text-secondary text-sm">
+                      <span className="font-medium text-tpahla-text-primary">Email:</span> reservations@abujacontiental.com
+                    </p>
+                  </div>
+                  <div className="mt-6">
+                    <h4 className="font-bold text-tpahla-text-primary mb-2 flex items-center">
+                       <Hotel size={20} className="mr-2 text-tpahla-gold" /> Accommodations
+                    </h4>
+                    <p className="text-tpahla-text-secondary mb-4 text-sm">
+                      Special rates are available for TPAHLA attendees. Use code "TPAHLA2025" when booking. Rooms should be reserved by September 15, 2025 to ensure availability and special pricing.
+                    </p>
+                    <a href="#" className="btn-outline-gold inline-block text-sm">
+                      Book Accommodation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -177,6 +183,7 @@ const EventDetails = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-tpahla-neutral p-6 rounded-lg shadow-lg border border-tpahla-gold/10">
+                  <img src="/lovable-uploads/photo-1472396961693-142e6e269027.png" alt="Guided Abuja City Tour" className="w-full h-48 object-cover rounded-md mb-4 shadow-md"/>
                   <h4 className="font-bold text-tpahla-text-primary mb-2">Guided Abuja City Tour</h4>
                   <p className="text-tpahla-text-secondary mb-2 text-sm">
                     Experience the beauty and culture of Nigeria's capital city with a guided tour of key landmarks and cultural sites.
@@ -184,6 +191,7 @@ const EventDetails = () => {
                   <p className="text-xs text-tpahla-gold">Available: October 16 & 19, 2025 | Duration: 3 hours</p>
                 </div>
                 <div className="bg-tpahla-neutral p-6 rounded-lg shadow-lg border border-tpahla-gold/10">
+                  <img src="/lovable-uploads/photo-1500673922987-e212871fec22.png" alt="Networking Reception" className="w-full h-48 object-cover rounded-md mb-4 shadow-md"/>
                   <h4 className="font-bold text-tpahla-text-primary mb-2">Networking Reception</h4>
                   <p className="text-tpahla-text-secondary mb-2 text-sm">
                     Connect with humanitarian leaders, sponsors, and distinguished guests in a relaxed setting.
@@ -196,7 +204,7 @@ const EventDetails = () => {
         </section>
       </main>
       
-      <Footer />
+      {/* Footer removed, handled by PublicLayout */}
     </div>
   );
 };
