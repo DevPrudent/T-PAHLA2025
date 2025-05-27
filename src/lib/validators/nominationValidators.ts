@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const nominationStepASchema = z.object({
@@ -32,8 +31,14 @@ export const nominationStepCSchema = z.object({
   justification: z.string().min(1, "Justification is required.").max(2500, "Justification should be concise (approx. 400-500 words)."), // Max length as proxy for word count
   notable_recognitions: z.string().optional(),
   media_links: z.array(z.object({ value: z.string().url("Please enter a valid URL.").min(1, "Link cannot be empty.") })).optional(),
+  file_uploads: z.array(z.object({
+    file_name: z.string(),
+    file_url: z.string().url(),
+    file_size: z.number().optional(), // Make size optional as it might not always be present
+    file_type: z.string().optional(), // Add file_type if available
+  })).optional(),
   // Placeholder for file uploads - will be handled later
-  // cv_resume: z.any().optional(), 
+  // cv_resume: z.any().optional(),
   // photos_media: z.any().optional(),
   // other_documents: z.any().optional(),
 });
@@ -70,4 +75,3 @@ export const nominationStepESchema = z.object({
 });
 
 export type NominationStepEData = z.infer<typeof nominationStepESchema>;
-
