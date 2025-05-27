@@ -1,23 +1,24 @@
 import NotificationBanner from "../components/common/NotificationBanner"; // Import the new banner
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel"; // Import Carousel components
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"; // Import Carousel components
 
 const About = () => {
-  const collaborators = [
-    { name: "Collaborator 1", logo: "https://via.placeholder.com/150x80?text=Logo+1" },
-    { name: "Collaborator 2", logo: "https://via.placeholder.com/150x80?text=Logo+2" },
-    { name: "Collaborator 3", logo: "https://via.placeholder.com/150x80?text=Logo+3" },
-    { name: "Collaborator 4", logo: "https://via.placeholder.com/150x80?text=Logo+4" },
-    { name: "Collaborator 5", logo: "https://via.placeholder.com/150x80?text=Logo+5" },
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const collaborators = [{
+    name: "Collaborator 1",
+    logo: "https://via.placeholder.com/150x80?text=Logo+1"
+  }, {
+    name: "Collaborator 2",
+    logo: "https://via.placeholder.com/150x80?text=Logo+2"
+  }, {
+    name: "Collaborator 3",
+    logo: "https://via.placeholder.com/150x80?text=Logo+3"
+  }, {
+    name: "Collaborator 4",
+    logo: "https://via.placeholder.com/150x80?text=Logo+4"
+  }, {
+    name: "Collaborator 5",
+    logo: "https://via.placeholder.com/150x80?text=Logo+5"
+  }];
+  return <div className="min-h-screen bg-background">
       {/* Navbar and Footer are removed as they are handled by PublicLayout */}
       
       {/* Page Header */}
@@ -144,7 +145,7 @@ const About = () => {
             <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
               <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
                  {/* Placeholder for logo, you can replace src with actual logo path */}
-                <img alt="Third Organizer Logo" className="h-32 object-contain" src="https://via.placeholder.com/200x100?text=Org+Logo+3" />
+                <img alt="Third Organizer Logo" className="h-32 object-contain" src="/lovable-uploads/21c9e800-6f9a-41fb-bbd9-085e95469934.png" />
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Our Valued Partner</h3>
@@ -160,24 +161,19 @@ const About = () => {
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-gold">Strategic Collaborators</h2>
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full max-w-4xl mx-auto"
-            >
+            <Carousel opts={{
+            align: "start",
+            loop: true
+          }} className="w-full max-w-4xl mx-auto">
               <CarouselContent>
-                {collaborators.map((collaborator, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                {collaborators.map((collaborator, index) => <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                     <div className="p-1">
                       <div className="bg-tpahla-neutral p-6 rounded-lg shadow-md border border-tpahla-gold/20 flex flex-col items-center justify-center h-40">
-                        <img src={collaborator.logo} alt={collaborator.name} className="max-h-20 object-contain"/>
+                        <img src={collaborator.logo} alt={collaborator.name} className="max-h-20 object-contain" />
                         <p className="mt-2 text-sm text-tpahla-text-secondary">{collaborator.name}</p>
                       </div>
                     </div>
-                  </CarouselItem>
-                ))}
+                  </CarouselItem>)}
               </CarouselContent>
               <CarouselPrevious className="text-tpahla-gold hover:bg-tpahla-gold/10 border-tpahla-gold" />
               <CarouselNext className="text-tpahla-gold hover:bg-tpahla-gold/10 border-tpahla-gold" />
@@ -187,7 +183,6 @@ const About = () => {
       </main>
       
       {/* Footer is removed as it's handled by PublicLayout */}
-    </div>
-  );
+    </div>;
 };
 export default About;
