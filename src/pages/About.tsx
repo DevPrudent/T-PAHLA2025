@@ -1,12 +1,24 @@
-
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
 import NotificationBanner from "../components/common/NotificationBanner"; // Import the new banner
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel"; // Import Carousel components
 
 const About = () => {
+  const collaborators = [
+    { name: "Collaborator 1", logo: "https://via.placeholder.com/150x80?text=Logo+1" },
+    { name: "Collaborator 2", logo: "https://via.placeholder.com/150x80?text=Logo+2" },
+    { name: "Collaborator 3", logo: "https://via.placeholder.com/150x80?text=Logo+3" },
+    { name: "Collaborator 4", logo: "https://via.placeholder.com/150x80?text=Logo+4" },
+    { name: "Collaborator 5", logo: "https://via.placeholder.com/150x80?text=Logo+5" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {/* Navbar and Footer are removed as they are handled by PublicLayout */}
       
       {/* Page Header */}
       <div className="pt-24 pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
@@ -58,7 +70,6 @@ const About = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {/* ... Vision cards - update styling for dark theme ... */}
               <div className="bg-background p-6 rounded-lg shadow-md border border-tpahla-gold/20">
                 <div className="w-16 h-16 bg-tpahla-emerald rounded-full flex items-center justify-center mb-4 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +113,7 @@ const About = () => {
         <section className="container mx-auto px-4 py-16">
           <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-gold">The Organizers</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"> {/* Changed to lg:grid-cols-3 */}
             <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
               <a href="https://ihsd-ng.org/" target="_blank" rel="noopener noreferrer" className="block hover:opacity-90 transition-opacity">
                 <div className="h-48 bg-tpahla-darkgreen flex items-center justify-center p-4">
@@ -118,8 +129,7 @@ const About = () => {
             </div>
             
             <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
-              {/* Hempawa Consult - Add link if available, for now just styled */}
-              <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen"> {/* Changed red-900 to darkgreen */}
+              <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
                 <img alt="Hempawa Consult Logo" className="h-32 object-contain" src="/lovable-uploads/c8a15bae-860c-4927-9901-dfe7459b6a8e.png" />
               </div>
               <div className="p-6">
@@ -129,11 +139,54 @@ const About = () => {
                 </p>
               </div>
             </div>
+
+            {/* New Third Organizer Card */}
+            <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
+              <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
+                 {/* Placeholder for logo, you can replace src with actual logo path */}
+                <img alt="Third Organizer Logo" className="h-32 object-contain" src="https://via.placeholder.com/200x100?text=Org+Logo+3" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Our Valued Partner</h3>
+                <p className="text-tpahla-text-secondary">
+                  This esteemed organization plays a crucial role in the success of TPAHLA, bringing unique expertise and resources. Their commitment to humanitarian efforts aligns perfectly with our mission to celebrate and foster leadership for a better Africa.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Strategic Collaborators Section */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-gold">Strategic Collaborators</h2>
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full max-w-4xl mx-auto"
+            >
+              <CarouselContent>
+                {collaborators.map((collaborator, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <div className="bg-tpahla-neutral p-6 rounded-lg shadow-md border border-tpahla-gold/20 flex flex-col items-center justify-center h-40">
+                        <img src={collaborator.logo} alt={collaborator.name} className="max-h-20 object-contain"/>
+                        <p className="mt-2 text-sm text-tpahla-text-secondary">{collaborator.name}</p>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="text-tpahla-gold hover:bg-tpahla-gold/10 border-tpahla-gold" />
+              <CarouselNext className="text-tpahla-gold hover:bg-tpahla-gold/10 border-tpahla-gold" />
+            </Carousel>
           </div>
         </section>
       </main>
       
-      <Footer />
+      {/* Footer is removed as it's handled by PublicLayout */}
     </div>
   );
 };
