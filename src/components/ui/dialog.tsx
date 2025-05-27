@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
@@ -37,7 +38,7 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        "print:fixed print:inset-0 print:left-0 print:top-0 print:w-full print:max-w-none print:translate-x-0 print:translate-y-0 print:border-none print:shadow-none print:p-4 print:m-0 print:bg-white dark:print:bg-gray-900 print:overflow-auto",
+        "print:fixed print:inset-0 print:left-0 print:top-0 print:w-full print:max-w-none print:translate-x-0 print:translate-y-0 print:border-none print:shadow-none print:p-4 print:m-0 print:bg-white dark:print:bg-gray-900 print:overflow-visible print:h-auto", // Changed print:overflow-auto to print:overflow-visible and added print:h-auto
         className
       )}
       {...props}

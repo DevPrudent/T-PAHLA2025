@@ -19,7 +19,7 @@ import {
   NominationStepDData, 
   NominationStepEData 
 } from '@/lib/validators/nominationValidators';
-import { Printer } from 'lucide-react';
+import { Printer, Loader2 } from 'lucide-react';
 
 import NominationGeneralDetails from './modal_parts/NominationGeneralDetails';
 import NominationSectionA from './modal_parts/NominationSectionA';
@@ -27,8 +27,11 @@ import NominationSectionB from './modal_parts/NominationSectionB';
 import NominationSectionC from './modal_parts/NominationSectionC';
 import NominationSectionD from './modal_parts/NominationSectionD';
 import NominationSectionE from './modal_parts/NominationSectionE';
+import { useNominationDocuments } from '@/hooks/useNominationDocuments'; // New Import
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
+type NominationDocument = Database['public']['Tables']['nomination_documents']['Row'];
+
 
 interface NominationDetailsModalProps {
   nomination: NominationRow | null;
@@ -37,6 +40,12 @@ interface NominationDetailsModalProps {
 }
 
 export const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ nomination, isOpen, onClose }) => {
+  const { 
+    data: uploadedDocuments, 
+    isLoading: isLoadingDocuments, 
+    error: documentsError 
+  } = useNominationDocuments(nomination?.id);
+
   if (!nomination) return null;
 
   const sectionA = nomination.form_section_a as NominationStepAData | null;
@@ -67,6 +76,9 @@ export const NominationDetailsModal: React.FC<NominationDetailsModalProps> = ({ 
             sectionC={sectionC} 
             summaryOfAchievement={nomination.summary_of_achievement} 
             formSectionCNotes={nomination.form_section_c_notes}
+            uploadedDocuments={uploadedDocuments || []} // Pass fetched documents
+            isLoadingDocuments={isLoadingDocuments} // Pass loading state
+            documentsError={documentsError} // Pass error state
           />
           <NominationSectionD sectionD={sectionD} />
           <NominationSectionE sectionE={sectionE} />
