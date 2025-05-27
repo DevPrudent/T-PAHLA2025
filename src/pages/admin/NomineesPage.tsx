@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+
+import React from 'react'; // Ensure React is imported if not using Next.js pages structure explicitly
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
@@ -13,120 +14,80 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Eye, Loader2, AlertCircle, Inbox, Users as PageIcon, ChevronLeft, ChevronRight, Search as SearchIcon, SortAsc, SortDesc } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox } from "lucide-react";
+import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import NominationDetailsModal from '@/components/admin/NominationDetailsModal';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'; // Added AlertDescription
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
+type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
 
+// Helper type for form_section_a for easier access
 type FormSectionAData = {
   nominee_email?: string;
+  // Add other fields from section A if needed for display, e.g., nominee_full_name
+  // This example focuses on email as per current table structure.
+  // The top-level `nominee_name` is used for the name column.
 };
 
-const ITEMS_PER_PAGE = 10;
-
-// Define SortableColumn and SortConfig
-type SortableColumn = 'id' | 'nominee_name' | 'submitted_at' | 'award_category_id'; // Added 'id'
-interface SortConfig {
-  key: SortableColumn;
-  direction: 'asc' | 'desc';
-}
-
-interface FetchApprovedNominationsResult {
-  data: NominationRow[];
-  count: number | null;
-}
-
-// Update fetchApprovedNominations to include sortConfig
-const fetchApprovedNominations = async (page: number, searchTerm: string, sortConfig: SortConfig): Promise<FetchApprovedNominationsResult> => {
-  const from = (page - 1) * ITEMS_PER_PAGE;
-  const to = page * ITEMS_PER_PAGE - 1;
-
-  let query = supabase
+const fetchNominations = async (): Promise<NominationRow[]> => {
+  const { data, error } = await supabase
     .from('nominations')
-    .select('*', { count: 'exact' })
-    .eq('status', 'approved')
-    .order(sortConfig.key, { ascending: sortConfig.direction === 'asc', nullsFirst: false }) // Use sortConfig
-    .range(from, to);
-
-  if (searchTerm) {
-    query = query.ilike('nominee_name', `%${searchTerm}%`);
-  }
-  
-  const { data, error, count } = await query;
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching approved nominations:', error);
+    console.error('Error fetching nominations:', error);
     throw new Error(error.message);
   }
-  return { data: data || [], count };
+  return data || [];
 };
 
 const NomineesPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  // Add sortConfig state, default to submitted_at desc
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'submitted_at', direction: 'desc' });
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); 
-    }, 500); 
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
-
-  // Update useQuery to include sortConfig
-  const { data: paginatedData, isLoading, error, isPlaceholderData } = useQuery<FetchApprovedNominationsResult, Error>({
-    queryKey: ['approvedNominations', currentPage, ITEMS_PER_PAGE, debouncedSearchTerm, sortConfig.key, sortConfig.direction],
-    queryFn: () => fetchApprovedNominations(currentPage, debouncedSearchTerm, sortConfig),
-    placeholderData: keepPreviousData,
+  const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
+    queryKey: ['nominations'],
+    queryFn: fetchNominations,
   });
 
-  const nominations = paginatedData?.data ?? [];
-  const totalCount = paginatedData?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const updateStatusMutation = useMutation<
+    NominationRow | null, // Supabase returns the updated row or null
+    Error,
+    { nominationId: string; status: NominationStatusEnum }
+  >({
+    mutationFn: async ({ nominationId, status }) => {
+      const { data, error: updateError } = await supabase
+        .from('nominations')
+        .update({ status: status, updated_at: new Date().toISOString() })
+        .eq('id', nominationId)
+        .select()
+        .single(); // Assuming we want the updated row back
 
-  const handleViewDetails = (nomination: NominationRow) => {
-    setSelectedNomination(nomination);
-    setIsModalOpen(true);
+      if (updateError) {
+        console.error('Error updating nomination status:', updateError);
+        throw updateError;
+      }
+      return data;
+    },
+    onSuccess: (updatedNomination) => {
+      queryClient.invalidateQueries({ queryKey: ['nominations'] });
+      toast.success(`Nomination ${updatedNomination ? updatedNomination.nominee_name : ''} status updated to ${updatedNomination?.status}!`);
+    },
+    onError: (err) => {
+      toast.error(`Failed to update status: ${err.message}`);
+    },
+  });
+
+  const handleUpdateStatus = (nominationId: string, status: NominationStatusEnum) => {
+    updateStatusMutation.mutate({ nominationId, status });
   };
 
-  // Add handleSort function
-  const handleSort = (key: SortableColumn) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-    setCurrentPage(1); // Reset to first page on new sort
-  };
-
-  const handleNextPage = () => {
-    if (!isPlaceholderData && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  if (isLoading && paginatedData === undefined && !isPlaceholderData) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-2">Loading approved nominations...</p>
+        <p className="ml-2">Loading nominations...</p>
       </div>
     );
   }
@@ -135,100 +96,48 @@ const NomineesPage = () => {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Loading Approved Nominations</AlertTitle>
+        <AlertTitle>Error Loading Nominations</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
   }
-  
-  if (totalCount === 0 && !isLoading) {
+
+  if (!nominations || nominations.length === 0) {
     return (
-      <div className="space-y-6">
-         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-green-600" />Approved Nominations</h1>
-          <div className="relative w-full max-w-sm">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by Nominee Name..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="text-center py-10">
-          <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-          <p className="mt-4 text-muted-foreground">
-            {debouncedSearchTerm ? `No approved nominations found for "${debouncedSearchTerm}".` : "No approved nominations found."}
-          </p>
-          {!debouncedSearchTerm && <p className="text-sm text-muted-foreground">Nominations with 'approved' status will appear here.</p>}
-        </div>
+      <div className="text-center py-10">
+        <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
+        <p className="mt-4 text-muted-foreground">No nominations found yet.</p>
+        <p className="text-sm text-muted-foreground">Once nominations are submitted, they will appear here.</p>
       </div>
     );
   }
 
-  // Add renderSortIcon function
-  const renderSortIcon = (columnKey: SortableColumn) => {
-    if (sortConfig.key !== columnKey) {
-      return null; 
-    }
-    return sortConfig.direction === 'asc' 
-      ? <SortAsc className="inline ml-1 h-4 w-4" /> 
-      : <SortDesc className="inline ml-1 h-4 w-4" />;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold flex items-center"><PageIcon className="mr-2 h-8 w-8 text-green-600" />Approved Nominations</h1>
-        <div className="relative w-full max-w-sm">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by Nominee Name..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <h1 className="text-3xl font-bold">Manage Nominees</h1>
+        <div className="space-x-2">
+          {/* Filter and Bulk Actions buttons can be implemented later */}
+          <Button variant="outline" disabled>Filter</Button>
+          <Button variant="secondary" disabled>Bulk Actions</Button>
         </div>
       </div>
       
       <p className="text-muted-foreground">
-        Review all nominations that have been marked as 'approved'. 
-        {totalCount > 0 ? ` Displaying ${nominations.length} of ${totalCount} nominations.` : ""}
-        {debouncedSearchTerm && ` (Filtered by "${debouncedSearchTerm}")`}
+        Review and manage all nominees. You can view entries, approve/reject nominees.
       </p>
       
       <Table>
-        <TableCaption>List of approved nominations. Page {currentPage} of {totalPages}.</TableCaption>
+        <TableCaption>List of all submitted nominations</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead 
-              className="w-[150px] cursor-pointer hover:bg-muted/80"
-              onClick={() => handleSort('id')}
-            >
-              Nomination ID {renderSortIcon('id')}
+            <TableHead className="w-[50px]">
+              <input type="checkbox" className="rounded" aria-label="Select all nominees" />
             </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/80"
-              onClick={() => handleSort('nominee_name')}
-            >
-              Nominee Name {renderSortIcon('nominee_name')}
-            </TableHead>
-            <TableHead>Email</TableHead> 
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/80"
-              onClick={() => handleSort('award_category_id')}
-            >
-              Category ID {renderSortIcon('award_category_id')}
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-muted/80"
-              onClick={() => handleSort('submitted_at')}
-            >
-              Date Submitted {renderSortIcon('submitted_at')}
-            </TableHead>
+            <TableHead>Nominee Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Category ID</TableHead>
+            <TableHead>Date Submitted</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -241,21 +150,52 @@ const NomineesPage = () => {
 
             return (
               <TableRow key={nomination.id}>
-                <TableCell className="font-mono text-xs truncate max-w-[150px]">{nomination.id}</TableCell>
+                <TableCell>
+                  <input type="checkbox" className="rounded" aria-label={`Select nominee ${nomination.nominee_name}`} />
+                </TableCell>
                 <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
                 <TableCell>{nomineeEmail}</TableCell>
                 <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>
                 <TableCell>{submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'}</TableCell>
                 <TableCell>
-                  <Badge variant="success">
-                    {nomination.status}
+                  <Badge variant={
+                    nomination.status === "approved" ? "success" : 
+                    nomination.status === "rejected" ? "destructive" :
+                    nomination.status === "submitted" ? "default" : // "submitted" often default
+                    "outline" // for "draft", "incomplete"
+                  }>
+                    {nomination.status || 'N/A'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
+                    <Button size="sm" variant="ghost" onClick={() => alert(`View details for ${nomination.nominee_name} (ID: ${nomination.id}) - to be implemented`)}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
+                    {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-green-600 hover:text-green-700"
+                          onClick={() => handleUpdateStatus(nomination.id, 'approved')}
+                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+                        >
+                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
+                           Approve
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
+                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+                        >
+                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
+                           Reject
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -263,38 +203,9 @@ const NomineesPage = () => {
           })}
         </TableBody>
       </Table>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1 || isLoading || isPlaceholderData}
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages || isLoading || isPlaceholderData}
-          >
-            Next
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      <NominationDetailsModal
-        nomination={selectedNomination}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 };
 
 export default NomineesPage;
+

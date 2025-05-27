@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -30,35 +30,13 @@ const NominationStepE = () => {
   const form = useForm<NominationStepEData>({
     resolver: zodResolver(nominationStepESchema),
     defaultValues: {
-      confirm_accuracy: false,
-      confirm_nominee_contact: false,
-      confirm_data_use: false,
-      nominator_signature: '',
-      date_signed: new Date(),
-      ...(nominationData.sectionE && { // Spread existing data if available
-        ...nominationData.sectionE,
-        date_signed: nominationData.sectionE.date_signed ? new Date(nominationData.sectionE.date_signed) : new Date(),
-      }),
+      confirm_accuracy: nominationData.sectionE?.confirm_accuracy || false,
+      confirm_nominee_contact: nominationData.sectionE?.confirm_nominee_contact || false,
+      confirm_data_use: nominationData.sectionE?.confirm_data_use || false,
+      nominator_signature: nominationData.sectionE?.nominator_signature || '',
+      date_signed: nominationData.sectionE?.date_signed ? new Date(nominationData.sectionE.date_signed) : new Date(),
     },
   });
-
-  useEffect(() => {
-    if (nominationData.sectionE) {
-      form.reset({
-        ...nominationData.sectionE,
-        date_signed: nominationData.sectionE.date_signed ? new Date(nominationData.sectionE.date_signed) : new Date(),
-      });
-    } else {
-      // Reset to initial empty state if sectionE is not available (e.g. new nomination)
-      form.reset({
-        confirm_accuracy: false,
-        confirm_nominee_contact: false,
-        confirm_data_use: false,
-        nominator_signature: '',
-        date_signed: new Date(),
-      });
-    }
-  }, [nominationData.sectionE, form]);
 
   const onSubmit = async (data: NominationStepEData) => {
     setIsSubmittingNomination(true);
@@ -101,10 +79,12 @@ const NominationStepE = () => {
         const nomineeName = fullNominationDataForSubmission.sectionA?.nominee_full_name || fullNominationDataForSubmission.sectionA?.nominee_organization || 'The Nominee';
         
         if (!nominatorEmail || !nominatorName || !nomineeName) {
+          // Log details if any crucial info is missing, but still attempt if some are present.
+          // The edge function itself will also validate.
           console.warn("Potentially missing nominator/nominee details for email. Proceeding with available info.", {
             nominatorEmail, nominatorName, nomineeName
           });
-          if (!nominatorEmail) { 
+          if (!nominatorEmail) { // Nominator email is critical
              throw new Error("Nominator email is missing for email notification.");
           }
         }
@@ -114,7 +94,7 @@ const NominationStepE = () => {
           nominatorName,
           nomineeName,
           nominationId,
-          siteUrl: window.location.origin, 
+          siteUrl: window.location.origin,
         });
         
         const { data: emailData, error: emailError } = await supabase.functions.invoke('send-nomination-email', {
@@ -123,7 +103,7 @@ const NominationStepE = () => {
             nominatorName,
             nomineeName,
             nominationId,
-            siteUrl: window.location.origin, 
+            siteUrl: window.location.origin, // Or a more specific URL to your awards page
           },
         });
 
@@ -153,6 +133,7 @@ const NominationStepE = () => {
       console.error('Supabase final submission error:', error);
     } finally {
       setIsSubmittingNomination(false);
+      // The component will re-render and show the "Submitted" state due to updated nominationData.sectionE
     }
   };
   
@@ -315,21 +296,21 @@ const NominationStepE = () => {
         />
 
         <div className="flex justify-between items-center pt-4">
-          <Button type="button" variant="tpahla-outline" onClick={() => setCurrentStep(4)} className="px-6" disabled={isSubmittingNomination || form.formState.isSubmitting}>
+          <Button type="button" variant="tpahla-outline" onClick={() => setCurrentStep(4)} className="px-6" disabled={isSubmittingNomination}>
             Back
           </Button>
           <Button 
             type="submit" 
             variant="tpahla-primary" 
-            disabled={isSubmittingNomination || form.formState.isSubmitting} 
+            disabled={isSubmittingNomination} 
             className="px-8 min-w-[150px]"
           >
-            {isSubmittingNomination || form.formState.isSubmitting ? (
+            {isSubmittingNomination ? (
               <Loader2 className="animate-spin mr-2" /> 
             ) : (
               <Send className="mr-2" />
             )}
-            {isSubmittingNomination || form.formState.isSubmitting ? 'Submitting...' : 'Submit Nomination'}
+            {isSubmittingNomination ? 'Submitting...' : 'Submit Nomination'}
           </Button>
         </div>
       </form>
@@ -338,3 +319,4 @@ const NominationStepE = () => {
 };
 
 export default NominationStepE;
+

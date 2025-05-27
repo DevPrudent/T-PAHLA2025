@@ -1,10 +1,9 @@
-import React, { useState } from "react"; // Added React import here
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-// import { useState } from "react"; // This was duplicated, removed. React is imported above.
+import { useState } from "react";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -31,11 +30,8 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
-import MessagesPage from "./pages/admin/MessagesPage";
-import NominationFormPage from "./pages/NominationFormPage";
-import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
-import IncompleteNominationsPage from "./pages/admin/IncompleteNominationsPage";
-import AdminNominationDetailPage from "./pages/admin/AdminNominationDetailPage"; // Added import
+import MessagesPage from "./pages/admin/MessagesPage"; // Import the new MessagesPage
+import NominationFormPage from "./pages/NominationFormPage"; // Import the new NominationFormPage
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -65,8 +61,7 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/awards" element={<Awards />} />
                 <Route path="/nominations" element={<Nominations />} />
-                <Route path="/nomination-form" element={<NominationFormPage />} />
-                <Route path="/nominate/edit/:nominationId" element={<NominationFormPage />} />
+                <Route path="/nomination-form" element={<NominationFormPage />} /> {/* New route */}
                 <Route path="/event" element={<EventDetails />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
@@ -79,12 +74,8 @@ const App = () => {
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
                 <Route path="nominees" element={<NomineesPage />} />
-                <Route path="nominations/completed" element={<CompletedNominationsPage />} />
-                <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
-                {/* New Route for detailed nomination view */}
-                <Route path="nominations/view/:nominationId" element={<AdminNominationDetailPage />} /> 
                 <Route path="transactions" element={<TransactionsPage />} />
-                <Route path="messages" element={<MessagesPage />} />
+                <Route path="messages" element={<MessagesPage />} /> {/* Add route for MessagesPage */}
               </Route>
 
               <Route path="*" element={<NotFound />} />

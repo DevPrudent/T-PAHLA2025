@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from "date-fns";
@@ -45,12 +46,6 @@ const NominationStepA = () => {
     },
   });
 
-  useEffect(() => {
-    if (nominationData.sectionA) {
-      form.reset(nominationData.sectionA);
-    }
-  }, [nominationData.sectionA, form]);
-
   const onSubmit = async (data: NominationStepAData) => {
     updateSectionData('sectionA', data);
     console.log("Section A Data to save:", data);
@@ -61,16 +56,14 @@ const NominationStepA = () => {
       const nominationPayload: Partial<NominationInsert> = {
         form_section_a: data as any, 
         user_id: user?.id,
-        // status: 'draft', // Status should only be set to draft on creation, not every update
+        status: 'draft',
         nominee_name: data.nominee_full_name,
       };
 
       if (currentNominationId) {
-        // Add updated_at timestamp
-        const updatePayload = { ...nominationPayload, updated_at: new Date().toISOString() };
         const { error } = await supabase
           .from('nominations')
-          .update(updatePayload)
+          .update(nominationPayload)
           .eq('id', currentNominationId);
         if (error) throw error;
         toast.success('Section A updated!');
@@ -79,7 +72,7 @@ const NominationStepA = () => {
             nominee_name: data.nominee_full_name,
             form_section_a: data as any,
             user_id: user?.id,
-            status: 'draft', // Set status to 'draft' only on initial creation
+            status: 'draft',
         };
         const { data: newNomination, error } = await supabase
           .from('nominations')
@@ -127,8 +120,7 @@ const NominationStepA = () => {
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  // defaultValue={field.value} // Let React Hook Form manage value/defaultValue through form.reset
-                  value={field.value || ""} // Control the component with field.value
+                  defaultValue={field.value}
                   className="flex flex-col space-y-1 md:flex-row md:space-x-4 md:space-y-0"
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
@@ -173,7 +165,7 @@ const NominationStepA = () => {
                       )}
                     >
                       {field.value ? (
-                        format(new Date(field.value), "PPP") 
+                        format(new Date(field.value), "PPP") // Using new Date() in case field.value is just YYYY-MM-DD string
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -205,11 +197,7 @@ const NominationStepA = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>4. Nationality *</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value} // Controlled component
-                // defaultValue={field.value} // Let RHF manage default through form.reset
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white">
                     <SelectValue placeholder="Select nationality" />
@@ -234,11 +222,7 @@ const NominationStepA = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>5. Country of Residence *</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value} // Controlled component
-                // defaultValue={field.value} // Let RHF manage default through form.reset
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white">
                     <SelectValue placeholder="Select country of residence" />
@@ -331,8 +315,8 @@ const NominationStepA = () => {
            <Button type="button" variant="tpahla-outline" size="lg" onClick={() => setCurrentStep(1)} disabled={true} className="opacity-0 pointer-events-none">
             Previous
           </Button>
-          <Button type="submit" variant="tpahla-primary" size="lg" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving...' : 'Save & Next'}
+          <Button type="submit" variant="tpahla-primary" size="lg">
+            Save & Next
           </Button>
         </div>
       </form>
