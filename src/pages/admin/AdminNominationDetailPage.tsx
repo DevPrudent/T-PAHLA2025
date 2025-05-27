@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +10,7 @@ import SectionCDisplay from '@/components/admin/displays/SectionCDisplay';
 import SectionDDisplay from '@/components/admin/displays/SectionDDisplay';
 import SectionEDisplay from '@/components/admin/displays/SectionEDisplay';
 import { Button } from '@/components/ui/button';
-import { Save, Tag, MessageSquare } from 'lucide-react'; // For bottom utilities
+import { Save, Tag, MessageSquare, CheckCircle } from 'lucide-react'; // For bottom utilities
 import { Textarea } from '@/components/ui/textarea'; // For internal note
 import { Input } from '@/components/ui/input'; // For tags
 import { toast } from 'sonner';
