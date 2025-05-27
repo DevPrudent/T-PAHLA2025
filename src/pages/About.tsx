@@ -148,10 +148,8 @@ const About = () => {
                 <img alt="Third Organizer Logo" className="h-32 object-contain" src="/lovable-uploads/21c9e800-6f9a-41fb-bbd9-085e95469934.png" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">Our Valued Partner</h3>
-                <p className="text-tpahla-text-secondary">
-                  This esteemed organization plays a crucial role in the success of TPAHLA, bringing unique expertise and resources. Their commitment to humanitarian efforts aligns perfectly with our mission to celebrate and foster leadership for a better Africa.
-                </p>
+                <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">African Refugee Foundation (AREF)</h3>
+                <p className="text-tpahla-text-secondary">AREF stands as a pioneering Pan-African organization committed to the protection, empowerment, and dignified resettlement of refugees, internally displaced persons (IDPs), and other vulnerable populations across the continent. Established as a beacon of advocacy and innovation, AREF has spent over two decades at the forefront of humanitarian intervention, policy influence, and community resilience-building in Africa.</p>
               </div>
             </div>
           </div>
