@@ -1,13 +1,9 @@
-
 import React from 'react';
 import DetailItemDisplay from '@/components/admin/DetailItemDisplay';
-import { getCountryNameByCode } from '@/lib/africanCountries'; // Assuming this utility exists
+import { getCountryNameByCode } from '@/lib/africanCountries';
 import { format, parseISO, isValid } from 'date-fns';
-import { Mail, Phone, Linkedin, /* X / Twitter icon */ Instagram } from 'lucide-react'; // Need to ensure X is available or use a placeholder
-// import { Twitter as XIcon } from 'lucide-react'; // If 'X' is not directly available
+import { Mail, Phone, Linkedin, Instagram, Twitter as XIcon } from 'lucide-react';
 
-// Assuming SectionAData structure from NominationDetailsModal or similar
-// For simplicity, using 'any' for now, but should be typed properly with NominationStepAData
 interface SectionAData {
   nominee_full_name?: string;
   nominee_gender?: string;
@@ -30,33 +26,43 @@ interface SectionADisplayProps {
 const renderSocialMedia = (socialMediaString?: string) => {
   if (!socialMediaString) return <DetailItemDisplay label="Social Media" value="N/A" fullWidth />;
 
-  // This is a simplified parser. Real-world might need more robust logic
-  // or the data should be stored in a structured format.
-  const links = socialMediaString.split(',').map(link => link.trim()).filter(link => link);
+  const links = socialMediaString.split(',').map(link => link.trim()).filter(link => link.toLowerCase() !== 'n/a' && link.toLowerCase() !== 'na' && link);
   
+  if (links.length === 0) {
+    return <DetailItemDisplay label="Social Media" value="N/A" fullWidth />;
+  }
+
   return (
     <DetailItemDisplay 
-      label="Social Media" 
+      label="Social Media Links" 
       value={
-        links.length > 0 ? (
-          <ul className="space-y-1">
-            {links.map((link, index) => {
-              let IconComponent;
-              if (link.toLowerCase().includes('linkedin')) IconComponent = Linkedin;
-              // else if (link.toLowerCase().includes('twitter') || link.toLowerCase().includes('x.com')) IconComponent = XIcon; // Or your X icon
-              else if (link.toLowerCase().includes('instagram')) IconComponent = Instagram;
-              
-              return (
-                <li key={index} className="flex items-center">
-                  {IconComponent && <IconComponent size={16} className="mr-2 text-gray-500" />}
-                  <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                    {link}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        ) : "N/A"
+        <ul className="space-y-1">
+          {links.map((link, index) => {
+            let IconComponent;
+            const lowerLink = link.toLowerCase();
+            if (lowerLink.includes('linkedin.com')) IconComponent = Linkedin;
+            else if (lowerLink.includes('instagram.com')) IconComponent = Instagram;
+            else if (lowerLink.includes('twitter.com') || lowerLink.includes('x.com')) IconComponent = XIcon;
+            
+            const displayLink = link.length > 40 ? `${link.substring(0, 37)}...` : link;
+
+            return (
+              <li key={index} className="flex items-center space-x-2">
+                {IconComponent && <IconComponent size={16} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />}
+                {!IconComponent && <div className="w-4 h-4 flex-shrink-0"></div>} {/* Placeholder for alignment */}
+                <a 
+                  href={link.startsWith('http') ? link : `https://${link}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                  title={link}
+                >
+                  {displayLink}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
       }
       fullWidth 
     />
@@ -70,27 +76,31 @@ const SectionADisplay: React.FC<SectionADisplayProps> = ({ data }) => {
   const dob = data.nominee_dob ? parseISO(data.nominee_dob) : null;
   const formattedDob = dob && isValid(dob) ? format(dob, 'PPP') : data.nominee_dob || 'N/A';
   
-  // Basic phone formatting idea (can be enhanced)
   const formattedPhone = (phone?: string) => {
     if (!phone) return 'N/A';
-    // Add more sophisticated formatting if needed
     return phone;
   };
+
+  // For flags, a text representation is used. Visual flags would require a flag icon library/assets.
+  const nationalityDisplay = data.nominee_nationality ? 
+    `${getCountryNameByCode(data.nominee_nationality) || data.nominee_nationality} (${data.nominee_nationality.toUpperCase()})` : 'N/A';
+  const residenceDisplay = data.nominee_country_of_residence ? 
+    `${getCountryNameByCode(data.nominee_country_of_residence) || data.nominee_country_of_residence} (${data.nominee_country_of_residence.toUpperCase()})` : 'N/A';
 
   return (
     <>
       <DetailItemDisplay label="Full Name" value={data.nominee_full_name} />
       <DetailItemDisplay label="Gender" value={data.nominee_gender ? data.nominee_gender.charAt(0).toUpperCase() + data.nominee_gender.slice(1) : 'N/A'} />
       <DetailItemDisplay label="Date of Birth" value={formattedDob} />
-      <DetailItemDisplay label="Nationality" value={data.nominee_nationality ? `${getCountryNameByCode(data.nominee_nationality) || data.nominee_nationality}` : 'N/A'} /> {/* TODO: Add flag icon */}
-      <DetailItemDisplay label="Country of Residence" value={data.nominee_country_of_residence ? `${getCountryNameByCode(data.nominee_country_of_residence) || data.nominee_country_of_residence}` : 'N/A'} /> {/* TODO: Add flag icon */}
+      <DetailItemDisplay label="Nationality" value={nationalityDisplay} />
+      <DetailItemDisplay label="Country of Residence" value={residenceDisplay} />
       <DetailItemDisplay label="Organization/Institution" value={data.nominee_organization} />
       <DetailItemDisplay label="Title/Position" value={data.nominee_title_position} />
       <DetailItemDisplay 
         label="Email Address" 
         value={data.nominee_email ? (
           <span className="flex items-center">
-            <Mail size={16} className="mr-2 text-gray-500" />
+            <Mail size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
             <a href={`mailto:${data.nominee_email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
               {data.nominee_email}
             </a>
@@ -101,7 +111,7 @@ const SectionADisplay: React.FC<SectionADisplayProps> = ({ data }) => {
         label="Phone Number" 
         value={data.nominee_phone ? (
           <span className="flex items-center">
-            <Phone size={16} className="mr-2 text-gray-500" /> {/* TODO: Add country code icon */}
+            <Phone size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
             {formattedPhone(data.nominee_phone)}
           </span>
         ) : 'N/A'}
