@@ -10,7 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 // Import layout components
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import NotificationBanner from "@/components/common/NotificationBanner";
+import FloatingIHSDPopup from "@/components/common/FloatingIHSDPopup";
 
 // Public pages
 import Index from "./pages/Index";
@@ -28,7 +28,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
-import NomineesPage from "./pages/admin/NomineesPage"; // This will be the main list, or we might rename/refactor it
+import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
 import MessagesPage from "./pages/admin/MessagesPage";
 import NominationFormPage from "./pages/NominationFormPage";
@@ -41,12 +41,12 @@ import RejectedNomineesPage from "./pages/admin/RejectedNomineesPage";
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
-    <NotificationBanner />
     <Navbar />
     <main className="flex-grow pt-24 bg-background"> {/* pt-24 for Navbar height (approx 6rem) */}
       <Outlet />
     </main>
     <Footer />
+    <FloatingIHSDPopup />
   </div>
 );
 
@@ -79,7 +79,6 @@ const App = () => {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
-                {/* The old /admin/nominees route might need to become a general overview or be removed if sub-pages cover all cases */}
                 <Route path="nominees" element={<NomineesPage />} /> 
                 <Route path="nominations/completed" element={<CompletedNominationsPage />} />
                 <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
