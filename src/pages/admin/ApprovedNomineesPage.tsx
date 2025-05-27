@@ -1,14 +1,20 @@
 
 import React from 'react';
+import { FilteredNominationsTable } from '@/components/admin/FilteredNominationsTable';
+import { Database } from '@/integrations/supabase/types';
+
+type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
 
 const ApprovedNomineesPage = () => {
+  const status: NominationStatusEnum = 'approved';
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Approved Nominees</h1>
-      <p className="text-muted-foreground">This page will display nominations with "approved" status.</p>
-      {/* Placeholder for table and filtering logic */}
-    </div>
+    <FilteredNominationsTable 
+      statusFilter={status} 
+      pageTitle="Approved Nominees"
+      showActions={true} // Admins can reject an approved nomination
+    />
   );
 };
 
 export default ApprovedNomineesPage;
+
