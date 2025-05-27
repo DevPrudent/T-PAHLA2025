@@ -1,4 +1,3 @@
-
 import React, { useState } from "react"; // Added React import here
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -36,6 +35,7 @@ import MessagesPage from "./pages/admin/MessagesPage";
 import NominationFormPage from "./pages/NominationFormPage";
 import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
 import IncompleteNominationsPage from "./pages/admin/IncompleteNominationsPage";
+import AdminNominationDetailPage from "./pages/admin/AdminNominationDetailPage"; // Added import
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -81,6 +81,8 @@ const App = () => {
                 <Route path="nominees" element={<NomineesPage />} />
                 <Route path="nominations/completed" element={<CompletedNominationsPage />} />
                 <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
+                {/* New Route for detailed nomination view */}
+                <Route path="nominations/view/:nominationId" element={<AdminNominationDetailPage />} /> 
                 <Route path="transactions" element={<TransactionsPage />} />
                 <Route path="messages" element={<MessagesPage />} />
               </Route>
