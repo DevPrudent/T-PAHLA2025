@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Award as AwardIcon, ChevronRight, Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, Image as ImageIcon, HelpCircle, ServerCrash, LucideProps } from "lucide-react"; // Added LucideProps
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -89,8 +87,6 @@ const Awards = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <div className="pt-24 pb-12 bg-tpahla-darkgreen text-tpahla-text-primary">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-serif font-bold mb-4 text-tpahla-gold">Award Categories - TPAHLA 2025</h1>
@@ -201,26 +197,7 @@ const Awards = () => {
           </div>
         </section>
         
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-serif font-bold mb-12 text-center text-tpahla-gold relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-24 after:h-1 after:bg-tpahla-emerald">Past Award Recipients</h2>
-            
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-tpahla-neutral rounded-lg shadow-xl p-8 border border-tpahla-gold/20">
-                <p className="text-center text-tpahla-text-secondary italic mb-6">
-                  Information about past award recipients will be available after the inaugural ceremony on October 18, 2025.
-                </p>
-                <div className="flex justify-center">
-                  <img 
-                    src="/lovable-uploads/0782cd19-ebc3-4e7c-8099-2ffc6e08289e.png" 
-                    alt="TPAHLA Logo" 
-                    className="h-24"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Past Award Recipients Section REMOVED */}
       </main>
       
       <Dialog open={selectedCluster !== null} onOpenChange={() => setSelectedCluster(null)}>
@@ -254,7 +231,7 @@ const Awards = () => {
         </DialogContent>
       </Dialog>
       
-      <Footer />
+      {/* Footer removed */}
     </div>
   );
 };
