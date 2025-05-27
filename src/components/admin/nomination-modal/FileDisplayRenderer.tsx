@@ -2,8 +2,8 @@
 import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Download } from 'lucide-react';
-import ModalDetailItem from './ModalDetailItem';
-import { FileInfo, NOMINATION_FILES_BUCKET } from '../NominationDetailsModal'; // Importing from the original modal for now
+import ModalDetailItem from '../ModalDetailItem';
+import { FileInfo, NOMINATION_FILES_BUCKET } from '../../NominationDetailsModal'; // Importing from the original modal for now
 
 interface FileDisplayRendererProps {
   files: FileInfo[] | FileInfo | null | undefined;
@@ -33,9 +33,10 @@ const FileDisplayRenderer: React.FC<FileDisplayRendererProps> = ({ files, label 
 
             if (fileData.storage_path && fileData.file_name) {
               fileName = fileData.file_name;
+              // Force download by setting { download: true }
               const { data: publicUrlData } = supabase.storage
                 .from(NOMINATION_FILES_BUCKET)
-                .getPublicUrl(fileData.storage_path, { download: fileName });
+                .getPublicUrl(fileData.storage_path, { download: true }); // Changed to force download
               publicUrl = publicUrlData?.publicUrl ?? '#';
             } else if (fileData.url && fileData.name) {
                 fileName = fileData.name;
@@ -44,10 +45,23 @@ const FileDisplayRenderer: React.FC<FileDisplayRendererProps> = ({ files, label 
 
             return (
               <li key={index} className="text-sm flex items-center">
-                <a href={publicUrl} target="_blank" rel="noopener noreferrer" download={fileName.includes('.') ? fileName : undefined} className="text-blue-600 dark:text-blue-400 hover:underline print:text-blue-600">
+                <a 
+                  href={publicUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  download={fileName.includes('.') ? fileName : undefined} 
+                  className="text-blue-600 dark:text-blue-400 hover:underline print:text-black print:no-underline"
+                >
                   {fileName}
                 </a>
-                <a href={publicUrl} download={fileName.includes('.') ? fileName : undefined} target="_blank" rel="noopener noreferrer" className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 print:hidden" title={`Download ${fileName}`}>
+                <a 
+                  href={publicUrl} 
+                  download={fileName.includes('.') ? fileName : undefined} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 print:hidden" 
+                  title={`Download ${fileName}`}
+                >
                   <Download size={16} />
                 </a>
               </li>

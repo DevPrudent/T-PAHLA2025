@@ -11,12 +11,12 @@ interface SectionCContentRendererProps {
 
 const SectionCContentRenderer: React.FC<SectionCContentRendererProps> = ({ data }) => {
   if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-    return <p className="text-sm text-gray-500 dark:text-gray-400">No data provided for this section.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400 print:text-black">No data provided for this section.</p>;
   }
 
   return (
-    <div className="space-y-3 p-1">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+    <div className="space-y-3 p-1 print:p-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 print:block print:space-y-2"> {/* Simplified grid for print */}
         <ModalDetailItem label="Justification Statement" value={data.justification_statement} fullWidth />
         <ModalDetailItem label="Achievements and Impact" value={data.achievements_and_impact} fullWidth />
         <ModalDetailItem label="Leadership and Innovation" value={data.leadership_and_innovation} fullWidth />
