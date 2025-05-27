@@ -1,23 +1,22 @@
+
 import NotificationBanner from "../components/common/NotificationBanner"; // Import the new banner
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"; // Import Carousel components
 
 const About = () => {
-  const collaborators = [{
-    name: "Collaborator 1",
-    logo: "https://via.placeholder.com/150x80?text=Logo+1"
-  }, {
-    name: "Collaborator 2",
-    logo: "https://via.placeholder.com/150x80?text=Logo+2"
-  }, {
-    name: "Collaborator 3",
-    logo: "https://via.placeholder.com/150x80?text=Logo+3"
-  }, {
-    name: "Collaborator 4",
-    logo: "https://via.placeholder.com/150x80?text=Logo+4"
-  }, {
-    name: "Collaborator 5",
-    logo: "https://via.placeholder.com/150x80?text=Logo+5"
-  }];
+  const collaborators = [
+    { name: "UNITAR", logo: "/lovable-uploads/01936239-bdc7-43a5-ad09-bdcfb83947ff.png" },
+    { name: "CIFAL Nigeria", logo: "/lovable-uploads/8ea19e05-52d6-4650-9471-65ed89feae3b.png" },
+    { name: "PROSE Integrated Limited", logo: "/lovable-uploads/9ba7c8d4-aa76-4598-b81c-22e333db53c9.png" },
+    { name: "OSHAssociation UK", logo: "/lovable-uploads/09c6397d-a397-4af8-a2eb-3bb509308043.png" },
+    { name: "National Youth Service Corps", logo: "/lovable-uploads/d01f6a31-21df-4d3a-88b9-1b12c0b36c56.png" },
+    { name: "National Emergency Management Agency", logo: "/lovable-uploads/34745fc8-b570-4d19-b5e6-18724cedba6a.png" },
+    { name: "National Boundary Commission", logo: "/lovable-uploads/c245cabe-1bd6-41fc-b80f-b4d5e8c7ade2.png" },
+    { name: "National Orientation Agency", logo: "/lovable-uploads/23d63c6b-74e0-43bb-98ef-92e814d38474.png" },
+    { name: "Federal Ministry of Budget and National Planning", logo: "/lovable-uploads/f3ddb519-011f-4ccf-ac4f-923fddac87ca.png" }, // Inferred name
+    { name: "Federal Ministry of Humanitarian Affairs and Poverty Alleviation", logo: "/lovable-uploads/89a62900-1e6d-4424-a5af-3f501b261019.png" }, // Inferred name
+    { name: "Vision FM", logo: "/lovable-uploads/57592dd5-79e6-4989-8ab7-77f963046b46.png" }, // Inferred name
+    { name: "HFC Hope For Children", logo: "/lovable-uploads/27dfe56f-8a11-4237-8a63-f1220770ad15.png" } // Inferred name
+  ];
   return <div className="min-h-screen bg-background">
       {/* Navbar and Footer are removed as they are handled by PublicLayout */}
       
@@ -162,13 +161,13 @@ const About = () => {
             <Carousel opts={{
             align: "start",
             loop: true
-          }} className="w-full max-w-4xl mx-auto">
+          }} className="w-full max-w-6xl mx-auto"> {/* Increased max-width for more items */}
               <CarouselContent>
-                {collaborators.map((collaborator, index) => <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                {collaborators.map((collaborator, index) => <CarouselItem key={index} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"> {/* Adjusted basis for more items */}
                     <div className="p-1">
-                      <div className="bg-tpahla-neutral p-6 rounded-lg shadow-md border border-tpahla-gold/20 flex flex-col items-center justify-center h-40">
-                        <img src={collaborator.logo} alt={collaborator.name} className="max-h-20 object-contain" />
-                        <p className="mt-2 text-sm text-tpahla-text-secondary">{collaborator.name}</p>
+                      <div className="bg-tpahla-neutral p-6 rounded-lg shadow-md border border-tpahla-gold/20 flex flex-col items-center justify-center h-48"> {/* Increased height */}
+                        <img src={collaborator.logo} alt={collaborator.name} className="max-h-24 object-contain mb-2" /> {/* Adjusted max-height and added margin */}
+                        <p className="mt-2 text-sm text-center text-tpahla-text-secondary">{collaborator.name}</p>
                       </div>
                     </div>
                   </CarouselItem>)}
