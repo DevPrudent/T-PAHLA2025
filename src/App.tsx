@@ -42,7 +42,7 @@ import RejectedNomineesPage from "./pages/admin/RejectedNomineesPage";
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
-    <main className="flex-grow pt-24 bg-background"> {/* pt-24 for Navbar height (approx 6rem) */}
+    <main className="flex-grow bg-background"> {/* Removed pt-24 */}
       <Outlet />
     </main>
     <Footer />
