@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
@@ -20,7 +19,9 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 print:hidden",
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      // For print: make it block, cover the screen with white, ensure it's opaque.
+      "print:!block print:bg-white print:dark:bg-white print:opacity-100", 
       className
     )}
     {...props}
@@ -38,7 +39,9 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        "print:!block print:relative print:w-full print:max-w-none print:translate-x-0 print:translate-y-0 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white dark:print:bg-transparent print:overflow-visible print:h-auto", // Adjusted print styles: removed fixed, inset, top, left. Added relative. Set p-0, m-0. Dark mode bg transparent.
+        // Print styles: ensure it's block, relative, full width, no transforms, no borders/shadows, specific padding/margin, and solid white background.
+        // Ensure it's visually on top of the overlay.
+        "print:!block print:relative print:w-full print:max-w-none print:translate-x-0 print:translate-y-0 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white dark:print:bg-white print:overflow-visible print:h-auto print:z-[51]", 
         className
       )}
       {...props}
@@ -120,4 +123,3 @@ export {
   DialogTitle,
   DialogDescription,
 }
-
