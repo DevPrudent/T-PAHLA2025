@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Ensure React is imported
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, Search } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -46,11 +47,28 @@ const fetchNominations = async (): Promise<NominationRow[]> => {
 const NomineesPage = () => {
   const queryClient = useQueryClient();
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Added for search
 
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
     queryKey: ['nominations'],
     queryFn: fetchNominations,
   });
+
+  // Filtered nominations based on search term (client-side for now)
+  const filteredNominations = React.useMemo(() => {
+    if (!nominations) return [];
+    if (!searchTerm) return nominations;
+    return nominations.filter(nomination => {
+      const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null;
+      const nomineeEmail = sectionAData?.nominee_email?.toLowerCase() || '';
+      
+      return (
+        nomination.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (nomination.nominee_name && nomination.nominee_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        nomineeEmail.includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [nominations, searchTerm]);
 
   const updateStatusMutation = useMutation<
     NominationRow | null, // Supabase returns the updated row or null
@@ -120,25 +138,37 @@ const NomineesPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Manage Nominees</h1>
+        <h1 className="text-3xl font-bold">Manage All Nominations</h1> {/* Updated title */}
         <div className="space-x-2">
           {/* Filter and Bulk Actions buttons can be implemented later */}
-          <Button variant="outline" disabled>Filter</Button>
-          <Button variant="secondary" disabled>Bulk Actions</Button>
+          {/* <Button variant="outline" disabled>Filter</Button> */}
+          {/* <Button variant="secondary" disabled>Bulk Actions</Button> */}
         </div>
       </div>
       
       <p className="text-muted-foreground">
-        Review and manage all nominees. You can view entries, approve/reject nominees.
+        Review and manage all submitted nominations. You can view entries and update status. Specific views for different statuses are available in the sidebar.
       </p>
+
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search by ID, Name, Email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-8 w-full max-w-md mb-4" 
+        />
+      </div>
       
       <Table>
-        <TableCaption>List of all submitted nominations</TableCaption>
+        <TableCaption>List of all submitted nominations. Use sidebar for filtered views.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]">
-              <input type="checkbox" className="rounded" aria-label="Select all nominees" />
+              <input type="checkbox" className="rounded" aria-label="Select all nominees" disabled />
             </TableHead>
+            <TableHead>Nomination ID</TableHead> {/* Added Nomination ID Column */}
             <TableHead>Nominee Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Category ID</TableHead>
@@ -148,16 +178,17 @@ const NomineesPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nominations.map((nomination) => {
-            const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null; // Simplified for brevity, full type in modal
+          {filteredNominations.map((nomination) => {
+            const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null; 
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
             const submissionDate = nomination.submitted_at || nomination.created_at;
 
             return (
               <TableRow key={nomination.id}>
                 <TableCell>
-                  <input type="checkbox" className="rounded" aria-label={`Select nominee ${nomination.nominee_name}`} />
+                  <input type="checkbox" className="rounded" aria-label={`Select nominee ${nomination.nominee_name}`} disabled />
                 </TableCell>
+                <TableCell className="font-mono text-xs">{nomination.id}</TableCell> {/* Added Nomination ID Cell */}
                 <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
                 <TableCell>{nomineeEmail}</TableCell>
                 <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>

@@ -28,10 +28,16 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
-import NomineesPage from "./pages/admin/NomineesPage";
+import NomineesPage from "./pages/admin/NomineesPage"; // This will be the main list, or we might rename/refactor it
 import TransactionsPage from "./pages/admin/TransactionsPage";
-import MessagesPage from "./pages/admin/MessagesPage"; // Import the new MessagesPage
-import NominationFormPage from "./pages/NominationFormPage"; // Import the new NominationFormPage
+import MessagesPage from "./pages/admin/MessagesPage";
+import NominationFormPage from "./pages/NominationFormPage";
+
+// New Admin Pages for submenus
+import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
+import IncompleteNominationsPage from "./pages/admin/IncompleteNominationsPage";
+import ApprovedNomineesPage from "./pages/admin/ApprovedNomineesPage";
+import RejectedNomineesPage from "./pages/admin/RejectedNomineesPage";
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -61,7 +67,7 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/awards" element={<Awards />} />
                 <Route path="/nominations" element={<Nominations />} />
-                <Route path="/nomination-form" element={<NominationFormPage />} /> {/* New route */}
+                <Route path="/nomination-form" element={<NominationFormPage />} />
                 <Route path="/event" element={<EventDetails />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
@@ -73,9 +79,14 @@ const App = () => {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
-                <Route path="nominees" element={<NomineesPage />} />
+                {/* The old /admin/nominees route might need to become a general overview or be removed if sub-pages cover all cases */}
+                <Route path="nominees" element={<NomineesPage />} /> 
+                <Route path="nominations/completed" element={<CompletedNominationsPage />} />
+                <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
+                <Route path="nominees/status/approved" element={<ApprovedNomineesPage />} /> 
+                <Route path="nominees/status/rejected" element={<RejectedNomineesPage />} />
                 <Route path="transactions" element={<TransactionsPage />} />
-                <Route path="messages" element={<MessagesPage />} /> {/* Add route for MessagesPage */}
+                <Route path="messages" element={<MessagesPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
