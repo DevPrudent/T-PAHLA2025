@@ -1,5 +1,4 @@
-
-import React from 'react'; // Ensure React is imported if not using Next.js pages structure explicitly
+import React, { useState } from 'react'; // Ensure React is imported
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -17,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'; // Added AlertDescription
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { NominationDetailsModal } from '@/components/admin/NominationDetailsModal';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
@@ -45,6 +45,7 @@ const fetchNominations = async (): Promise<NominationRow[]> => {
 
 const NomineesPage = () => {
   const queryClient = useQueryClient();
+  const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
 
   const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
     queryKey: ['nominations'],
@@ -81,6 +82,10 @@ const NomineesPage = () => {
 
   const handleUpdateStatus = (nominationId: string, status: NominationStatusEnum) => {
     updateStatusMutation.mutate({ nominationId, status });
+  };
+
+  const handleViewDetails = (nomination: NominationRow) => {
+    setSelectedNomination(nomination);
   };
 
   if (isLoading) {
@@ -144,7 +149,7 @@ const NomineesPage = () => {
         </TableHeader>
         <TableBody>
           {nominations.map((nomination) => {
-            const sectionAData = nomination.form_section_a as FormSectionAData | null;
+            const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null; // Simplified for brevity, full type in modal
             const nomineeEmail = sectionAData?.nominee_email || 'N/A';
             const submissionDate = nomination.submitted_at || nomination.created_at;
 
@@ -161,15 +166,15 @@ const NomineesPage = () => {
                   <Badge variant={
                     nomination.status === "approved" ? "success" : 
                     nomination.status === "rejected" ? "destructive" :
-                    nomination.status === "submitted" ? "default" : // "submitted" often default
-                    "outline" // for "draft", "incomplete"
+                    nomination.status === "submitted" ? "default" : 
+                    "outline" 
                   }>
                     {nomination.status || 'N/A'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => alert(`View details for ${nomination.nominee_name} (ID: ${nomination.id}) - to be implemented`)}>
+                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
                       <Eye size={16} className="mr-1" /> View
                     </Button>
                     {(nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
@@ -203,9 +208,13 @@ const NomineesPage = () => {
           })}
         </TableBody>
       </Table>
+      <NominationDetailsModal 
+        nomination={selectedNomination}
+        isOpen={!!selectedNomination}
+        onClose={() => setSelectedNomination(null)}
+      />
     </div>
   );
 };
 
 export default NomineesPage;
-
