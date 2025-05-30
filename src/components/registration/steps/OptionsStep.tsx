@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { africanCountries } from '@/lib/africanCountries';
-import { awardCategories } from '@/lib/awardCategories';
+import { awardCategoriesData } from '@/lib/awardCategories';
 import type { RegistrationData } from '../MultiStepRegistration';
 
 interface Props {
@@ -83,9 +82,9 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {awardCategories.map((category) => (
+              {awardCategoriesData.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
-                  {category.name}
+                  {category.title}
                 </SelectItem>
               ))}
             </SelectContent>
