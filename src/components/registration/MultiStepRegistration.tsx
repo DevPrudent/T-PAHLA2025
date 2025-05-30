@@ -23,6 +23,7 @@ export interface RegistrationData {
   
   // Nominee specific
   nomineeCategory?: string;
+  specificAward?: string;
   tier?: string;
   cvFile?: File;
   
@@ -90,7 +91,39 @@ const MultiStepRegistration = () => {
       case 1:
         return registrationData.participationType !== null;
       case 2:
-        return registrationData.fullName && registrationData.email && registrationData.phone;
+        // For nominee, require category, specific award, and tier
+        if (registrationData.participationType === 'nominee') {
+          return !!(registrationData.fullName && 
+                   registrationData.email && 
+                   registrationData.phone && 
+                   registrationData.country && 
+                   registrationData.nomineeCategory && 
+                   registrationData.specificAward && 
+                   registrationData.tier);
+        }
+        // For group, require group name and type
+        else if (registrationData.participationType === 'group') {
+          return !!(registrationData.fullName && 
+                   registrationData.email && 
+                   registrationData.phone && 
+                   registrationData.country && 
+                   registrationData.groupName && 
+                   registrationData.groupType);
+        }
+        // For sponsor, require sponsorship type and amount
+        else if (registrationData.participationType === 'sponsor') {
+          return !!(registrationData.fullName && 
+                   registrationData.email && 
+                   registrationData.phone && 
+                   registrationData.country && 
+                   registrationData.sponsorshipType && 
+                   registrationData.customAmount);
+        }
+        // For individual, just require basic info
+        return !!(registrationData.fullName && 
+                 registrationData.email && 
+                 registrationData.phone && 
+                 registrationData.country);
       case 3:
         return true;
       default:

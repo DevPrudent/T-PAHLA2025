@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle } from 'lucide-react';
 import type { RegistrationData } from '../MultiStepRegistration';
+import { getAwardNameByValue, getCategoryTitleById } from '@/lib/awardCategories';
 
 interface Props {
   data: RegistrationData;
@@ -53,6 +54,20 @@ export const ReviewStep = ({ data }: Props) => {
         'platinum': 'Platinum Package - 15 Delegates ($2,000)',
       };
       return groupMap[data.groupType] || data.groupType;
+    }
+    return null;
+  };
+
+  const getAwardCategoryDisplay = () => {
+    if (data.participationType === 'nominee' && data.nomineeCategory) {
+      return getCategoryTitleById(data.nomineeCategory);
+    }
+    return null;
+  };
+
+  const getSpecificAwardDisplay = () => {
+    if (data.participationType === 'nominee' && data.nomineeCategory && data.specificAward) {
+      return getAwardNameByValue(data.nomineeCategory, data.specificAward);
     }
     return null;
   };
@@ -121,10 +136,16 @@ export const ReviewStep = ({ data }: Props) => {
 
           {data.participationType === 'nominee' && (
             <>
-              {data.nomineeCategory && (
+              {getAwardCategoryDisplay() && (
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Award Category</div>
-                  <div className="font-medium">{data.nomineeCategory}</div>
+                  <div className="font-medium">{getAwardCategoryDisplay()}</div>
+                </div>
+              )}
+              {getSpecificAwardDisplay() && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Specific Award</div>
+                  <div className="font-medium">{getSpecificAwardDisplay()}</div>
                 </div>
               )}
               {getTierDisplay() && (

@@ -1,4 +1,3 @@
-
 export interface RegistrationCategory {
   id: string;
   name: string;
@@ -17,7 +16,7 @@ export interface AddOn {
 
 export const registrationCategories: RegistrationCategory[] = [
   {
-    id: "category1",
+    id: "tier1",
     name: "Category 1 - Flagship Honoree Tier",
     price: 15000,
     tier: "🥇",
@@ -37,7 +36,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category2",
+    id: "tier2",
     name: "Category 2 - Premier Recognition Tier",
     price: 10000,
     tier: "🥈",
@@ -56,7 +55,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category3",
+    id: "tier3",
     name: "Category 3 - Emerging Trailblazer",
     price: 7000,
     tier: "🥉",
@@ -75,7 +74,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category4",
+    id: "tier4",
     name: "Category 4 - Standard Honoree",
     price: 6000,
     tier: "🏅",
@@ -92,7 +91,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category5",
+    id: "tier5",
     name: "Category 5 - Standard Honoree",
     price: 5000,
     tier: "🏵️",
@@ -108,7 +107,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category6",
+    id: "tier6",
     name: "Category 6 - Entry Honoree",
     price: 3500,
     tier: "🔹",
@@ -124,7 +123,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category7",
+    id: "tier7",
     name: "Category 7 - Entry Honoree",
     price: 3500,
     tier: "🔸",
@@ -140,7 +139,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category8",
+    id: "tier8",
     name: "Category 8 - Entry Honoree",
     price: 3333,
     tier: "⚪",
@@ -155,7 +154,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category9",
+    id: "tier9",
     name: "Category 9 - Entry Honoree",
     price: 3000,
     tier: "⚫",
@@ -169,7 +168,7 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
-    id: "category10",
+    id: "tier10",
     name: "Category 10 - Entry Honoree",
     price: 3000,
     tier: "🟣",
@@ -309,52 +308,52 @@ export const addOns: AddOn[] = [
 // Award Categories for selection
 export const awardCategories = [
   {
-    id: "humanitarian-legacy",
+    id: "leadership_legacy",
     name: "Humanitarian Legacy & Leadership",
     description: "Recognizing lifetime achievement and transformational leadership in humanitarian work"
   },
   {
-    id: "governance-impact",
+    id: "governance_impact",
     name: "Governance for Humanitarian Impact",
     description: "Honoring leaders in government who champion humanitarian causes"
   },
   {
-    id: "youth-gender",
+    id: "youth_gender_equality",
     name: "Youth & Gender Empowerment",
     description: "Celebrating leaders advancing youth development and gender equality"
   },
   {
-    id: "sustainable-development",
+    id: "sustainable_development_environment",
     name: "Sustainable Development & Climate",
     description: "Recognizing environmental stewardship and sustainable development initiatives"
   },
   {
-    id: "innovation-tech",
+    id: "innovation_technology",
     name: "Humanitarian Tech & Innovation",
     description: "Honoring technological innovation in humanitarian solutions"
   },
   {
-    id: "disaster-relief",
+    id: "disaster_relief_crisis_management",
     name: "Disaster Relief & Emergency Response",
     description: "Recognizing excellence in disaster management and emergency response"
   },
   {
-    id: "public-sector",
+    id: "public_sector_recognition",
     name: "Public Sector & Institutional Impact",
     description: "Celebrating institutional leadership in humanitarian development"
   },
   {
-    id: "social-cultural",
+    id: "social_cultural",
     name: "Social & Cultural Contributions",
     description: "Honoring contributions to social development and cultural preservation"
   },
   {
-    id: "human-rights",
+    id: "human_rights",
     name: "Human Rights & Justice",
     description: "Recognizing advocacy and action for human rights and social justice"
   },
   {
-    id: "health-research",
+    id: "research_development",
     name: "Humanitarian Research & Public Health",
     description: "Celebrating research and public health initiatives that serve humanity"
   }

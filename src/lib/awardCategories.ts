@@ -1,3 +1,42 @@
+import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideProps } from "lucide-react";
+
+// Type for icon components
+export type LucideIconComponent = React.FC<LucideProps>;
+
+// Icon mapping
+export const iconMap: Record<string, LucideIconComponent> = {
+  Users,
+  ShieldCheck,
+  Users2,
+  Leaf,
+  Lightbulb,
+  Home,
+  Landmark,
+  BookOpen,
+  Scale,
+  Search,
+  Default: HelpCircle,
+};
+
+// Type for raw data from Supabase
+export interface AwardCategoryFromDB {
+  id: string;
+  cluster_title: string;
+  description: string | null;
+  awards: unknown | null; // Supabase jsonb can be 'unknown' initially
+  icon_name: string | null;
+  image_path: string | null;
+}
+
+// Type for data structure after fetching and transforming
+export interface AwardCluster {
+  id: string;
+  clusterTitle: string;
+  IconComponent: LucideIconComponent;
+  description: string;
+  awards: string[];
+  imagePath: string | null;
+}
 
 export interface Award {
   name: string;
@@ -48,17 +87,17 @@ export const awardCategoriesData: AwardCategory[] = [
     id: 'sustainable_development_environment',
     title: 'SUSTAINABLE DEVELOPMENT & ENVIRONMENTAL STEWARDSHIP',
     awards: [
-      { name: 'Sustainable Development & Environmental Stewardship Award', value: 'sustainable_development_environmental_stewardship' },
+      { name: 'Environmental Stewardship & SDGs Impact', value: 'environmental_stewardship_sdgs_impact' },
       { name: 'Climate Change Leadership Award', value: 'climate_change_leadership' },
       { name: 'Renewable Energy & Humanitarian Infrastructure Award', value: 'renewable_energy_humanitarian_infrastructure' },
-      { name: 'Clean Water, Sanitation & Hygiene (WASH) Award', value: 'wash_award' },
+      { name: 'WASH (Water, Sanitation & Hygiene) Initiative Award', value: 'wash_award' },
     ],
   },
   {
     id: 'innovation_technology',
     title: 'HUMANITARIAN INNOVATION & TECHNOLOGY',
     awards: [
-      { name: 'Humanitarian Innovation & Technology Award', value: 'humanitarian_innovation_technology' },
+      { name: 'Tech for Good: Innovation & Aid Delivery', value: 'tech_for_good_innovation' },
       { name: 'Corporate Social Responsibility (CSR) Excellence Award', value: 'csr_excellence' },
       { name: 'Media & Advocacy for Humanitarian Excellence Award', value: 'media_advocacy_humanitarian_excellence' },
     ],
@@ -68,7 +107,7 @@ export const awardCategoriesData: AwardCategory[] = [
     title: 'DISASTER RELIEF & CRISIS MANAGEMENT',
     awards: [
       { name: 'Disaster Relief & Emergency Response Award', value: 'disaster_relief_emergency_response' },
-      { name: 'Excellence in Disaster Relief & National Emergency Management Award', value: 'excellence_disaster_relief_national_emergency_management' },
+      { name: 'National Emergency Management Excellence', value: 'national_emergency_management_excellence' },
       { name: 'Humanitarian Food Security & Nutrition Award', value: 'humanitarian_food_security_nutrition' },
     ],
   },
@@ -76,9 +115,36 @@ export const awardCategoriesData: AwardCategory[] = [
     id: 'public_sector_recognition',
     title: 'PUBLIC SECTOR AND INSTITUTIONAL RECOGNITION',
     awards: [
-      { name: 'Best Minister for Infrastructure & Humanitarian Development Award', value: 'best_minister_infrastructure_humanitarian_development' },
-      { name: 'Best Humanitarian-Friendly Minister of Finance Award', value: 'best_minister_finance' },
-      { name: 'Best Humanitarian-Friendly Law Maker Award', value: 'best_law_maker' },
+      { name: 'Infrastructure for Humanitarian Development', value: 'infrastructure_humanitarian_development' },
+      { name: 'Minister of Finance for Humanitarian Growth', value: 'minister_finance_humanitarian_growth' },
+      { name: 'Lawmakers Championing Rights & Inclusion', value: 'lawmakers_championing_rights' },
+      { name: 'Anti-Corruption Leadership for Humanitarian Advancement', value: 'anti_corruption_leadership' },
+    ],
+  },
+  {
+    id: 'social_cultural',
+    title: 'HUMANITARIAN, SOCIAL & CULTURAL CONTRIBUTIONS',
+    awards: [
+      { name: 'Arts & Humanitarian Storytelling', value: 'arts_humanitarian_storytelling' },
+      { name: 'Social Impact Award', value: 'social_impact_award' },
+      { name: 'Humanitarian Education & Capacity-Building', value: 'humanitarian_education_capacity_building' },
+      { name: 'Excellence in Humanitarian Advocacy', value: 'excellence_humanitarian_advocacy' },
+    ],
+  },
+  {
+    id: 'human_rights',
+    title: 'HUMAN RIGHTS & SOCIAL JUSTICE',
+    awards: [
+      { name: 'Human Rights Defender of the Year', value: 'human_rights_defender' },
+      { name: 'Migration & Refugee Assistance Advocate', value: 'migration_refugee_assistance' },
+    ],
+  },
+  {
+    id: 'research_development',
+    title: 'HUMANITARIAN RESEARCH & DEVELOPMENT',
+    awards: [
+      { name: 'Scientific Research & Policy for Humanitarian Impact', value: 'scientific_research_policy' },
+      { name: 'Public Health & Crisis Management Excellence', value: 'public_health_crisis_management' },
     ],
   },
 ];
@@ -96,4 +162,3 @@ export const getAwardNameByValue = (categoryId: string, awardValue: string): str
   const category = awardCategoriesData.find(cat => cat.id === categoryId);
   return category?.awards.find(award => award.value === awardValue)?.name;
 };
-

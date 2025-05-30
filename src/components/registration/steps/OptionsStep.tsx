@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,26 +6,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { africanCountries } from '@/lib/africanCountries';
-import { awardCategoriesData } from '@/lib/awardCategories';
+import { awardCategoriesData, getAwardsForCategory } from '@/lib/awardCategories';
+import { registrationCategories } from '@/lib/registrationData';
 import type { RegistrationData } from '../MultiStepRegistration';
+import { Separator } from '@/components/ui/separator';
+import { Check } from 'lucide-react';
 
 interface Props {
   data: RegistrationData;
   onUpdate: (updates: Partial<RegistrationData>) => void;
 }
 
-const nomineeTiers = [
-  { id: 'tier1', name: 'Tier 1 - Flagship Honoree', price: 15000, description: 'Premier recognition with maximum visibility' },
-  { id: 'tier2', name: 'Tier 2 - Premier Recognition', price: 10000, description: 'High-level recognition with comprehensive benefits' },
-  { id: 'tier3', name: 'Tier 3 - Emerging Trailblazer', price: 7000, description: 'Humanitarian Excellence recognition package' },
-  { id: 'tier4', name: 'Tier 4 - Standard Honoree', price: 6000, description: 'Quality recognition with essential benefits' },
-  { id: 'tier5', name: 'Tier 5 - Standard Honoree', price: 5000, description: 'Standard honoree package with key benefits' },
-  { id: 'tier6', name: 'Tier 6 - Entry Honoree', price: 3500, description: 'Entry-level recognition package' },
-  { id: 'tier7', name: 'Tier 7 - Entry Honoree', price: 3500, description: 'Entry-level recognition package' },
-  { id: 'tier8', name: 'Tier 8 - Entry Honoree', price: 3333, description: 'Entry-level recognition package' },
-  { id: 'tier9', name: 'Tier 9 - Entry Honoree', price: 3000, description: 'Essential recognition package' },
-  { id: 'tier10', name: 'Tier 10 - Entry Honoree', price: 3000, description: 'Essential recognition package' },
-];
+const nomineeTiers = registrationCategories.filter(cat => 
+  cat.id.startsWith('tier')
+);
 
 const groupTypes = [
   { id: 'silver', name: 'Silver Package', seats: 5, price: 750, description: 'Ideal for NGOs, CSR Units' },
@@ -34,6 +28,8 @@ const groupTypes = [
 ];
 
 export const OptionsStep = ({ data, onUpdate }: Props) => {
+  const [availableAwards, setAvailableAwards] = useState<{name: string, value: string}[]>([]);
+
   const calculateTotal = (updates: Partial<RegistrationData> = {}) => {
     const currentData = { ...data, ...updates };
     let total = 0;
@@ -72,12 +68,31 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
     }
   };
 
+  // Update available awards when category changes
+  useEffect(() => {
+    if (data.nomineeCategory) {
+      setAvailableAwards(getAwardsForCategory(data.nomineeCategory));
+    } else {
+      setAvailableAwards([]);
+    }
+  }, [data.nomineeCategory]);
+
+  // Get the selected tier details
+  const selectedTier = data.tier ? nomineeTiers.find(t => t.id === data.tier) : null;
+  
+  // Get the selected group package details
+  const selectedGroupType = data.groupType ? groupTypes.find(g => g.id === data.groupType) : null;
+
   const renderNomineeOptions = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="nomineeCategory">Award Category *</Label>
-          <Select value={data.nomineeCategory} onValueChange={(value) => handleInputChange('nomineeCategory', value)}>
+          <Select value={data.nomineeCategory} onValueChange={(value) => {
+            handleInputChange('nomineeCategory', value);
+            // Reset specific award when category changes
+            handleInputChange('specificAward', '');
+          }}>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -91,42 +106,65 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
           </Select>
         </div>
 
-        <div>
-          <Label htmlFor="tier">Recognition Tier *</Label>
-          <Select value={data.tier} onValueChange={(value) => handleInputChange('tier', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select tier" />
-            </SelectTrigger>
-            <SelectContent>
-              {nomineeTiers.map((tier) => (
-                <SelectItem key={tier.id} value={tier.id}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>{tier.name}</span>
-                    <Badge variant="outline">${tier.price.toLocaleString()}</Badge>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {data.nomineeCategory && availableAwards.length > 0 && (
+          <div>
+            <Label htmlFor="specificAward">Specific Award *</Label>
+            <Select value={data.specificAward} onValueChange={(value) => handleInputChange('specificAward', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select specific award" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAwards.map((award) => (
+                  <SelectItem key={award.value} value={award.value}>
+                    {award.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
-      {data.tier && (
-        <Card className="bg-tpahla-purple/5">
-          <CardContent className="pt-6">
-            {(() => {
-              const selectedTier = nomineeTiers.find(t => t.id === data.tier);
-              return selectedTier ? (
-                <div>
-                  <h4 className="font-semibold">{selectedTier.name}</h4>
-                  <p className="text-sm text-muted-foreground">{selectedTier.description}</p>
-                  <Badge className="mt-2">${selectedTier.price.toLocaleString()}</Badge>
+      <div>
+        <Label htmlFor="tier">Recognition Tier *</Label>
+        <div className="grid grid-cols-1 gap-4 mt-2">
+          {nomineeTiers.map((tier) => (
+            <Card
+              key={tier.id}
+              className={`cursor-pointer transition-all ${
+                data.tier === tier.id ? 'ring-2 ring-tpahla-gold border-tpahla-gold' : 'hover:border-tpahla-purple/30'
+              }`}
+              onClick={() => handleInputChange('tier', tier.id)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg flex items-center">
+                    <span className="mr-2">{tier.tier}</span> {tier.name}
+                    {data.tier === tier.id && (
+                      <span className="ml-2 text-tpahla-gold">
+                        <Check size={18} />
+                      </span>
+                    )}
+                  </CardTitle>
+                  <Badge className="text-lg px-4 py-2">${tier.price.toLocaleString()}</Badge>
                 </div>
-              ) : null;
-            })()}
-          </CardContent>
-        </Card>
-      )}
+                <CardDescription>{tier.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="font-medium text-sm mb-2">Package Includes:</p>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                  {tier.includes.map((benefit, idx) => (
+                    <li key={idx} className="flex items-start text-sm">
+                      <span className="text-tpahla-gold mr-2 mt-0.5">✓</span>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
@@ -154,7 +192,14 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
               onClick={() => handleInputChange('groupType', group.id)}
             >
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{group.name}</CardTitle>
+                <CardTitle className="text-lg flex items-center">
+                  {group.name}
+                  {data.groupType === group.id && (
+                    <span className="ml-2 text-tpahla-gold">
+                      <Check size={18} />
+                    </span>
+                  )}
+                </CardTitle>
                 <CardDescription>{group.description}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -163,6 +208,9 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                   <div className="text-lg font-bold text-tpahla-gold">
                     ${group.price.toLocaleString()}
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Includes all-inclusive general access, brand mention at events, and networking opportunities
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -181,10 +229,11 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
             <SelectValue placeholder="Select sponsorship type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="title">Title Sponsor</SelectItem>
-            <SelectItem value="platinum">Platinum Sponsor</SelectItem>
-            <SelectItem value="gold">Gold Sponsor</SelectItem>
-            <SelectItem value="silver">Silver Sponsor</SelectItem>
+            <SelectItem value="platinum">Platinum Sponsorship ($100,000+)</SelectItem>
+            <SelectItem value="gold">Gold Sponsorship ($50,000)</SelectItem>
+            <SelectItem value="silver">Silver Sponsorship ($25,000)</SelectItem>
+            <SelectItem value="bronze">Bronze Sponsorship ($10,000)</SelectItem>
+            <SelectItem value="exhibition">Exhibition Space ($5,000)</SelectItem>
             <SelectItem value="custom">Custom Package</SelectItem>
           </SelectContent>
         </Select>
@@ -200,6 +249,58 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
           placeholder="Enter amount"
         />
       </div>
+
+      <Card className="bg-tpahla-purple/5 border-tpahla-purple/20">
+        <CardHeader>
+          <CardTitle className="text-lg">Sponsorship Benefits</CardTitle>
+          <CardDescription>Benefits vary based on sponsorship level</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Platinum Sponsorship ($100,000+)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Exclusive naming rights for one award category</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Keynote speaking opportunity at the gala</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Premier branding across all channels & red carpet</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 10 guests</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Gold Sponsorship ($50,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Panel speaking or moderation opportunity</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Strategic partner branding across marketing channels</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 6 guests</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -309,6 +410,32 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                 Your registration includes full access to all public sessions, networking opportunities, and event materials.
               </p>
               <Badge className="text-lg px-4 py-2">$200</Badge>
+              
+              <div className="mt-6 p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2">Package Includes:</h4>
+                <ul className="text-sm space-y-1">
+                  <li className="flex items-start">
+                    <span className="text-tpahla-gold mr-2">✓</span>
+                    <span>General access to all public sessions (Oct 16–18)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-tpahla-gold mr-2">✓</span>
+                    <span>Entry to High-Level Roundtables & Networking</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-tpahla-gold mr-2">✓</span>
+                    <span>Event Entry (Conference, Dinner & Gala)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-tpahla-gold mr-2">✓</span>
+                    <span>Event materials & delegate badge</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-tpahla-gold mr-2">✓</span>
+                    <span>Certificate of Participation</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           )}
           {data.participationType === 'group' && renderGroupOptions()}
