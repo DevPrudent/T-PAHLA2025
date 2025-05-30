@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,21 +14,8 @@ export const useRegistration = () => {
     setIsLoading(true);
     
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to save your registration.",
-          variant: "destructive",
-        });
-        return null;
-      }
-
       // Prepare registration data for database
       const registrationData: RegistrationInsert = {
-        user_id: user.id,
         full_name: data.fullName,
         email: data.email,
         phone: data.phone,
@@ -117,6 +103,7 @@ export const useRegistration = () => {
           payment_method: paymentMethod,
           payment_status: 'pending',
           transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          currency: 'USD',
         })
         .select()
         .single();
