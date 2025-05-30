@@ -1,4 +1,3 @@
-
 import MultiStepRegistration from "@/components/registration/MultiStepRegistration";
 
 const NewRegistrationPage = () => {

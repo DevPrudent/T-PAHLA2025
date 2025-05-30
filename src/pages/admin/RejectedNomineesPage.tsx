@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FilteredNominationsTable } from '@/components/admin/FilteredNominationsTable';
 import { Database } from '@/integrations/supabase/types';
@@ -17,4 +16,3 @@ const RejectedNomineesPage = () => {
 };
 
 export default RejectedNomineesPage;
-
