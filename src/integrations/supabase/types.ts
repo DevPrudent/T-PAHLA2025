@@ -184,6 +184,196 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          gateway_reference: string | null
+          gateway_response: Json | null
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          payment_status:
+            | Database["public"]["Enums"]["payment_status_enum"]
+            | null
+          registration_id: string
+          transaction_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          gateway_reference?: string | null
+          gateway_response?: Json | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?:
+            | Database["public"]["Enums"]["payment_status_enum"]
+            | null
+          registration_id: string
+          transaction_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          gateway_reference?: string | null
+          gateway_response?: Json | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?:
+            | Database["public"]["Enums"]["payment_status_enum"]
+            | null
+          registration_id?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registration_documents: {
+        Row: {
+          file_name: string
+          file_size: number | null
+          file_type: string
+          id: string
+          registration_id: string
+          storage_path: string
+          uploaded_at: string | null
+        }
+        Insert: {
+          file_name: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          registration_id: string
+          storage_path: string
+          uploaded_at?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          registration_id?: string
+          storage_path?: string
+          uploaded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_documents_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registrations: {
+        Row: {
+          add_ons: string[] | null
+          country: string
+          created_at: string | null
+          custom_amount: number | null
+          cv_file_path: string | null
+          email: string
+          full_name: string
+          group_name: string | null
+          group_type: Database["public"]["Enums"]["group_type_enum"] | null
+          id: string
+          nominee_category: string | null
+          number_of_seats: number | null
+          organization: string | null
+          participation_type: Database["public"]["Enums"]["participation_type_enum"]
+          phone: string
+          position: string | null
+          registration_status:
+            | Database["public"]["Enums"]["registration_status_enum"]
+            | null
+          special_requests: string | null
+          sponsorship_type:
+            | Database["public"]["Enums"]["sponsorship_type_enum"]
+            | null
+          submitted_at: string | null
+          tier: string | null
+          total_amount: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          add_ons?: string[] | null
+          country: string
+          created_at?: string | null
+          custom_amount?: number | null
+          cv_file_path?: string | null
+          email: string
+          full_name: string
+          group_name?: string | null
+          group_type?: Database["public"]["Enums"]["group_type_enum"] | null
+          id?: string
+          nominee_category?: string | null
+          number_of_seats?: number | null
+          organization?: string | null
+          participation_type: Database["public"]["Enums"]["participation_type_enum"]
+          phone: string
+          position?: string | null
+          registration_status?:
+            | Database["public"]["Enums"]["registration_status_enum"]
+            | null
+          special_requests?: string | null
+          sponsorship_type?:
+            | Database["public"]["Enums"]["sponsorship_type_enum"]
+            | null
+          submitted_at?: string | null
+          tier?: string | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          add_ons?: string[] | null
+          country?: string
+          created_at?: string | null
+          custom_amount?: number | null
+          cv_file_path?: string | null
+          email?: string
+          full_name?: string
+          group_name?: string | null
+          group_type?: Database["public"]["Enums"]["group_type_enum"] | null
+          id?: string
+          nominee_category?: string | null
+          number_of_seats?: number | null
+          organization?: string | null
+          participation_type?: Database["public"]["Enums"]["participation_type_enum"]
+          phone?: string
+          position?: string | null
+          registration_status?:
+            | Database["public"]["Enums"]["registration_status_enum"]
+            | null
+          special_requests?: string | null
+          sponsorship_type?:
+            | Database["public"]["Enums"]["sponsorship_type_enum"]
+            | null
+          submitted_at?: string | null
+          tier?: string | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -193,6 +383,7 @@ export type Database = {
     }
     Enums: {
       document_type_enum: "cv_resume" | "photo_media" | "additional_document"
+      group_type_enum: "silver" | "gold" | "platinum"
       nomination_status_enum:
         | "draft"
         | "submitted"
@@ -200,6 +391,21 @@ export type Database = {
         | "rejected"
         | "incomplete"
       nominee_type_enum: "individual" | "organization" | "institution"
+      participation_type_enum: "nominee" | "individual" | "group" | "sponsor"
+      payment_status_enum:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "cancelled"
+        | "refunded"
+      registration_status_enum:
+        | "draft"
+        | "pending_payment"
+        | "paid"
+        | "cancelled"
+        | "refunded"
+      sponsorship_type_enum: "title" | "platinum" | "gold" | "silver" | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -316,6 +522,7 @@ export const Constants = {
   public: {
     Enums: {
       document_type_enum: ["cv_resume", "photo_media", "additional_document"],
+      group_type_enum: ["silver", "gold", "platinum"],
       nomination_status_enum: [
         "draft",
         "submitted",
@@ -324,6 +531,23 @@ export const Constants = {
         "incomplete",
       ],
       nominee_type_enum: ["individual", "organization", "institution"],
+      participation_type_enum: ["nominee", "individual", "group", "sponsor"],
+      payment_status_enum: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+        "refunded",
+      ],
+      registration_status_enum: [
+        "draft",
+        "pending_payment",
+        "paid",
+        "cancelled",
+        "refunded",
+      ],
+      sponsorship_type_enum: ["title", "platinum", "gold", "silver", "custom"],
     },
   },
 } as const

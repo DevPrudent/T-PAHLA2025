@@ -7,12 +7,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CreditCard, Building, Smartphone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useRegistration } from '@/hooks/useRegistration';
 import type { RegistrationData } from '../MultiStepRegistration';
 
 interface Props {
   data: RegistrationData;
   onUpdate: (updates: Partial<RegistrationData>) => void;
   onSuccess: () => void;
+  registrationId?: string;
 }
 
 const paymentMethods = [
@@ -39,43 +41,62 @@ const paymentMethods = [
   }
 ];
 
-export const PaymentStep = ({ data, onSuccess }: Props) => {
+export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
   const [selectedMethod, setSelectedMethod] = useState('paystack');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { createPayment, updatePaymentStatus } = useRegistration();
 
   const handlePayment = async () => {
+    if (!registrationId) {
+      toast({
+        title: "Error",
+        description: "Registration ID is missing. Please go back and complete the previous steps.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
-      // Simulate payment processing
+      // Create payment record
+      const paymentId = await createPayment(registrationId, selectedMethod);
+      
+      if (!paymentId) {
+        return;
+      }
+
       toast({
         title: "Processing Payment",
         description: "Please wait while we process your payment...",
       });
 
-      // Simulate API call delay
+      // Simulate payment processing (replace with actual payment gateway integration)
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Simulate successful payment
-      const transactionId = `TPAHLA2025_${Date.now()}`;
+      const success = await updatePaymentStatus(paymentId, 'completed', `${selectedMethod}_${Date.now()}`);
       
-      toast({
-        title: "Payment Successful!",
-        description: `Transaction ID: ${transactionId}`,
-      });
+      if (success) {
+        toast({
+          title: "Payment Successful!",
+          description: "Your registration has been completed successfully.",
+        });
 
-      // In real implementation, you would:
-      // 1. Call your payment gateway (Paystack, Flutterwave, or Stripe)
-      // 2. Handle the response
-      // 3. Save the transaction details to your database
-      // 4. Send confirmation email
-
-      setTimeout(() => {
-        onSuccess();
-      }, 1000);
+        setTimeout(() => {
+          onSuccess();
+        }, 1000);
+      } else {
+        toast({
+          title: "Payment Update Failed",
+          description: "Payment processed but status update failed. Please contact support.",
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
+      console.error('Payment error:', error);
       toast({
         title: "Payment Failed",
         description: "There was an error processing your payment. Please try again.",

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRegistration } from '@/hooks/useRegistration';
 import { ParticipationTypeStep } from './steps/ParticipationTypeStep';
 import { OptionsStep } from './steps/OptionsStep';
 import { ReviewStep } from './steps/ReviewStep';
@@ -43,6 +44,7 @@ export interface RegistrationData {
 
 const MultiStepRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [registrationId, setRegistrationId] = useState<string | null>(null);
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     participationType: null,
     fullName: '',
@@ -53,6 +55,7 @@ const MultiStepRegistration = () => {
     totalAmount: 0,
   });
 
+  const { saveRegistration, isLoading } = useRegistration();
   const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
 
@@ -60,7 +63,18 @@ const MultiStepRegistration = () => {
     setRegistrationData(prev => ({ ...prev, ...updates }));
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    // Save to database when moving from step 3 (review) to step 4 (payment)
+    if (currentStep === 3) {
+      const savedRegistrationId = await saveRegistration(registrationData);
+      if (savedRegistrationId) {
+        setRegistrationId(savedRegistrationId);
+        setCurrentStep(currentStep + 1);
+      }
+      // If save failed, stay on current step (error toast already shown in hook)
+      return;
+    }
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -114,6 +128,7 @@ const MultiStepRegistration = () => {
             data={registrationData}
             onUpdate={updateRegistrationData}
             onSuccess={() => setCurrentStep(5)}
+            registrationId={registrationId || undefined}
           />
         );
       case 5:
@@ -184,11 +199,20 @@ const MultiStepRegistration = () => {
                   
                   <Button
                     onClick={nextStep}
-                    disabled={!canProceed()}
+                    disabled={!canProceed() || isLoading}
                     className="bg-tpahla-darkgreen hover:bg-tpahla-emerald flex items-center gap-2"
                   >
-                    {currentStep === 3 ? 'Proceed to Payment' : 'Next'}
-                    <ChevronRight size={16} />
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        {currentStep === 3 ? 'Save & Proceed to Payment' : 'Next'}
+                        <ChevronRight size={16} />
+                      </>
+                    )}
                   </Button>
                 </div>
               )}

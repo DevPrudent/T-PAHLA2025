@@ -32,6 +32,7 @@ import NomineesPage from "./pages/admin/NomineesPage";
 import TransactionsPage from "./pages/admin/TransactionsPage";
 import MessagesPage from "./pages/admin/MessagesPage";
 import NominationFormPage from "./pages/NominationFormPage";
+import NewRegistrationPage from "./pages/NewRegistrationPage";
 
 // New Admin Pages for submenus
 import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
@@ -42,7 +43,7 @@ import RejectedNomineesPage from "./pages/admin/RejectedNomineesPage";
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
-    <main className="flex-grow bg-background"> {/* Removed pt-24 */}
+    <main className="flex-grow bg-background">
       <Outlet />
     </main>
     <Footer />
@@ -71,6 +72,7 @@ const App = () => {
                 <Route path="/event" element={<EventDetails />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
+                <Route path="/new-registration" element={<NewRegistrationPage />} />
                 <Route path="/contact" element={<Contact />} />
               </Route>
 
