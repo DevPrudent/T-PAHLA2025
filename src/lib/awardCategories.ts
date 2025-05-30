@@ -1,4 +1,4 @@
-import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideProps } from "lucide-react";
+import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideCrop as LucideProps } from "lucide-react";
 
 // Type for icon components
 export type LucideIconComponent = React.FC<LucideProps>;
