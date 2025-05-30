@@ -240,39 +240,51 @@ export const registrationCategories: RegistrationCategory[] = [
 
 export const addOns: AddOn[] = [
   {
-    id: "extra-guest",
-    name: "Additional Guest",
-    price: 500,
-    description: "Extra guest for gala dinner and events"
+    id: "extra-accommodation",
+    name: "Extended Hotel Stay",
+    price: 200,
+    description: "Additional night accommodation at the event hotel"
   },
   {
-    id: "vip-lounge",
-    name: "VIP Lounge Access",
-    price: 300,
-    description: "Exclusive access to VIP lounge throughout the event"
-  },
-  {
-    id: "photography",
-    name: "Professional Photography Package",
-    price: 250,
-    description: "Personal photography session and edited photos"
-  },
-  {
-    id: "spa-wellness",
-    name: "Spa & Wellness Package",
-    price: 400,
-    description: "Spa treatments and wellness activities"
+    id: "airport-transfer",
+    name: "Premium Airport Transfer",
+    price: 100,
+    description: "Luxury vehicle airport pickup and drop-off service"
   },
   {
     id: "cultural-tour",
     name: "Extended Cultural Tour",
-    price: 200,
-    description: "Additional cultural sites and experiences in Abuja"
+    price: 150,
+    description: "Additional cultural sites and experiences in Abuja beyond standard tour"
+  },
+  {
+    id: "networking-session",
+    name: "VIP Networking Session",
+    price: 300,
+    description: "Exclusive access to private networking sessions with dignitaries"
+  },
+  {
+    id: "media-package",
+    name: "Enhanced Media Coverage",
+    price: 500,
+    description: "Additional media interviews and feature coverage"
+  },
+  {
+    id: "additional-guest",
+    name: "Additional Guest Pass",
+    price: 400,
+    description: "Guest pass for spouse/companion to attend all events"
   },
   {
     id: "business-center",
     name: "Business Center Access",
     price: 150,
-    description: "Access to business facilities and meeting rooms"
+    description: "Access to business facilities and meeting rooms throughout event"
+  },
+  {
+    id: "spa-wellness",
+    name: "Spa & Wellness Package",
+    price: 250,
+    description: "Spa treatments and wellness activities during your stay"
   }
 ];
