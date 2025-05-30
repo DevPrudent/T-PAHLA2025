@@ -108,6 +108,81 @@ export const registrationCategories: RegistrationCategory[] = [
     ]
   },
   {
+    id: "category6",
+    name: "Category 6",
+    price: 3500,
+    tier: "🔹",
+    description: "Standard recognition package",
+    includes: [
+      "3-Star Hotel Accommodation (4 Nights)",
+      "Executive Meal Vouchers (3 Days)",
+      "Shopping Voucher – $100",
+      "Abuja City Tour & Photography",
+      "Event Entry (Conference, Dinner & Gala)",
+      "Digital Mention",
+      "Group Feature in Awards Directory"
+    ]
+  },
+  {
+    id: "category7",
+    name: "Category 7",
+    price: 3500,
+    tier: "🔸",
+    description: "Standard recognition package",
+    includes: [
+      "3-Star Hotel Accommodation (4 Nights)",
+      "Executive Meal Vouchers (3 Days)",
+      "Shopping Voucher – $100",
+      "Abuja City Tour & Photography",
+      "Event Entry (Conference, Dinner & Gala)",
+      "Group Mention",
+      "Awards Directory Entry"
+    ]
+  },
+  {
+    id: "category8",
+    name: "Category 8",
+    price: 3333,
+    tier: "⚪",
+    description: "Basic recognition package",
+    includes: [
+      "3-Star Hotel Accommodation (4 Nights)",
+      "Executive Meal Vouchers (3 Days)",
+      "Shopping Voucher – $100",
+      "Abuja City Tour & Photography",
+      "Event Entry (Conference, Dinner & Gala)",
+      "Awards Directory Entry"
+    ]
+  },
+  {
+    id: "category9",
+    name: "Category 9",
+    price: 3000,
+    tier: "⚫",
+    description: "Essential recognition package",
+    includes: [
+      "3-Star Hotel Accommodation (4 Nights)",
+      "Executive Meal Vouchers (3 Days)",
+      "Abuja City Tour & Photography",
+      "Event Entry (Conference, Dinner & Gala)",
+      "Awards Directory Entry"
+    ]
+  },
+  {
+    id: "category10",
+    name: "Category 10",
+    price: 3000,
+    tier: "🟣",
+    description: "Essential recognition package",
+    includes: [
+      "3-Star Hotel Accommodation (4 Nights)",
+      "Executive Meal Vouchers (3 Days)",
+      "Abuja City Tour & Photography",
+      "Event Entry (Conference, Dinner & Gala)",
+      "Awards Directory Entry"
+    ]
+  },
+  {
     id: "individual",
     name: "Individual Participation",
     price: 200,
