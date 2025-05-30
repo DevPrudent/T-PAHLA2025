@@ -57,10 +57,10 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category3",
-    name: "Category 3 - Humanitarian Excellence",
+    name: "Category 3 - Emerging Trailblazer",
     price: 7000,
     tier: "🥉",
-    description: "Emerging Trailblazers recognition package",
+    description: "Humanitarian Excellence recognition package",
     includes: [
       "4-Star Hotel Accommodation (4 Nights)",
       "Executive Lunch & Dinner Vouchers (3 Days)",
@@ -76,7 +76,7 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category4",
-    name: "Category 4",
+    name: "Category 4 - Standard Honoree",
     price: 6000,
     tier: "🏅",
     description: "Quality recognition with essential benefits",
@@ -93,7 +93,7 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category5",
-    name: "Category 5",
+    name: "Category 5 - Standard Honoree",
     price: 5000,
     tier: "🏵️",
     description: "Standard honoree package with key benefits",
@@ -109,10 +109,10 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category6",
-    name: "Category 6",
+    name: "Category 6 - Entry Honoree",
     price: 3500,
     tier: "🔹",
-    description: "Standard recognition package",
+    description: "Entry-level recognition package",
     includes: [
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
@@ -125,10 +125,10 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category7",
-    name: "Category 7",
+    name: "Category 7 - Entry Honoree",
     price: 3500,
     tier: "🔸",
-    description: "Standard recognition package",
+    description: "Entry-level recognition package",
     includes: [
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
@@ -141,10 +141,10 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category8",
-    name: "Category 8",
+    name: "Category 8 - Entry Honoree",
     price: 3333,
     tier: "⚪",
-    description: "Basic recognition package",
+    description: "Entry-level recognition package",
     includes: [
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
@@ -156,7 +156,7 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category9",
-    name: "Category 9",
+    name: "Category 9 - Entry Honoree",
     price: 3000,
     tier: "⚫",
     description: "Essential recognition package",
@@ -170,7 +170,7 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "category10",
-    name: "Category 10",
+    name: "Category 10 - Entry Honoree",
     price: 3000,
     tier: "🟣",
     description: "Essential recognition package",
@@ -198,42 +198,47 @@ export const registrationCategories: RegistrationCategory[] = [
   },
   {
     id: "silver-corporate",
-    name: "Silver Corporate",
+    name: "Silver Corporate Package",
     price: 750,
     tier: "🏢",
-    description: "5 delegates package",
+    description: "5 delegates package - Ideal for NGOs, CSR Units",
     includes: [
       "All-inclusive general access for 5 delegates",
       "Brand mention at Conference, Dinner & Gala",
       "Corporate networking opportunities",
-      "Event materials for all delegates"
+      "Event materials for all delegates",
+      "Certificate of participation for each delegate"
     ]
   },
   {
     id: "gold-corporate",
-    name: "Gold Corporate",
+    name: "Gold Corporate Package",
     price: 1500,
-    tier: "🏢",
-    description: "10 delegates package",
+    tier: "🏆",
+    description: "10 delegates package - Perfect for institutions & multinationals",
     includes: [
       "All-inclusive general access for 10 delegates",
-      "Brand mention at Conference, Dinner & Gala",
-      "Corporate networking opportunities",
-      "Event materials for all delegates"
+      "Enhanced brand mention at all events",
+      "Priority corporate networking opportunities",
+      "Event materials for all delegates",
+      "Certificate of participation for each delegate",
+      "Corporate logo in event materials"
     ]
   },
   {
     id: "platinum-corporate",
-    name: "Platinum Sponsor Delegate Pack",
+    name: "Platinum Corporate Package",
     price: 2000,
-    tier: "🏢",
-    description: "15 delegates package",
+    tier: "💎",
+    description: "15 delegates package - Premium visibility for governments & academia",
     includes: [
       "All-inclusive general access for 15 delegates",
-      "Brand mention at Conference, Dinner & Gala",
-      "Corporate networking opportunities",
+      "Premium sponsor recognition at all events",
+      "Exclusive corporate networking sessions",
       "Event materials for all delegates",
-      "Sponsor recognition"
+      "Certificate of participation for each delegate",
+      "Corporate logo in event materials",
+      "Special mention in closing ceremony"
     ]
   }
 ];
@@ -286,5 +291,120 @@ export const addOns: AddOn[] = [
     name: "Spa & Wellness Package",
     price: 250,
     description: "Spa treatments and wellness activities during your stay"
+  },
+  {
+    id: "professional-photography",
+    name: "Professional Photography Package",
+    price: 300,
+    description: "Personal photography session with professional editing and delivery"
+  },
+  {
+    id: "legacy-documentation",
+    name: "Legacy Documentation Package",
+    price: 350,
+    description: "Professional video interview and documentary-style coverage of your humanitarian work"
+  }
+];
+
+// Award Categories for selection
+export const awardCategories = [
+  {
+    id: "humanitarian-legacy",
+    name: "Humanitarian Legacy & Leadership",
+    description: "Recognizing lifetime achievement and transformational leadership in humanitarian work"
+  },
+  {
+    id: "governance-impact",
+    name: "Governance for Humanitarian Impact",
+    description: "Honoring leaders in government who champion humanitarian causes"
+  },
+  {
+    id: "youth-gender",
+    name: "Youth & Gender Empowerment",
+    description: "Celebrating leaders advancing youth development and gender equality"
+  },
+  {
+    id: "sustainable-development",
+    name: "Sustainable Development & Climate",
+    description: "Recognizing environmental stewardship and sustainable development initiatives"
+  },
+  {
+    id: "innovation-tech",
+    name: "Humanitarian Tech & Innovation",
+    description: "Honoring technological innovation in humanitarian solutions"
+  },
+  {
+    id: "disaster-relief",
+    name: "Disaster Relief & Emergency Response",
+    description: "Recognizing excellence in disaster management and emergency response"
+  },
+  {
+    id: "public-sector",
+    name: "Public Sector & Institutional Impact",
+    description: "Celebrating institutional leadership in humanitarian development"
+  },
+  {
+    id: "social-cultural",
+    name: "Social & Cultural Contributions",
+    description: "Honoring contributions to social development and cultural preservation"
+  },
+  {
+    id: "human-rights",
+    name: "Human Rights & Justice",
+    description: "Recognizing advocacy and action for human rights and social justice"
+  },
+  {
+    id: "health-research",
+    name: "Humanitarian Research & Public Health",
+    description: "Celebrating research and public health initiatives that serve humanity"
+  }
+];
+
+// Event Itinerary
+export const eventItinerary = [
+  {
+    date: "October 15, 2025",
+    title: "Arrival & VIP Reception",
+    activities: [
+      "Delegate arrival and check-in",
+      "Welcome reception",
+      "Networking cocktail"
+    ]
+  },
+  {
+    date: "October 16, 2025",
+    title: "Cultural Experience & Humanitarian Storytelling",
+    activities: [
+      "Abuja cultural tour and photography",
+      "Humanitarian storytelling sessions",
+      "Cultural evening program"
+    ]
+  },
+  {
+    date: "October 17, 2025",
+    title: "High-Level Policy Roundtables",
+    activities: [
+      "Strategic leadership roundtables",
+      "Policy engagement sessions",
+      "Pre-award gala dinner"
+    ]
+  },
+  {
+    date: "October 18, 2025",
+    title: "Leadership Showcase & Grand Awards Gala",
+    activities: [
+      "Leadership showcase presentations",
+      "Grand awards ceremony",
+      "Gala dinner and celebration"
+    ]
+  },
+  {
+    date: "October 19, 2025",
+    title: "Farewell & Departure",
+    activities: [
+      "Farewell breakfast",
+      "Departure arrangements",
+      "Airport transfers"
+    ]
   }
 ];
