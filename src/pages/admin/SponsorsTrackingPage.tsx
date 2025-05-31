@@ -25,8 +25,7 @@ import {
   DialogContent, 
   DialogDescription, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle
 } from "@/components/ui/dialog";
 import { 
   BarChart, 
@@ -50,7 +49,8 @@ import {
   Building, 
   DollarSign, 
   Users, 
-  AlertCircle 
+  AlertCircle,
+  CheckCircle
 } from "lucide-react";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -133,7 +133,7 @@ const SponsorsTrackingPage = () => {
     return sponsors.filter(sponsor => 
       sponsor.full_name.toLowerCase().includes(searchLower) ||
       sponsor.email.toLowerCase().includes(searchLower) ||
-      sponsor.organization.toLowerCase().includes(searchLower) ||
+      sponsor.organization?.toLowerCase().includes(searchLower) ||
       sponsor.sponsorship_type?.toLowerCase().includes(searchLower)
     );
   }, [sponsors, searchTerm]);
@@ -184,8 +184,8 @@ const SponsorsTrackingPage = () => {
         sponsor.id,
         sponsor.full_name,
         sponsor.email,
-        sponsor.organization,
-        sponsor.sponsorship_type,
+        sponsor.organization || 'N/A',
+        sponsor.sponsorship_type || 'Custom',
         sponsor.total_amount,
         sponsor.registration_status,
         sponsor.created_at ? format(new Date(sponsor.created_at), 'yyyy-MM-dd') : 'N/A'
@@ -259,7 +259,7 @@ const SponsorsTrackingPage = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
-                <Building className="mr-2 h-4 w-4 text-muted-foreground" />
+                <CheckCircle className="mr-2 h-4 w-4 text-muted-foreground" />
                 <div className="text-2xl font-bold">{stats.paidSponsors}</div>
               </div>
             </CardContent>
@@ -530,6 +530,14 @@ const SponsorsTrackingPage = () => {
                             <span className="text-tpahla-gold mr-2">✓</span>
                             <span>VIP Seating for 10 guests</span>
                           </li>
+                          <li className="flex items-start">
+                            <span className="text-tpahla-gold mr-2">✓</span>
+                            <span>Full-page brochure feature & branded items in guest packs</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-tpahla-gold mr-2">✓</span>
+                            <span>Dedicated booth, media interviews, and a corporate video showcase</span>
+                          </li>
                         </>
                       )}
                       
@@ -550,6 +558,10 @@ const SponsorsTrackingPage = () => {
                           <li className="flex items-start">
                             <span className="text-tpahla-gold mr-2">✓</span>
                             <span>Half-page feature in brochure</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-tpahla-gold mr-2">✓</span>
+                            <span>Prime logo placement & media coverage</span>
                           </li>
                         </>
                       )}

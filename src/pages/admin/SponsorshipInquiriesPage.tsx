@@ -59,80 +59,37 @@ interface SponsorshipInquiry {
   notes: string;
 }
 
-// Simulated data - in a real app, this would come from your database
-const mockInquiries: SponsorshipInquiry[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john.smith@example.com',
-    phone: '+1234567890',
-    organization: 'Global Health Initiative',
-    sponsorship_type: 'Platinum Sponsorship',
-    message: 'We are interested in becoming a platinum sponsor for TPAHLA 2025. Please provide more details about the benefits and visibility opportunities.',
-    status: 'new',
-    created_at: '2025-05-15T10:30:00Z',
-    updated_at: '2025-05-15T10:30:00Z',
-    notes: ''
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@techforgood.org',
-    phone: '+2345678901',
-    organization: 'Tech For Good Foundation',
-    sponsorship_type: 'Gold Sponsorship',
-    message: 'Our foundation is looking to support humanitarian initiatives in Africa. We would like to discuss gold sponsorship options.',
-    status: 'contacted',
-    created_at: '2025-05-10T14:45:00Z',
-    updated_at: '2025-05-12T09:15:00Z',
-    notes: 'Called on May 12, scheduled follow-up meeting for May 20.'
-  },
-  {
-    id: '3',
-    name: 'Michael Wong',
-    email: 'm.wong@africandev.org',
-    phone: '+3456789012',
-    organization: 'African Development Partners',
-    sponsorship_type: 'Silver Sponsorship',
-    message: 'We are considering sponsoring TPAHLA 2025 at the silver level. Please send us the detailed sponsorship package.',
-    status: 'converted',
-    created_at: '2025-05-05T11:20:00Z',
-    updated_at: '2025-05-14T16:30:00Z',
-    notes: 'Confirmed silver sponsorship on May 14. Payment pending.'
-  },
-  {
-    id: '4',
-    name: 'Amina Diallo',
-    email: 'a.diallo@greenfuture.org',
-    phone: '+4567890123',
-    organization: 'Green Future Initiative',
-    sponsorship_type: 'Bronze Sponsorship',
-    message: 'We are a small NGO focused on environmental sustainability. We would like to know more about the bronze sponsorship package.',
-    status: 'declined',
-    created_at: '2025-05-08T09:10:00Z',
-    updated_at: '2025-05-13T13:45:00Z',
-    notes: 'Budget constraints, will reconsider for next year.'
-  },
-  {
-    id: '5',
-    name: 'Elena Rodriguez',
-    email: 'e.rodriguez@globalaid.org',
-    phone: '+5678901234',
-    organization: 'Global Aid Network',
-    sponsorship_type: 'Custom Package',
-    message: 'We are interested in a custom sponsorship package that focuses on our youth empowerment initiatives. Please contact us to discuss options.',
-    status: 'new',
-    created_at: '2025-05-14T16:50:00Z',
-    updated_at: '2025-05-14T16:50:00Z',
-    notes: ''
-  }
-];
-
-// In a real app, this would fetch from your database
+// Fetch sponsorship inquiries from contact_messages table
 const fetchSponsorshipInquiries = async (): Promise<SponsorshipInquiry[]> => {
-  // Simulating API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return mockInquiries;
+  const { data, error } = await supabase
+    .from('contact_messages')
+    .select('*')
+    .ilike('subject', '%sponsor%')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching sponsorship inquiries:', error);
+    throw new Error(error.message);
+  }
+  
+  // Transform contact_messages to SponsorshipInquiry format
+  return (data || []).map(message => ({
+    id: message.id,
+    name: `${message.first_name || ''} ${message.last_name || ''}`.trim(),
+    email: message.email,
+    phone: message.phone || 'N/A',
+    organization: message.subject || 'N/A',
+    sponsorship_type: message.subject?.includes('Platinum') ? 'Platinum Sponsorship' :
+                      message.subject?.includes('Gold') ? 'Gold Sponsorship' :
+                      message.subject?.includes('Silver') ? 'Silver Sponsorship' :
+                      message.subject?.includes('Bronze') ? 'Bronze Sponsorship' :
+                      message.subject?.includes('Exhibition') ? 'Exhibition Space' : 'Custom Package',
+    message: message.message,
+    status: 'new', // Default status for all inquiries
+    created_at: message.created_at,
+    updated_at: message.created_at,
+    notes: ''
+  }));
 };
 
 const SponsorshipInquiriesPage = () => {
@@ -160,13 +117,11 @@ const SponsorshipInquiriesPage = () => {
     );
   }, [inquiries, searchTerm]);
   
-  // Simulated mutation for updating inquiry status
+  // Mutation for updating inquiry status (in a real app, this would update your database)
   const updateInquiryMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes: string }) => {
-      // Simulating API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       // In a real app, this would update your database
+      // For now, we'll just return the data to simulate a successful update
       return { id, status, notes };
     },
     onSuccess: (data) => {
@@ -217,6 +172,28 @@ const SponsorshipInquiriesPage = () => {
     }
   };
 
+  // Calculate statistics
+  const stats = React.useMemo(() => {
+    if (!inquiries) return null;
+    
+    const total = inquiries.length;
+    const newCount = inquiries.filter(i => i.status === 'new').length;
+    const contactedCount = inquiries.filter(i => i.status === 'contacted').length;
+    const convertedCount = inquiries.filter(i => i.status === 'converted').length;
+    const declinedCount = inquiries.filter(i => i.status === 'declined').length;
+    
+    const conversionRate = total > 0 ? Math.round((convertedCount / total) * 100) : 0;
+    
+    return {
+      total,
+      newCount,
+      contactedCount,
+      convertedCount,
+      declinedCount,
+      conversionRate
+    };
+  }, [inquiries]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -228,14 +205,14 @@ const SponsorshipInquiriesPage = () => {
       </p>
       
       {/* Statistics Cards */}
-      {inquiries && (
+      {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Inquiries</p>
-                  <p className="text-2xl font-bold">{inquiries.length}</p>
+                  <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
                 <Inbox className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -247,7 +224,7 @@ const SponsorshipInquiriesPage = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">New</p>
-                  <p className="text-2xl font-bold">{inquiries.filter(i => i.status === 'new').length}</p>
+                  <p className="text-2xl font-bold">{stats.newCount}</p>
                 </div>
                 <Clock className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -259,7 +236,7 @@ const SponsorshipInquiriesPage = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Converted</p>
-                  <p className="text-2xl font-bold">{inquiries.filter(i => i.status === 'converted').length}</p>
+                  <p className="text-2xl font-bold">{stats.convertedCount}</p>
                 </div>
                 <Check className="h-8 w-8 text-green-500" />
               </div>
@@ -271,11 +248,7 @@ const SponsorshipInquiriesPage = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Conversion Rate</p>
-                  <p className="text-2xl font-bold">
-                    {inquiries.length > 0 
-                      ? `${Math.round((inquiries.filter(i => i.status === 'converted').length / inquiries.length) * 100)}%` 
-                      : '0%'}
-                  </p>
+                  <p className="text-2xl font-bold">{stats.conversionRate}%</p>
                 </div>
                 <AlertCircle className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -368,7 +341,7 @@ const SponsorshipInquiriesPage = () => {
           <DialogHeader>
             <DialogTitle>Sponsorship Inquiry Details</DialogTitle>
             <DialogDescription>
-              Inquiry from {selectedInquiry?.organization} - {format(new Date(selectedInquiry?.created_at || new Date()), 'PPP')}
+              Inquiry from {selectedInquiry?.organization} - {selectedInquiry?.created_at ? format(new Date(selectedInquiry.created_at), 'PPP') : 'N/A'}
             </DialogDescription>
           </DialogHeader>
           
