@@ -32,6 +32,8 @@ import {
   UserX,
   CreditCard,
   UserPlus,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
