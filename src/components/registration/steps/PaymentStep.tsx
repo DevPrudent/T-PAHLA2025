@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Building, Smartphone } from 'lucide-react';
+import { CreditCard, Building, Smartphone, ChevronsRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
 import type { RegistrationData } from '../MultiStepRegistration';
+import { Separator } from '@/components/ui/separator';
 
 interface Props {
   data: RegistrationData;
@@ -25,24 +26,40 @@ const paymentMethods = [
     recommended: true
   },
   {
-    id: 'flutterwave',
-    name: 'Flutterwave',
-    description: 'Multiple payment options',
+    id: 'bank_transfer',
+    name: 'Bank Transfer',
+    description: 'Manual bank transfer (requires verification)',
     icon: Building,
     recommended: false
   },
   {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'International cards',
+    id: 'flutterwave',
+    name: 'Flutterwave',
+    description: 'Multiple payment options',
     icon: Smartphone,
     recommended: false
+  }
+];
+
+const bankDetails = [
+  {
+    currency: 'NGN',
+    accountName: 'The Pan African Humanitarian Leadership Award (TPAHLA)/IHSD',
+    accountNumber: '1229874160',
+    bank: 'Zenith Bank'
+  },
+  {
+    currency: 'USD',
+    accountName: 'The Pan African Humanitarian Leadership Award (TPAHLA)/IHSD',
+    accountNumber: '5075232190',
+    bank: 'Zenith Bank'
   }
 ];
 
 export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
   const [selectedMethod, setSelectedMethod] = useState('paystack');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showBankDetails, setShowBankDetails] = useState(false);
   const { toast } = useToast();
   const { createPayment, updatePaymentStatus } = useRegistration();
 
@@ -59,6 +76,13 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
     setIsProcessing(true);
     
     try {
+      // For bank transfer, show bank details instead of processing payment
+      if (selectedMethod === 'bank_transfer') {
+        setShowBankDetails(true);
+        setIsProcessing(false);
+        return;
+      }
+
       // Create payment record
       const paymentId = await createPayment(registrationId, selectedMethod);
       
@@ -106,6 +130,14 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
     }
   };
 
+  const handleBankTransferComplete = () => {
+    toast({
+      title: "Bank Transfer Instructions Sent",
+      description: "Please complete your transfer and allow 24-48 hours for verification.",
+    });
+    onSuccess();
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -145,86 +177,141 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
         </CardContent>
       </Card>
 
-      {/* Payment Methods */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Choose Payment Method</CardTitle>
-          <CardDescription>
-            Select your preferred payment gateway. All methods support major cards and local payment options.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
-            <div className="space-y-3">
-              {paymentMethods.map((method) => {
-                const IconComponent = method.icon;
-                return (
-                  <div
-                    key={method.id}
-                    className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedMethod === method.id
-                        ? 'border-tpahla-gold bg-tpahla-gold/5'
-                        : 'border-border hover:border-tpahla-purple/30'
-                    }`}
-                    onClick={() => setSelectedMethod(method.id)}
-                  >
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <IconComponent className="w-5 h-5 text-tpahla-purple" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={method.id} className="font-medium cursor-pointer">
-                          {method.name}
-                        </Label>
-                        {method.recommended && (
-                          <Badge variant="secondary" className="text-xs">
-                            Recommended
-                          </Badge>
-                        )}
+      {!showBankDetails ? (
+        <>
+          {/* Payment Methods */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Choose Payment Method</CardTitle>
+              <CardDescription>
+                Select your preferred payment gateway. All methods support major cards and local payment options.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
+                <div className="space-y-3">
+                  {paymentMethods.map((method) => {
+                    const IconComponent = method.icon;
+                    return (
+                      <div
+                        key={method.id}
+                        className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all ${
+                          selectedMethod === method.id
+                            ? 'border-tpahla-gold bg-tpahla-gold/5'
+                            : 'border-border hover:border-tpahla-purple/30'
+                        }`}
+                        onClick={() => setSelectedMethod(method.id)}
+                      >
+                        <RadioGroupItem value={method.id} id={method.id} />
+                        <IconComponent className="w-5 h-5 text-tpahla-purple" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor={method.id} className="font-medium cursor-pointer">
+                              {method.name}
+                            </Label>
+                            {method.recommended && (
+                              <Badge variant="secondary" className="text-xs">
+                                Recommended
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{method.description}</p>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{method.description}</p>
-                    </div>
+                    );
+                  })}
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
+
+          {/* Security Information */}
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <h4 className="font-semibold text-green-800 mb-2">🔒 Secure Payment</h4>
+              <ul className="text-sm text-green-700 space-y-1">
+                <li>• SSL encrypted payment processing</li>
+                <li>• PCI DSS compliant payment gateways</li>
+                <li>• Your payment information is never stored on our servers</li>
+                <li>• Instant payment confirmation and receipt</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Payment Button */}
+          <div className="pt-4">
+            <Button
+              onClick={handlePayment}
+              disabled={isProcessing}
+              className="w-full bg-tpahla-darkgreen hover:bg-tpahla-emerald text-white py-6 text-lg font-semibold"
+              size="lg"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                  Processing Payment...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Pay ${data.totalAmount.toLocaleString()} - Complete Registration
+                </>
+              )}
+            </Button>
+          </div>
+        </>
+      ) : (
+        /* Bank Transfer Details */
+        <Card>
+          <CardHeader>
+            <CardTitle>Bank Transfer Details</CardTitle>
+            <CardDescription>
+              Please transfer the exact amount to one of the following accounts and include your name and email as reference.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {bankDetails.map((account, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium mb-2">{account.currency} Account</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Account Name:</span>
+                    <span className="font-medium">{account.accountName}</span>
                   </div>
-                );
-              })}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Account Number:</span>
+                    <span className="font-medium">{account.accountNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Bank:</span>
+                    <span className="font-medium">{account.bank}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h4 className="font-medium text-yellow-800 mb-2">Important Instructions</h4>
+              <ul className="space-y-1 text-sm text-yellow-700">
+                <li>• Include your full name and email as payment reference</li>
+                <li>• Transfer the exact amount: ${data.totalAmount.toLocaleString()}</li>
+                <li>• After making the transfer, please email proof of payment to payments@tpahla.org</li>
+                <li>• Your registration will be confirmed within 24-48 hours after verification</li>
+              </ul>
             </div>
-          </RadioGroup>
-        </CardContent>
-      </Card>
 
-      {/* Security Information */}
-      <Card className="border-green-200 bg-green-50">
-        <CardContent className="pt-6">
-          <h4 className="font-semibold text-green-800 mb-2">🔒 Secure Payment</h4>
-          <ul className="text-sm text-green-700 space-y-1">
-            <li>• SSL encrypted payment processing</li>
-            <li>• PCI DSS compliant payment gateways</li>
-            <li>• Your payment information is never stored on our servers</li>
-            <li>• Instant payment confirmation and receipt</li>
-          </ul>
-        </CardContent>
-      </Card>
+            <Separator />
 
-      {/* Payment Button */}
-      <div className="pt-4">
-        <Button
-          onClick={handlePayment}
-          disabled={isProcessing}
-          className="w-full bg-tpahla-darkgreen hover:bg-tpahla-emerald text-white py-6 text-lg font-semibold"
-          size="lg"
-        >
-          {isProcessing ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Processing Payment...
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-5 h-5 mr-2" />
-              Pay ${data.totalAmount.toLocaleString()} - Complete Registration
-            </>
-          )}
-        </Button>
-      </div>
+            <Button 
+              onClick={handleBankTransferComplete} 
+              className="w-full bg-tpahla-darkgreen hover:bg-tpahla-emerald text-white"
+            >
+              <ChevronsRight className="mr-2 h-4 w-4" />
+              I've Noted the Details - Continue
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <p className="text-xs text-center text-muted-foreground">
         By completing this payment, you agree to the TPAHLA 2025 terms and conditions. 

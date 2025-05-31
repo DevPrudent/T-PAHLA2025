@@ -27,6 +27,15 @@ const groupTypes = [
   { id: 'platinum', name: 'Platinum Package', seats: 15, price: 2000, description: 'Premium visibility for governments & academia' },
 ];
 
+const sponsorshipTypes = [
+  { id: 'platinum', name: 'Platinum Sponsorship', price: 100000, description: 'Lead Partner' },
+  { id: 'gold', name: 'Gold Sponsorship', price: 50000, description: 'Strategic Partner' },
+  { id: 'silver', name: 'Silver Sponsorship', price: 25000, description: 'Supporting Partner' },
+  { id: 'bronze', name: 'Bronze Sponsorship', price: 10000, description: 'Contributing Partner' },
+  { id: 'exhibition', name: 'Exhibition Space', price: 5000, description: 'Exhibitor' },
+  { id: 'custom', name: 'Custom Package', price: 0, description: 'Tailored to your needs' }
+];
+
 export const OptionsStep = ({ data, onUpdate }: Props) => {
   const [availableAwards, setAvailableAwards] = useState<{name: string, value: string}[]>([]);
 
@@ -51,7 +60,16 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
         }
         break;
       case 'sponsor':
-        total = currentData.customAmount || 0;
+        if (currentData.sponsorshipType && currentData.sponsorshipType !== 'custom') {
+          const sponsorType = sponsorshipTypes.find(s => s.id === currentData.sponsorshipType);
+          total = sponsorType ? sponsorType.price : 0;
+          // Update customAmount to match the sponsorship type price
+          if (sponsorType && sponsorType.price > 0) {
+            onUpdate({ customAmount: sponsorType.price });
+          }
+        } else {
+          total = currentData.customAmount || 0;
+        }
         break;
     }
 
@@ -63,7 +81,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
     onUpdate(updates);
     
     // Recalculate total if relevant fields change
-    if (['tier', 'groupType', 'customAmount'].includes(field)) {
+    if (['tier', 'groupType', 'sponsorshipType', 'customAmount'].includes(field)) {
       calculateTotal(updates);
     }
   };
@@ -82,6 +100,10 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
   
   // Get the selected group package details
   const selectedGroupType = data.groupType ? groupTypes.find(g => g.id === data.groupType) : null;
+
+  // Get the selected sponsorship type details
+  const selectedSponsorshipType = data.sponsorshipType ? 
+    sponsorshipTypes.find(s => s.id === data.sponsorshipType) : null;
 
   const renderNomineeOptions = () => (
     <div className="space-y-6">
@@ -223,31 +245,51 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
   const renderSponsorOptions = () => (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="sponsorshipType">Sponsorship Type</Label>
-        <Select value={data.sponsorshipType} onValueChange={(value) => handleInputChange('sponsorshipType', value)}>
+        <Label htmlFor="sponsorshipType">Sponsorship Type *</Label>
+        <Select 
+          value={data.sponsorshipType} 
+          onValueChange={(value) => {
+            handleInputChange('sponsorshipType', value);
+            
+            // If not custom, set the amount automatically
+            if (value !== 'custom') {
+              const sponsorType = sponsorshipTypes.find(s => s.id === value);
+              if (sponsorType) {
+                handleInputChange('customAmount', sponsorType.price);
+              }
+            }
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select sponsorship type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="platinum">Platinum Sponsorship ($100,000+)</SelectItem>
-            <SelectItem value="gold">Gold Sponsorship ($50,000)</SelectItem>
-            <SelectItem value="silver">Silver Sponsorship ($25,000)</SelectItem>
-            <SelectItem value="bronze">Bronze Sponsorship ($10,000)</SelectItem>
-            <SelectItem value="exhibition">Exhibition Space ($5,000)</SelectItem>
-            <SelectItem value="custom">Custom Package</SelectItem>
+            {sponsorshipTypes.map((type) => (
+              <SelectItem key={type.id} value={type.id}>
+                {type.name} {type.price > 0 && `($${type.price.toLocaleString()})`}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <Label htmlFor="customAmount">Sponsorship Amount (USD) *</Label>
+        <Label htmlFor="customAmount">
+          Sponsorship Amount (USD) {data.sponsorshipType === 'custom' ? '*' : ''}
+        </Label>
         <Input
           id="customAmount"
           type="number"
           value={data.customAmount || ''}
           onChange={(e) => handleInputChange('customAmount', parseInt(e.target.value) || 0)}
           placeholder="Enter amount"
+          disabled={data.sponsorshipType !== 'custom'}
         />
+        {data.sponsorshipType !== 'custom' && (
+          <p className="text-sm text-muted-foreground mt-1">
+            Amount is fixed based on selected sponsorship type
+          </p>
+        )}
       </div>
 
       <Card className="bg-tpahla-purple/5 border-tpahla-purple/20">
@@ -295,6 +337,38 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                 <li className="flex items-start">
                   <span className="text-tpahla-gold mr-2">✓</span>
                   <span>VIP Seating for 6 guests</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Silver Sponsorship ($25,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Official sponsor branding on event and print materials</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 4 guests</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Bronze Sponsorship ($10,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Acknowledgment as a supporter across key channels</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 2 guests</span>
                 </li>
               </ul>
             </div>
@@ -409,7 +483,6 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
               <p className="text-muted-foreground mb-4">
                 Your registration includes full access to all public sessions, networking opportunities, and event materials.
               </p>
-              <Badge className="text-lg px-4 py-2">$200</Badge>
               
               <div className="mt-6 p-4 bg-muted rounded-lg">
                 <h4 className="font-medium mb-2">Package Includes:</h4>
@@ -436,6 +509,8 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                   </li>
                 </ul>
               </div>
+              
+              <Badge className="text-lg px-4 py-2 mt-6">$200</Badge>
             </div>
           )}
           {data.participationType === 'group' && renderGroupOptions()}
