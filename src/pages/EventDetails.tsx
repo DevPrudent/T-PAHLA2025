@@ -43,7 +43,7 @@ const EventDetails = () => {
       date: "October 15, 2025",
       title: "Arrival & Cultural Reception",
       description: "The city comes alive with the arrival of a diverse mix of finalists, dignitaries, innovators, activists, and development stakeholders from across Africa and the Diaspora. It marks the beginning of a powerful convergence of change-makers.",
-      image: "/lovable-uploads/photo-1472396961693-142e6e269027.png",
+      image: "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/category_images//1747913267029-Disasters.jpg",
       events: [
         {
           time: "All Day",
