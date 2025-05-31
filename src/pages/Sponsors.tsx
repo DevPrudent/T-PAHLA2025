@@ -208,6 +208,72 @@ const Sponsors = () => {
                     Become a Sponsor
                   </Button>
                 </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Sponsorship Inquiry</DialogTitle>
+                    <DialogDescription>
+                      Complete the form below to express your interest in sponsoring TPAHLA 2025.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <form onSubmit={handleSubmitInquiry} className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input id="name" value={formData.name} onChange={handleInputChange} required />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input id="phone" value={formData.phone} onChange={handleInputChange} required />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="organization">Organization</Label>
+                        <Input id="organization" value={formData.organization} onChange={handleInputChange} required />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="sponsorshipType">Sponsorship Type</Label>
+                        <Select value={formData.sponsorshipType} onValueChange={handleSponsorshipTypeChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select sponsorship type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sponsorshipTiers.map(tier => (
+                              <SelectItem key={tier.id} value={tier.name}>
+                                {tier.name} ({tier.price})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="message">Additional Information</Label>
+                        <Textarea 
+                          id="message" 
+                          value={formData.message} 
+                          onChange={handleInputChange} 
+                          placeholder="Please share any specific requirements or questions you have."
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setContactDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">Submit Inquiry</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
               </Dialog>
               <a href={brochureUrl} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20">
@@ -338,21 +404,17 @@ const Sponsors = () => {
                       </ul>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => {
-                              setSelectedTier(tier.id);
-                              setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
-                              setContactDialogOpen(true);
-                            }}
-                          >
-                            Select {tier.name}
-                          </Button>
-                        </DialogTrigger>
-                      </Dialog>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          setSelectedTier(tier.id);
+                          setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
+                          setContactDialogOpen(true);
+                        }}
+                      >
+                        Select {tier.name}
+                      </Button>
                     </CardFooter>
                   </Card>
                 ))}
@@ -382,21 +444,17 @@ const Sponsors = () => {
                       </ul>
                     </CardContent>
                     <CardFooter className="flex justify-center pt-4 pb-8">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="lg"
-                            className="bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90"
-                            onClick={() => {
-                              setSelectedTier(tier.id);
-                              setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
-                              setContactDialogOpen(true);
-                            }}
-                          >
-                            Become a {tier.name.split(' ')[0]} Sponsor
-                          </Button>
-                        </DialogTrigger>
-                      </Dialog>
+                      <Button 
+                        size="lg"
+                        className="bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90"
+                        onClick={() => {
+                          setSelectedTier(tier.id);
+                          setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
+                          setContactDialogOpen(true);
+                        }}
+                      >
+                        Become a {tier.name.split(' ')[0]} Sponsor
+                      </Button>
                     </CardFooter>
                   </Card>
                 </TabsContent>
@@ -427,21 +485,17 @@ const Sponsors = () => {
                         </ul>
                       </CardContent>
                       <CardFooter className="flex justify-between">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              className="w-full"
-                              onClick={() => {
-                                setSelectedTier(tier.id);
-                                setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
-                                setContactDialogOpen(true);
-                              }}
-                            >
-                              Select {tier.name}
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => {
+                            setSelectedTier(tier.id);
+                            setFormData(prev => ({ ...prev, sponsorshipType: tier.name }));
+                            setContactDialogOpen(true);
+                          }}
+                        >
+                          Select {tier.name}
+                        </Button>
                       </CardFooter>
                     </Card>
                   ))}
@@ -531,16 +585,12 @@ const Sponsors = () => {
                 for humanitarian research, capacity building, innovation, and impact-led collaboration.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90"
-                      onClick={() => setContactDialogOpen(true)}
-                    >
-                      Become a Sponsor Today
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
+                <Button 
+                  className="bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90"
+                  onClick={() => setContactDialogOpen(true)}
+                >
+                  Become a Sponsor Today
+                </Button>
                 <a href={brochureUrl} target="_blank" rel="noopener noreferrer">
                   <Button variant="outline">
                     <Download className="mr-2 h-4 w-4" />
