@@ -29,7 +29,7 @@ const AwardClusterDialog: React.FC<AwardClusterDialogProps> = ({ selectedCluster
             >
               <DialogHeader>
                 <div className="flex items-center gap-3 mb-2">
-                  {IconComponent && <IconComponent className="text-tpahla-emerald" size={28} />}
+                  {IconComponent && <IconComponent className="text-tpahla-emerald\" size={28} />}
                   <DialogTitle className="text-2xl font-serif text-tpahla-gold">
                     {selectedCluster.clusterTitle}
                   </DialogTitle>
