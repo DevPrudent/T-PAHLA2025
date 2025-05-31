@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Award, DollarSign, CheckCircle, Clock, ListChecks, Loader2, UserPlus } from "lucide-react";
+import { Users, Award, DollarSign, CheckCircle, Clock, ListChecks, Loader2, UserPlus, Folder, CreditCard } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
