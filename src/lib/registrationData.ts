@@ -22,6 +22,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🥇",
     description: "Premier recognition with maximum visibility and exclusive benefits",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "5-Star Hotel Accommodation (4 Nights)",
       "VIP Airport Pickup & Drop-Off",
       "Executive Lunch & Dinner Vouchers (3 Days)",
@@ -42,6 +43,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🥈",
     description: "High-level recognition with comprehensive benefits",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "4-Star Hotel Accommodation (4 Nights)",
       "VIP Airport Pickup & Drop-Off",
       "Executive Lunch & Dinner Vouchers (3 Days)",
@@ -61,6 +63,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🥉",
     description: "Humanitarian Excellence recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "4-Star Hotel Accommodation (4 Nights)",
       "Executive Lunch & Dinner Vouchers (3 Days)",
       "Shopping Voucher – $125",
@@ -80,6 +83,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🏅",
     description: "Quality recognition with essential benefits",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "4-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Shopping Voucher – $125",
@@ -97,6 +101,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🏵️",
     description: "Standard honoree package with key benefits",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "4-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Shopping Voucher – $125",
@@ -113,6 +118,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🔹",
     description: "Entry-level recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Shopping Voucher – $100",
@@ -129,6 +135,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🔸",
     description: "Entry-level recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Shopping Voucher – $100",
@@ -145,6 +152,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "⚪",
     description: "Entry-level recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Shopping Voucher – $100",
@@ -160,6 +168,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "⚫",
     description: "Essential recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Abuja City Tour & Photography",
@@ -174,6 +183,7 @@ export const registrationCategories: RegistrationCategory[] = [
     tier: "🟣",
     description: "Essential recognition package",
     includes: [
+      "Distinguished Humanitarian Fellowship – fihsd",
       "3-Star Hotel Accommodation (4 Nights)",
       "Executive Meal Vouchers (3 Days)",
       "Abuja City Tour & Photography",
