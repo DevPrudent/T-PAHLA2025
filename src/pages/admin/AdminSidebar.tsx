@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Added useState and useEffect
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -10,9 +10,9 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub, // Added for submenus
-  SidebarMenuSubItem, // Added for submenus
-  SidebarMenuSubButton, // Added for submenus
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,26 +24,27 @@ import {
   BarChart3, 
   LogOut, 
   MessageSquare,
-  ChevronDown, // Added for submenu toggle icon
-  ChevronRight, // Added for submenu toggle icon
-  FileCheck2, // Icon for Completed Nominations
-  FileClock, // Icon for Incomplete Nominations
-  UserCheck, // Icon for Approved Nominees
-  UserX, // Icon for Rejected Nominees
+  ChevronDown,
+  ChevronRight,
+  FileCheck2,
+  FileClock,
+  UserCheck,
+  UserX,
+  CreditCard,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-// Define a type for nav items that supports children for submenus
 type AdminNavItem = {
   href?: string;
   label: string;
   icon: React.ElementType;
   children?: AdminNavItem[];
-  onClick?: () => void; // For items that toggle submenus
-  isInitiallyOpen?: boolean; // To control initial open state for submenus
-  parentPath?: string; // To help with isActive logic for children
-  id: string; // Added unique id for submenu state key
+  onClick?: () => void;
+  isInitiallyOpen?: boolean;
+  parentPath?: string;
+  id: string;
 };
 
 export function AdminSidebar() {
@@ -51,21 +52,20 @@ export function AdminSidebar() {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // State for controlling submenu visibility
   const initialOpenSubmenus: { [key: string]: boolean } = {
     nominationsSubmenu: location.pathname.startsWith("/admin/nominations"),
     nomineeStatusSubmenu: location.pathname.startsWith("/admin/nominees/status"),
+    registrationsSubmenu: location.pathname.startsWith("/admin/registrations"),
   };
   
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>(initialOpenSubmenus);
 
   useEffect(() => {
-    // Update submenu open state if path changes and matches a parentPath
-    // This helps keep the correct submenu open when navigating directly via URL or back/forward browser buttons
     setOpenSubmenus(prev => ({
       ...prev,
       nominationsSubmenu: location.pathname.startsWith("/admin/nominations"),
       nomineeStatusSubmenu: location.pathname.startsWith("/admin/nominees/status"),
+      registrationsSubmenu: location.pathname.startsWith("/admin/registrations"),
     }));
   }, [location.pathname]);
 
@@ -77,7 +77,7 @@ export function AdminSidebar() {
     { id: "dashboard", href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { id: "awardCategories", href: "/admin/categories", label: "Award Categories", icon: Folder },
     { 
-      id: "nominationsSubmenu", // Unique ID
+      id: "nominationsSubmenu",
       label: "Nominations", 
       icon: Users, 
       onClick: () => toggleSubmenu("nominationsSubmenu"),
@@ -88,7 +88,7 @@ export function AdminSidebar() {
       ]
     },
     { 
-      id: "nomineeStatusSubmenu", // Unique ID
+      id: "nomineeStatusSubmenu",
       label: "Nominee Status", 
       icon: Users, 
       onClick: () => toggleSubmenu("nomineeStatusSubmenu"),
@@ -98,7 +98,19 @@ export function AdminSidebar() {
         { id: "rejectedNominees", href: "/admin/nominees/status/rejected", label: "Rejected", icon: UserX },
       ]
     },
-    { id: "transactions", href: "/admin/transactions", label: "Transactions", icon: ListChecks },
+    { 
+      id: "registrationsSubmenu",
+      label: "Registrations", 
+      icon: UserPlus, 
+      onClick: () => toggleSubmenu("registrationsSubmenu"),
+      parentPath: "/admin/registrations", 
+      children: [
+        { id: "allRegistrations", href: "/admin/registrations", label: "All Registrations", icon: Users },
+        { id: "pendingRegistrations", href: "/admin/registrations/pending", label: "Pending Payment", icon: Clock },
+        { id: "paidRegistrations", href: "/admin/registrations/paid", label: "Paid", icon: CheckCircle },
+      ]
+    },
+    { id: "transactions", href: "/admin/transactions", label: "Transactions", icon: CreditCard },
     { id: "messages", href: "/admin/messages", label: "Messages", icon: MessageSquare },
   ];
 
@@ -126,7 +138,6 @@ export function AdminSidebar() {
     return false;
   };
 
-
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -141,7 +152,7 @@ export function AdminSidebar() {
             <SidebarGroupLabel>Management</SidebarGroupLabel>
             <SidebarMenu>
               {adminNavItems.map((item) => (
-                <SidebarMenuItem key={item.id}> {/* Use item.id as key */}
+                <SidebarMenuItem key={item.id}>
                   {item.children ? (
                     <>
                       <SidebarMenuButton
@@ -158,7 +169,7 @@ export function AdminSidebar() {
                       {openSubmenus[item.id] && (
                         <SidebarMenuSub>
                           {item.children.map((child) => (
-                            <SidebarMenuSubItem key={child.id}> {/* Use child.id as key */}
+                            <SidebarMenuSubItem key={child.id}>
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={child.href ? isSubmenuItemActive(child.href) : false}

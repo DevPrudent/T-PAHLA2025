@@ -39,6 +39,9 @@ import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
 import IncompleteNominationsPage from "./pages/admin/IncompleteNominationsPage";
 import ApprovedNomineesPage from "./pages/admin/ApprovedNomineesPage";
 import RejectedNomineesPage from "./pages/admin/RejectedNomineesPage";
+import RegistrationsPage from "./pages/admin/RegistrationsPage";
+import PendingRegistrationsPage from "./pages/admin/PendingRegistrationsPage";
+import PaidRegistrationsPage from "./pages/admin/PaidRegistrationsPage";
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -86,6 +89,9 @@ const App = () => {
                 <Route path="nominations/incomplete" element={<IncompleteNominationsPage />} />
                 <Route path="nominees/status/approved" element={<ApprovedNomineesPage />} /> 
                 <Route path="nominees/status/rejected" element={<RejectedNomineesPage />} />
+                <Route path="registrations" element={<RegistrationsPage />} />
+                <Route path="registrations/pending" element={<PendingRegistrationsPage />} />
+                <Route path="registrations/paid" element={<PaidRegistrationsPage />} />
                 <Route path="transactions" element={<TransactionsPage />} />
                 <Route path="messages" element={<MessagesPage />} />
               </Route>

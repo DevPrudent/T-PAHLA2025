@@ -102,8 +102,8 @@ export const useRegistration = () => {
           amount: registration.total_amount,
           payment_method: paymentMethod,
           payment_status: 'pending',
-          transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           currency: 'USD',
+          transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         })
         .select()
         .single();
