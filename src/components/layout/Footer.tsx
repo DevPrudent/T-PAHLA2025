@@ -1,5 +1,4 @@
-
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -48,10 +47,6 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-serif font-bold mb-4 text-tpahla-gold">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin className="h-5 w-5 mr-2 text-tpahla-gold mt-0.5 flex-shrink-0" />
-                <span className="text-sm">Abuja Continental Hotel, Nigeria</span>
-              </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
                 <span className="text-sm">+234 123 456 7890</span>
@@ -59,6 +54,14 @@ const Footer = () => {
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
                 <span className="text-sm">info@tpahla.org</span>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
+                <span className="text-sm">nominations@tpahla.org</span>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
+                <a href="https://www.tpahla.org" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-tpahla-gold">www.tpahla.org</a>
               </li>
             </ul>
           </div>

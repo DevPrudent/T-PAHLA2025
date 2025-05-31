@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Phone, Send, CheckCircle, AlertCircle, HelpCircle, MessageSquare, Globe, Clock } from 'lucide-react';
+import { Mail, Phone, Send, CheckCircle, AlertCircle, HelpCircle, MessageSquare, Globe, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -129,8 +129,8 @@ const Contact = () => {
                 <span className="text-sm">+234 123 456 7890</span>
               </div>
               <div className="bg-tpahla-gold/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
-                <MapPin className="h-4 w-4 text-tpahla-gold mr-2" />
-                <span className="text-sm">Abuja, Nigeria</span>
+                <Globe className="h-4 w-4 text-tpahla-gold mr-2" />
+                <span className="text-sm">www.tpahla.org</span>
               </div>
             </div>
           </motion.div>
@@ -163,15 +163,13 @@ const Contact = () => {
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
                       <div className="bg-tpahla-gold/20 p-3 rounded-full mr-4">
-                        <MapPin className="h-6 w-6 text-tpahla-gold" />
+                        <Globe className="h-6 w-6 text-tpahla-gold" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-tpahla-text-primary mb-1">Address</h3>
+                        <h3 className="font-bold text-tpahla-text-primary mb-1">Website</h3>
                         <p className="text-tpahla-text-secondary">
-                          TPAHLA Secretariat<br />
-                          Plot 701 Ahmadu Bello Way<br />
-                          Central Business District<br />
-                          Abuja, FCT, Nigeria
+                          <a href="https://www.tpahla.org" target="_blank" rel="noopener noreferrer" className="hover:text-tpahla-gold transition-colors">www.tpahla.org</a><br />
+                          <a href="https://www.ihsd-ng.org/TPAHLA" target="_blank" rel="noopener noreferrer" className="hover:text-tpahla-gold transition-colors">www.ihsd-ng.org/TPAHLA</a>
                         </p>
                       </div>
                     </motion.div>
@@ -474,42 +472,8 @@ const Contact = () => {
           </div>
         </section>
         
-        {/* Map Section */}
-        <section className="container mx-auto px-4 mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-6xl mx-auto"
-          >
-            <Card className="border-tpahla-gold/20 overflow-hidden">
-              <CardHeader className="bg-tpahla-neutral border-b border-tpahla-gold/20">
-                <CardTitle className="text-tpahla-gold flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Our Location
-                </CardTitle>
-                <CardDescription>Find us at the heart of Abuja</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="h-[400px] w-full">
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.3035561326!2d7.483338714342075!3d9.049476891008858!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0ba5345430c1%3A0xfa8d0f794ad7b154!2sAbuja%2C%20Nigeria!5e0!3m2!1sen!2sus!4v1627563772081!5m2!1sen!2sus" 
-                    width="100%" 
-                    height="100%" 
-                    style={{ border: 0 }}
-                    allowFullScreen={true}
-                    loading="lazy"
-                    title="TPAHLA Office Location"
-                  ></iframe>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </section>
-        
         {/* FAQ Section */}
-        <section className="container mx-auto px-4 py-12 bg-tpahla-neutral-light rounded-lg mb-16">
+        <section className="container mx-auto px-4 mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
