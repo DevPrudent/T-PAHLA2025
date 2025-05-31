@@ -34,6 +34,8 @@ import {
   UserPlus,
   Clock as ClockIcon,
   CheckCircle,
+  DollarSign,
+  Handshake,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -58,6 +60,7 @@ export function AdminSidebar() {
     nominationsSubmenu: location.pathname.startsWith("/admin/nominations"),
     nomineeStatusSubmenu: location.pathname.startsWith("/admin/nominees/status"),
     registrationsSubmenu: location.pathname.startsWith("/admin/registrations"),
+    sponsorsSubmenu: location.pathname.startsWith("/admin/sponsors"),
   };
   
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>(initialOpenSubmenus);
@@ -68,6 +71,7 @@ export function AdminSidebar() {
       nominationsSubmenu: location.pathname.startsWith("/admin/nominations"),
       nomineeStatusSubmenu: location.pathname.startsWith("/admin/nominees/status"),
       registrationsSubmenu: location.pathname.startsWith("/admin/registrations"),
+      sponsorsSubmenu: location.pathname.startsWith("/admin/sponsors"),
     }));
   }, [location.pathname]);
 
@@ -110,6 +114,17 @@ export function AdminSidebar() {
         { id: "allRegistrations", href: "/admin/registrations", label: "All Registrations", icon: Users },
         { id: "pendingRegistrations", href: "/admin/registrations/pending", label: "Pending Payment", icon: ClockIcon },
         { id: "paidRegistrations", href: "/admin/registrations/paid", label: "Paid", icon: CheckCircle },
+      ]
+    },
+    { 
+      id: "sponsorsSubmenu",
+      label: "Sponsors", 
+      icon: Handshake, 
+      onClick: () => toggleSubmenu("sponsorsSubmenu"),
+      parentPath: "/admin/sponsors", 
+      children: [
+        { id: "sponsorsTracking", href: "/admin/sponsors/tracking", label: "Sponsors Tracking", icon: BarChart3 },
+        { id: "sponsorshipInquiries", href: "/admin/sponsors/inquiries", label: "Sponsorship Inquiries", icon: MessageSquare },
       ]
     },
     { id: "transactions", href: "/admin/transactions", label: "Transactions", icon: CreditCard },
