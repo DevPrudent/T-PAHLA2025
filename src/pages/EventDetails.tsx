@@ -246,6 +246,13 @@ const EventDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <Card className="bg-tpahla-neutral border-tpahla-gold/20 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
+              <div className="h-40 overflow-hidden">
+                <img 
+                  src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" 
+                  alt="Event Dates" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <CalendarDays className="h-8 w-8 text-tpahla-gold mr-3" />
@@ -262,6 +269,13 @@ const EventDetails = () => {
 
             <Card className="bg-tpahla-neutral border-tpahla-gold/20 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
+              <div className="h-40 overflow-hidden">
+                <img 
+                  src="/lovable-uploads/eb1ccb9c-bbec-46b8-87e5-2f58868b4b76.png" 
+                  alt="Venue" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <MapPin className="h-8 w-8 text-tpahla-gold mr-3" />
@@ -278,6 +292,13 @@ const EventDetails = () => {
 
             <Card className="bg-tpahla-neutral border-tpahla-gold/20 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
+              <div className="h-40 overflow-hidden">
+                <img 
+                  src="/lovable-uploads/d6cbd5f9-4bd4-447d-912d-aa8223a71b4f.jpg" 
+                  alt="Attendees" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   <Users className="h-8 w-8 text-tpahla-gold mr-3" />
@@ -660,7 +681,7 @@ const EventDetails = () => {
             <Card className="bg-tpahla-neutral border-tpahla-gold/20 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="h-48 overflow-hidden">
                 <img 
-                  src="/lovable-uploads/photo-1472396961693-142e6e269027.png" 
+                  src="/lovable-uploads/d6cbd5f9-4bd4-447d-912d-aa8223a71b4f.jpg" 
                   alt="Networking Sessions" 
                   className="w-full h-full object-cover"
                 />
