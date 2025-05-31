@@ -6,8 +6,6 @@ import {
   Calendar, 
   FileText, 
   Users, 
-  Zap, 
-  BarChart, 
   ArrowRight,
   Clock
 } from "lucide-react";
@@ -311,100 +309,8 @@ const Nominations = () => {
           </div>
         </section>
         
-        {/* Judging Criteria Section */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <motion.div 
-              className="max-w-4xl mx-auto text-center mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl font-serif font-bold mb-6 text-tpahla-gold">
-                Judging Criteria
-              </h2>
-              <p className="text-lg text-tpahla-text-secondary">
-                Nominations are evaluated based on the following criteria by our distinguished panel of judges
-              </p>
-            </motion.div>
-            
-            <div className="max-w-5xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Impact & Reach",
-                    description: "Measurable positive change and scope of influence",
-                    icon: BarChart,
-                    color: "bg-tpahla-emerald",
-                    weight: "30%"
-                  },
-                  {
-                    title: "Innovation & Creativity",
-                    description: "Novel approaches to addressing humanitarian challenges",
-                    icon: Zap,
-                    color: "bg-tpahla-gold",
-                    weight: "25%"
-                  },
-                  {
-                    title: "Sustainability",
-                    description: "Long-term viability and environmental responsibility",
-                    icon: CheckCircle,
-                    color: "bg-tpahla-purple",
-                    weight: "20%"
-                  },
-                  {
-                    title: "Leadership",
-                    description: "Vision, inspiration, and effective management",
-                    icon: Users,
-                    color: "bg-tpahla-emerald",
-                    weight: "15%"
-                  },
-                  {
-                    title: "Collaboration",
-                    description: "Partnerships and stakeholder engagement",
-                    icon: Users,
-                    color: "bg-tpahla-gold",
-                    weight: "10%"
-                  },
-                  {
-                    title: "Documentation",
-                    description: "Quality and completeness of supporting evidence",
-                    icon: FileText,
-                    color: "bg-tpahla-purple",
-                    weight: "10%"
-                  }
-                ].map((criterion, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                  >
-                    <Card className="h-full border-tpahla-gold/20 hover:border-tpahla-gold/40 transition-colors">
-                      <CardContent className="pt-6">
-                        <div className="flex items-center mb-4">
-                          <div className={`w-10 h-10 rounded-full ${criterion.color} flex items-center justify-center`}>
-                            <criterion.icon className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="font-bold text-tpahla-text-primary">{criterion.title}</h3>
-                            <Badge variant="outline" className="mt-1">{criterion.weight}</Badge>
-                          </div>
-                        </div>
-                        <p className="text-tpahla-text-secondary text-sm">{criterion.description}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-        
         {/* FAQ Section */}
-        <section className="py-16 bg-tpahla-neutral-light">
+        <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <motion.div 
               className="max-w-4xl mx-auto text-center mb-12"
@@ -468,7 +374,7 @@ const Nominations = () => {
         </section>
         
         {/* Timeline Section */}
-        <section className="py-16 bg-background">
+        <section className="py-16 bg-tpahla-neutral-light">
           <div className="container mx-auto px-4">
             <motion.div 
               className="max-w-4xl mx-auto text-center mb-12"
