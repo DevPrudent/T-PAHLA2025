@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Award, DollarSign, CheckCircle, Clock, ListChecks, Loader2 } from "lucide-react";
+import { Users, Award, DollarSign, CheckCircle, Clock, ListChecks, Loader2, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const fetchCategoriesCount = async () => {
   const { count, error } = await supabase
@@ -120,6 +123,21 @@ const fetchRecentNominations = async () => {
   return data;
 };
 
+const fetchRecentRegistrations = async () => {
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5);
+  
+  if (error) {
+    console.error("Error fetching recent registrations:", error);
+    return [];
+  }
+  
+  return data;
+};
+
 const DashboardPage = () => {
   const { data: categoriesCount, isLoading: isLoadingCategoriesCount } = useQuery({
     queryKey: ['awardCategoriesCount'],
@@ -159,6 +177,11 @@ const DashboardPage = () => {
   const { data: recentNominations, isLoading: isLoadingRecentNominations } = useQuery({
     queryKey: ['recentNominations'],
     queryFn: fetchRecentNominations,
+  });
+
+  const { data: recentRegistrations, isLoading: isLoadingRecentRegistrations } = useQuery({
+    queryKey: ['recentRegistrations'],
+    queryFn: fetchRecentRegistrations,
   });
 
   // Display values with loading states
@@ -243,9 +266,14 @@ const DashboardPage = () => {
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Latest payment activities</CardDescription>
+          <CardHeader className="flex justify-between items-center">
+            <div>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Latest payment activities</CardDescription>
+            </div>
+            <Link to="/admin/transactions">
+              <Button variant="outline" size="sm">View All</Button>
+            </Link>
           </CardHeader>
           <CardContent>
             {isLoadingRecentTransactions ? (
@@ -276,9 +304,56 @@ const DashboardPage = () => {
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Nomination Entries</CardTitle>
-            <CardDescription>Latest nomination submissions</CardDescription>
+          <CardHeader className="flex justify-between items-center">
+            <div>
+              <CardTitle>Recent Registrations</CardTitle>
+              <CardDescription>Latest registration submissions</CardDescription>
+            </div>
+            <Link to="/admin/registrations">
+              <Button variant="outline" size="sm">View All</Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {isLoadingRecentRegistrations ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : recentRegistrations && recentRegistrations.length > 0 ? (
+              <div className="space-y-4">
+                {recentRegistrations.map((registration) => (
+                  <div key={registration.id} className="flex justify-between items-center border-b pb-2">
+                    <div>
+                      <p className="font-medium">{registration.full_name || 'Unknown'}</p>
+                      <p className="text-sm text-muted-foreground">{registration.email || 'No email'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm">${registration.total_amount.toLocaleString()}</p>
+                      <Badge variant={
+                        registration.registration_status === 'paid' ? 'success' : 
+                        registration.registration_status === 'cancelled' ? 'destructive' : 
+                        'outline'
+                      }>
+                        {registration.registration_status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">No registrations found</p>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex justify-between items-center">
+            <div>
+              <CardTitle>Recent Nomination Entries</CardTitle>
+              <CardDescription>Latest nomination submissions</CardDescription>
+            </div>
+            <Link to="/admin/nominees">
+              <Button variant="outline" size="sm">View All</Button>
+            </Link>
           </CardHeader>
           <CardContent>
             {isLoadingRecentNominations ? (
@@ -308,6 +383,41 @@ const DashboardPage = () => {
             ) : (
               <p className="text-muted-foreground text-center py-8">No nominations found</p>
             )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Links</CardTitle>
+            <CardDescription>Frequently used admin actions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <Link to="/admin/categories">
+                <Button variant="outline" className="w-full justify-start">
+                  <Folder className="mr-2 h-4 w-4" />
+                  Manage Categories
+                </Button>
+              </Link>
+              <Link to="/admin/nominees">
+                <Button variant="outline" className="w-full justify-start">
+                  <Users className="mr-2 h-4 w-4" />
+                  Review Nominations
+                </Button>
+              </Link>
+              <Link to="/admin/registrations">
+                <Button variant="outline" className="w-full justify-start">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Manage Registrations
+                </Button>
+              </Link>
+              <Link to="/admin/transactions">
+                <Button variant="outline" className="w-full justify-start">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  View Transactions
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>

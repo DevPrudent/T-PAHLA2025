@@ -51,7 +51,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
         }
         break;
       case 'individual':
-        total = 200;
+        total = 200; // Fixed price for individual attendees
         break;
       case 'group':
         if (currentData.groupType) {
@@ -318,6 +318,22 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                   <span className="text-tpahla-gold mr-2">✓</span>
                   <span>VIP Seating for 10 guests</span>
                 </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Full-page brochure feature & branded items in guest packs</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Dedicated booth, media interviews, and a corporate video showcase</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Advisory Board invitation for future humanitarian strategy</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Inclusion in the TPAHLA Post-Event Global Report</span>
+                </li>
               </ul>
             </div>
             
@@ -338,6 +354,22 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                   <span className="text-tpahla-gold mr-2">✓</span>
                   <span>VIP Seating for 6 guests</span>
                 </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Half-page feature in brochure</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Branded gift inclusion</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Prime logo placement & media coverage</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Featured in event communiqués and award visuals</span>
+                </li>
               </ul>
             </div>
             
@@ -352,7 +384,23 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Logo placement on website, banners & media</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
                   <span>VIP Seating for 4 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Quarter-page feature in event brochure</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Stage mention & award presentation opportunity</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Post-event inclusion in digital archives</span>
                 </li>
               </ul>
             </div>
@@ -368,7 +416,19 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Logo on selected materials & online listings</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
                   <span>VIP Seating for 2 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Post-event appreciation & mention in final report</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Recognition on TPAHLA's social media platforms</span>
                 </li>
               </ul>
             </div>

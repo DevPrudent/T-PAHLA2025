@@ -32,7 +32,7 @@ import {
   UserX,
   CreditCard,
   UserPlus,
-  Clock,
+  Clock as ClockIcon,
   CheckCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -108,7 +108,7 @@ export function AdminSidebar() {
       parentPath: "/admin/registrations", 
       children: [
         { id: "allRegistrations", href: "/admin/registrations", label: "All Registrations", icon: Users },
-        { id: "pendingRegistrations", href: "/admin/registrations/pending", label: "Pending Payment", icon: Clock },
+        { id: "pendingRegistrations", href: "/admin/registrations/pending", label: "Pending Payment", icon: ClockIcon },
         { id: "paidRegistrations", href: "/admin/registrations/paid", label: "Paid", icon: CheckCircle },
       ]
     },
