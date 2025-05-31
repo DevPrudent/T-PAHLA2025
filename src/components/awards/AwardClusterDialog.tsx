@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Award, ExternalLink, Download, Calendar, MapPin, Users } from 'lucide-react';
+import { Award, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -85,26 +85,8 @@ const AwardClusterDialog: React.FC<AwardClusterDialogProps> = ({ selectedCluster
               
               <Separator className="my-6 bg-tpahla-gold/20" />
               
-              <div className="bg-tpahla-gold/10 p-4 rounded-lg">
-                <h4 className="font-medium text-tpahla-gold mb-3">Event Information</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 text-tpahla-gold mr-2" />
-                    <span className="text-tpahla-text-secondary">October 18, 2025</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 text-tpahla-gold mr-2" />
-                    <span className="text-tpahla-text-secondary">Abuja Continental Hotel</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 text-tpahla-gold mr-2" />
-                    <span className="text-tpahla-text-secondary">500+ Attendees</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap justify-between items-center mt-6 gap-4">
-                <div className="flex gap-2">
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="bg-tpahla-gold/10 text-tpahla-gold">
                     {selectedCluster.awards.length} Award{selectedCluster.awards.length !== 1 ? 's' : ''}
                   </Badge>
@@ -113,7 +95,7 @@ const AwardClusterDialog: React.FC<AwardClusterDialogProps> = ({ selectedCluster
                   </Badge>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Link to="/nominations">
                     <Button size="sm" className="bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90">
                       Nominate Now
