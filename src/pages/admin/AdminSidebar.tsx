@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +37,7 @@ import {
   CheckCircle,
   DollarSign,
   Handshake,
+  Award
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -81,7 +83,7 @@ export function AdminSidebar() {
 
   const adminNavItems: AdminNavItem[] = [
     { id: "dashboard", href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { id: "awardCategories", href: "/admin/categories", label: "Award Categories", icon: Folder },
+    { id: "awardCategories", href: "/admin/categories", label: "Award Categories", icon: Award },
     { 
       id: "nominationsSubmenu",
       label: "Nominations", 
@@ -159,8 +161,21 @@ export function AdminSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <Link to="/admin" className="flex items-center gap-2">
-          <img alt="TPAHLA Logo" className="h-10" src="/lovable-uploads/62fe4193-0108-4af1-94b9-a45993de1c9d.png" />
-          <span className="font-semibold text-lg text-tpahla-gold">Admin Panel</span>
+          <motion.img 
+            alt="TPAHLA Logo" 
+            className="h-10" 
+            src="/lovable-uploads/62fe4193-0108-4af1-94b9-a45993de1c9d.png"
+            whileHover={{ rotate: 5 }}
+            transition={{ type: "spring", stiffness: 300, damping: 10 }}
+          />
+          <motion.span 
+            className="font-semibold text-lg text-tpahla-gold"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Admin Panel
+          </motion.span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="flex flex-col justify-between">

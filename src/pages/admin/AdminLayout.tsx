@@ -1,6 +1,6 @@
-
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
@@ -18,8 +18,15 @@ const AdminLayout = () => {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-screen bg-tpahla-darkgreen">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Loader2 className="h-12 w-12 animate-spin text-tpahla-gold" />
+          <p className="mt-4 text-tpahla-gold text-center">Loading admin panel...</p>
+        </motion.div>
       </div>
     );
   }
@@ -32,15 +39,28 @@ const AdminLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-muted/40">
+      <div className="min-h-screen flex w-full bg-tpahla-neutral-light">
         <AdminSidebar />
         <SidebarInset className="flex-1 flex flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 py-4">
             <SidebarTrigger className="sm:hidden" />
-            {/* Breadcrumbs or page title can go here */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex-1"
+            >
+              <h1 className="text-lg font-medium text-tpahla-gold">TPAHLA Admin Dashboard</h1>
+            </motion.div>
           </header>
-          <main className="flex-1 p-4 sm:px-6 sm:py-0">
-            <Outlet /> {/* Render child routes only if authenticated */}
+          <main className="flex-1 p-4 sm:px-6 sm:py-6 overflow-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Outlet /> {/* Render child routes only if authenticated */}
+            </motion.div>
           </main>
         </SidebarInset>
       </div>

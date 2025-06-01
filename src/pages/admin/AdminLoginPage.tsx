@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState('');
@@ -56,48 +56,73 @@ const AdminLoginPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <img src="/lovable-uploads/62fe4193-0108-4af1-94b9-a45993de1c9d.png" alt="TPAHLA Logo" className="w-20 h-20 mx-auto mb-4" />
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the admin panel.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="admin@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+    <div className="flex items-center justify-center min-h-screen bg-tpahla-darkgreen">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md px-4"
+      >
+        <Card className="border-tpahla-gold/30 bg-tpahla-neutral">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-tpahla-gold/20 flex items-center justify-center">
+              <ShieldCheck className="h-10 w-10 text-tpahla-gold" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+            <CardTitle className="text-2xl text-tpahla-gold">Admin Login</CardTitle>
+            <CardDescription className="text-tpahla-text-secondary">
+              Enter your credentials to access the admin panel
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-tpahla-text-primary">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  className="bg-tpahla-neutral-light border-tpahla-gold/20 text-tpahla-text-primary focus:border-tpahla-gold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-tpahla-text-primary">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  className="bg-tpahla-neutral-light border-tpahla-gold/20 text-tpahla-text-primary focus:border-tpahla-gold"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-tpahla-gold text-tpahla-darkgreen hover:bg-tpahla-gold/90" 
                 disabled={isSubmitting}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Login
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          {/* Optional: Add links like "Forgot password?" here */}
-        </CardFooter>
-      </Card>
+              >
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isSubmitting ? 'Logging in...' : 'Login'}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-tpahla-text-secondary">
+              For admin access, please contact the system administrator
+            </p>
+          </CardFooter>
+        </Card>
+        
+        <div className="mt-8 text-center">
+          <Link to="/" className="text-tpahla-gold hover:text-tpahla-gold/80 text-sm">
+            ← Return to Homepage
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 };
