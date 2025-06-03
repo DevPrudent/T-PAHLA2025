@@ -67,7 +67,7 @@ const EventDetails = () => {
       date: "October 16, 2025",
       title: "City Tour & Humanitarian Storytelling",
       description: "A day of discovery and dialogue, offering a guided exploration of the host city's rich tapestry, blending historical tours, innovation hubs, and community visits.",
-      image: "/lovable-uploads/photo-1500673922987-e212871fec22.png",
+      image: "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//abuja.jpg",
       events: [
         {
           time: "09:00 - 13:00",
