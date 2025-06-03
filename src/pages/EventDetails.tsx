@@ -139,7 +139,7 @@ const EventDetails = () => {
       date: "October 19, 2025",
       title: "Farewell & Departure",
       description: "Delegates, enriched, inspired, and united, begin their journey back to their respective countries. Bonds have been formed, ideas have been sparked, and a continental movement has been reignited.",
-      image: "/lovable-uploads/photo-1472396961693-142e6e269027.png",
+      image: "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg",
       events: [
         {
           time: "08:00 - 10:00",
