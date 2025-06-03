@@ -519,7 +519,7 @@ const EventDetails = () => {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-tpahla-gold/30 to-transparent rounded-lg"></div>
                 <img 
-                  src="/lovable-uploads/photo-1472396961693-142e6e269027.png" 
+                  src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg" 
                   alt="TPAHLA Gala Night" 
                   className="rounded-lg shadow-2xl border-2 border-tpahla-gold/30 w-full h-auto"
                 />
