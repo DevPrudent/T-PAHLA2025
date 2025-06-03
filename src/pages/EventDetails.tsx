@@ -641,7 +641,7 @@ const EventDetails = () => {
             <Card className="bg-tpahla-neutral border-tpahla-gold/20 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="h-48 overflow-hidden">
                 <img 
-                  src="/lovable-uploads/photo-1472396961693-142e6e269027.png" 
+                  src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//abuja.jpg" 
                   alt="Guided Abuja City Tour" 
                   className="w-full h-full object-cover"
                 />
