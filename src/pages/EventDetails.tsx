@@ -91,7 +91,7 @@ const EventDetails = () => {
       date: "October 17, 2025",
       title: "Strategic Engagement With Policy Powerhouse",
       description: "The day opens with engagements at the National Assembly, high-level ministerial roundtables, and thought-provoking keynote lectures. This is where advocacy meets action — ideas take root, policies take shape.",
-      image: "/lovable-uploads/photo-1472396961693-142e6e269027.png",
+      image: "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//assembly.jpg",
       events: [
         {
           time: "09:00 - 12:00",
