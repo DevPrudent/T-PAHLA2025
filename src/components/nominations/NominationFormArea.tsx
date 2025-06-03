@@ -69,7 +69,7 @@ const NominationFormArea = () => {
           */}
           {nominationId && !isEffectivelySubmitted && currentStep !== 5 && (
             <div className="mt-8 text-center">
-              <Button variant="link" onClick={resetNomination} className="text-tpahla-gold hover:text-yellow-400">
+              <Button variant="link\" onClick={resetNomination} className="text-tpahla-gold hover:text-yellow-400">
                 Start New Nomination
               </Button>
               <p className="text-xs text-gray-500 mt-1">Nomination ID: {nominationId}</p>
