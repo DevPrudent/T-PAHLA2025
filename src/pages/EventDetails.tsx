@@ -248,7 +248,7 @@ const EventDetails = () => {
               <div className="h-2 bg-gradient-to-r from-tpahla-gold-gradient-start to-tpahla-gold-gradient-end"></div>
               <div className="h-40 overflow-hidden">
                 <img 
-                  src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg 
+                  src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg" 
                   alt="Event Dates" 
                   className="w-full h-full object-cover"
                 />
