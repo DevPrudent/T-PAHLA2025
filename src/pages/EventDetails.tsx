@@ -318,7 +318,7 @@ const EventDetails = () => {
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="md:w-1/2">
                 <img 
-                  src="/lovable-uploads/f6e12c6c-8ef9-4703-9637-d933aa55e1cc.png" 
+                  src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//Abuja-Continental-Hotel_99751a821f9fac72ccf8bed268b05039.jpg" 
                   alt="Abuja Continental Hotel" 
                   className="rounded-lg shadow-md w-full h-auto object-cover"
                 />
