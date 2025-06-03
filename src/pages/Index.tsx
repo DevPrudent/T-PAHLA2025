@@ -52,7 +52,7 @@ const Index = () => {
             {/* Registration Preview */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="h-48 overflow-hidden">
-                <img alt="Join The Event" className="h-full w-full object-cover" src="/lovable-uploads/2c11f3df-79f0-41bc-b465-50ab1387c508.png" />
+                <img alt="Join The Event" className="h-full w-full object-cover" src="https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg" />
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-serif font-bold mb-3">Join The Event</h3>
