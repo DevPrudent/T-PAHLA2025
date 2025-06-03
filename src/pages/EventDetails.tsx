@@ -115,7 +115,7 @@ const EventDetails = () => {
       date: "October 18, 2025",
       title: "Knowledge Exchange, Leadership Showcase & Gala Night",
       description: "The week crescendos at the TPAHLA 2025 Gala Night & Awards Ceremony, an elegant, world-class evening where spotlights shine on Africa's finest humanitarian champions.",
-      image: "/lovable-uploads/photo-1500673922987-e212871fec22.png",
+      image: "https://zrutcdhfqahfduxppudv.supabase.co/storage/v1/object/public/documents//stage1.jpg",
       events: [
         {
           time: "09:00 - 12:30",
