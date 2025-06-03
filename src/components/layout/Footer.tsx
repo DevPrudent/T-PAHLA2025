@@ -49,15 +49,27 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
-                <span className="text-sm">+234 123 456 7890</span>
+                <span className="text-sm">
+                  <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-tpahla-gold">+234-810-490-6878 (WhatsApp)</a>
+                </span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
+                <span className="text-sm">+234-802-368-6143</span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
+                <span className="text-sm">+234-706-751-9128</span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
+                <span className="text-sm">+234-806-039-6906</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
-                <span className="text-sm">info@tpahla.org</span>
-              </li>
-              <li className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />
-                <span className="text-sm">nominations@tpahla.org</span>
+                <span className="text-sm">
+                  <a href="mailto:2025@tpahla.africa" className="hover:text-tpahla-gold">2025@tpahla.africa</a>
+                </span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-tpahla-gold flex-shrink-0" />

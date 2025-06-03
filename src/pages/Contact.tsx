@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
@@ -122,11 +122,13 @@ const Contact = () => {
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <div className="bg-tpahla-gold/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
                 <Mail className="h-4 w-4 text-tpahla-gold mr-2" />
-                <span className="text-sm">info@tpahla.org</span>
+                <span className="text-sm">2025@tpahla.africa</span>
               </div>
               <div className="bg-tpahla-gold/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
                 <Phone className="h-4 w-4 text-tpahla-gold mr-2" />
-                <span className="text-sm">+234 123 456 7890</span>
+                <span className="text-sm">
+                  <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="font-bold">+234-810-490-6878 (WhatsApp)</a>
+                </span>
               </div>
               <div className="bg-tpahla-gold/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
                 <Globe className="h-4 w-4 text-tpahla-gold mr-2" />
@@ -185,9 +187,10 @@ const Contact = () => {
                       <div>
                         <h3 className="font-bold text-tpahla-text-primary mb-1">Phone</h3>
                         <p className="text-tpahla-text-secondary">
-                          Main: +234 123 456 7890<br />
-                          Nominations: +234 123 456 7891<br />
-                          Sponsorships: +234 123 456 7892
+                          <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-tpahla-gold">+234-810-490-6878 (WhatsApp)</a><br />
+                          +234-802-368-6143<br />
+                          +234-706-751-9128<br />
+                          +234-806-039-6906
                         </p>
                       </div>
                     </motion.div>
@@ -203,9 +206,8 @@ const Contact = () => {
                       <div>
                         <h3 className="font-bold text-tpahla-text-primary mb-1">Email</h3>
                         <p className="text-tpahla-text-secondary">
-                          General Inquiries: <a href="mailto:info@tpahla.org" className="hover:text-tpahla-gold transition-colors">info@tpahla.org</a><br />
-                          Nominations: <a href="mailto:nominations@tpahla.org" className="hover:text-tpahla-gold transition-colors">nominations@tpahla.org</a><br />
-                          Sponsorships: <a href="mailto:sponsors@tpahla.org" className="hover:text-tpahla-gold transition-colors">sponsors@tpahla.org</a>
+                          <a href="mailto:2025@tpahla.africa" className="hover:text-tpahla-gold transition-colors">2025@tpahla.africa</a><br />
+                          <a href="mailto:tpahla@ihsd-ng.org" className="hover:text-tpahla-gold transition-colors">tpahla@ihsd-ng.org</a>
                         </p>
                       </div>
                     </motion.div>
@@ -511,7 +513,7 @@ const Contact = () => {
                         },
                         {
                           question: "How can I contact the TPAHLA team?",
-                          answer: "You can reach us through email at info@tpahla.org, by phone at +234 123 456 7890, or by filling out the contact form on this page. We aim to respond to all inquiries within 48 hours."
+                          answer: "You can reach us through email at 2025@tpahla.africa, by phone at +234-810-490-6878 (WhatsApp), +234-802-368-6143, +234-706-751-9128, or +234-806-039-6906, or by filling out the contact form on this page. We aim to respond to all inquiries within 48 hours."
                         },
                         {
                           question: "Is TPAHLA affiliated with any government or international organization?",
@@ -540,6 +542,10 @@ const Contact = () => {
                         {
                           question: "When is the nomination deadline?",
                           answer: "All nominations must be submitted by August 15, 2025. Late submissions will not be considered."
+                        },
+                        {
+                          question: "When do nominations open?",
+                          answer: "Nominations open on June 20, 2025, and will remain open until August 15, 2025."
                         },
                         {
                           question: "Is there a fee to submit a nomination?",
@@ -640,6 +646,10 @@ const Contact = () => {
                       Follow on Social Media
                     </Button>
                   </motion.div>
+                </div>
+                <div className="mt-6 text-gray-300">
+                  <p>For inquiries: <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-gold hover:underline font-bold">+234-810-490-6878 (WhatsApp)</a></p>
+                  <p>Email: <a href="mailto:2025@tpahla.africa" className="text-tpahla-gold hover:underline">2025@tpahla.africa</a></p>
                 </div>
               </CardContent>
             </Card>

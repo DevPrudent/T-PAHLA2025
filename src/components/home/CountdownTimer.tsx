@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 const CountdownTimer = () => {
@@ -62,6 +61,11 @@ const CountdownTimer = () => {
         <p className="text-center mt-8 text-gray-600 max-w-lg mx-auto">
           Join us on October 18, 2025 at the Abuja Continental Hotel, Nigeria for the prestigious Pan-African Humanitarian Leadership Awards ceremony.
         </p>
+        
+        <div className="text-center mt-4 text-gray-600">
+          <p>For inquiries: <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-purple hover:underline font-bold">+234-810-490-6878 (WhatsApp)</a></p>
+          <p>Email: <a href="mailto:2025@tpahla.africa" className="text-tpahla-purple hover:underline">2025@tpahla.africa</a></p>
+        </div>
       </div>
     </section>
   );

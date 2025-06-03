@@ -14,14 +14,12 @@ const NominationFormArea = () => {
   const [isNominationPeriodOpen, setIsNominationPeriodOpen] = useState(true); // Default to true for now
 
   useEffect(() => {
-    // For testing, keep nominations open.
-    // Replace with actual date logic for production.
-    // const currentDate = new Date();
-    // const nominationsOpenDate = new Date("2025-06-01T00:00:00Z"); 
-    // const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
-    // const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
-    // setIsNominationPeriodOpen(isOpen);
-    setIsNominationPeriodOpen(true); 
+    // Check if current date is within nomination period
+    const currentDate = new Date();
+    const nominationsOpenDate = new Date("2025-06-20T00:00:00Z"); 
+    const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
+    const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
+    setIsNominationPeriodOpen(isOpen);
   }, []);
 
   const renderStep = () => {
@@ -84,7 +82,7 @@ const NominationFormArea = () => {
               <AlertCircle className="h-4 w-4 text-tpahla-purple" />
               <AlertDescription>
                 <span className="font-medium">Nominations are currently closed.</span>
-                The nomination period is from June 1, 2025, to August 15, 2025.
+                The nomination period is from June 20, 2025, to August 15, 2025.
               </AlertDescription>
             </Alert>
             
@@ -94,13 +92,13 @@ const NominationFormArea = () => {
               </div>
               <h3 className="text-xl font-bold mb-2 text-tpahla-gold">Nominations Currently Closed</h3>
               <p className="text-gray-400 mb-6">
-                Please check back between June 1, 2025, and August 15, 2025, to submit your nominations.
+                Please check back between June 20, 2025, and August 15, 2025, to submit your nominations.
               </p>
               
               <div className="py-4 px-6 bg-gray-700 rounded-lg inline-block">
                 <div className="flex items-center">
                   <CalendarIcon className="h-5 w-5 text-tpahla-gold mr-2" />
-                  <span className="font-medium">Nominations Open: <span className="text-tpahla-gold">June 1, 2025</span></span>
+                  <span className="font-medium">Nominations Open: <span className="text-tpahla-gold">June 20, 2025</span></span>
                 </div>
                 <div className="flex items-center mt-2">
                   <CalendarIcon className="h-5 w-5 text-tpahla-gold mr-2" />
@@ -118,9 +116,9 @@ const NominationFormArea = () => {
       )}
        <div className="mt-12 text-center text-gray-400 text-sm">
             <p className="font-semibold">SUBMISSION DETAILS</p>
-            <p>Submit the completed form and supporting documents to: <a href="mailto:tpahla@ihsd-ng.org" className="text-tpahla-gold hover:underline">tpahla@ihsd-ng.org</a></p>
+            <p>Submit the completed form and supporting documents to: <a href="mailto:2025@tpahla.africa" className="text-tpahla-gold hover:underline">2025@tpahla.africa</a></p>
             <p>Visit <a href="https://ihsd-ng.org/TPAHLA" target="_blank" rel="noopener noreferrer" className="text-tpahla-gold hover:underline">https://ihsd-ng.org/TPAHLA</a> for more information and full award guidelines.</p>
-            <p>For inquiries: +234-802-368 6143, +234-806-039 6906</p>
+            <p>For inquiries: <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-gold hover:underline font-bold">+234-810-490-6878 (WhatsApp)</a>, +234-802-368-6143, +234-706-751-9128, +234-806-039-6906</p>
             <p className="mt-4 font-semibold">#TPAHLA2025 | #AfricanHumanitarianHeroes | #HonoringHeroes | #ForgingForward</p>
         </div>
     </div>

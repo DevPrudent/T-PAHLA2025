@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 
 const NominationSection = () => {
   const nominationSteps = [
@@ -118,12 +120,14 @@ const NominationSection = () => {
               </div>
               
               <div className="pt-4">
-                <button 
-                  type="submit" 
-                  className="w-full bg-tpahla-purple hover:bg-tpahla-darkpurple text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tpahla-purple"
-                >
-                  Submit Nomination
-                </button>
+                <Link to="/nomination-form">
+                  <Button 
+                    type="button" 
+                    className="w-full bg-tpahla-purple hover:bg-tpahla-darkpurple text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tpahla-purple"
+                  >
+                    Submit Nomination
+                  </Button>
+                </Link>
               </div>
             </form>
           </div>
@@ -164,8 +168,12 @@ const NominationSection = () => {
           
           <div className="mt-8 text-center">
             <p className="font-medium text-tpahla-purple text-lg">
-              Nomination Deadline: August 15, 2025
+              Nomination Period: June 20 - August 15, 2025
             </p>
+            <div className="mt-4">
+              <p>For inquiries: <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-purple hover:underline font-bold">+234-810-490-6878 (WhatsApp)</a></p>
+              <p>Email: <a href="mailto:2025@tpahla.africa" className="text-tpahla-purple hover:underline">2025@tpahla.africa</a></p>
+            </div>
           </div>
         </div>
       </div>

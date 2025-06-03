@@ -335,6 +335,10 @@ const Nominations = () => {
                     answer: "All nominations must be submitted by August 15, 2025. Late submissions will not be considered."
                   },
                   {
+                    question: "When do nominations open?",
+                    answer: "Nominations open on June 20, 2025, and will remain open until August 15, 2025."
+                  },
+                  {
                     question: "Is there a fee to submit a nomination?",
                     answer: "No, there is no cost associated with submitting a nomination for any award category."
                   },
@@ -400,7 +404,7 @@ const Nominations = () => {
                 <div className="space-y-12 relative">
                   {[
                     {
-                      date: "June 1, 2025",
+                      date: "June 20, 2025",
                       title: "Nominations Open",
                       description: "The nomination portal opens for all categories.",
                       icon: Calendar,
@@ -494,6 +498,10 @@ const Nominations = () => {
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
+              <div className="mt-6 text-gray-300">
+                <p>For inquiries: <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-gold hover:underline font-bold">+234-810-490-6878 (WhatsApp)</a></p>
+                <p>Email: <a href="mailto:2025@tpahla.africa" className="text-tpahla-gold hover:underline">2025@tpahla.africa</a></p>
+              </div>
             </motion.div>
           </div>
         </section>

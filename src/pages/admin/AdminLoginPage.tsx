@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,8 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@tpahla.africa');
+  const [password, setPassword] = useState('Admin25@1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { session, loading: authLoading } = useAuth();
@@ -80,7 +80,7 @@ const AdminLoginPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder="admin@tpahla.africa"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
