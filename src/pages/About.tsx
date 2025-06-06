@@ -1,4 +1,3 @@
-
 import NotificationBanner from "../components/common/NotificationBanner"; // Import the new banner
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"; // Import Carousel components
 
@@ -128,6 +127,18 @@ const About = () => {
               </a>
             </div>
             
+            {/* New Third Organizer Card - Moved to second position */}
+            <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
+              <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
+                 {/* Placeholder for logo, you can replace src with actual logo path */}
+                <img alt="Third Organizer Logo" className="h-32 object-contain" src="/lovable-uploads/21c9e800-6f9a-41fb-bbd9-085e95469934.png" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">African Refugee Foundation (AREF)</h3>
+                <p className="text-tpahla-text-secondary">AREF stands as a pioneering Pan-African organization committed to the protection, empowerment, and dignified resettlement of refugees, internally displaced persons (IDPs), and other vulnerable populations across the continent. Established as a beacon of advocacy and innovation, AREF has spent over two decades at the forefront of humanitarian intervention, policy influence, and community resilience-building in Africa.</p>
+              </div>
+            </div>
+            
             <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
               <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
                 <img alt="Hempawa Consult Logo" className="h-32 object-contain" src="/lovable-uploads/c8a15bae-860c-4927-9901-dfe7459b6a8e.png" />
@@ -137,18 +148,6 @@ const About = () => {
                 <p className="text-tpahla-text-secondary">
                   Hempawa Consult is a premier consulting firm specializing in event management, strategic communications, and project implementation across Africa. With extensive experience organizing high-profile events, Hempawa brings a wealth of expertise to ensure TPAHLA achieves its goals of recognizing and celebrating humanitarian excellence.
                 </p>
-              </div>
-            </div>
-
-            {/* New Third Organizer Card */}
-            <div className="bg-tpahla-neutral rounded-lg shadow-md overflow-hidden border border-tpahla-gold/20">
-              <div className="h-48 flex items-center justify-center p-4 bg-tpahla-darkgreen">
-                 {/* Placeholder for logo, you can replace src with actual logo path */}
-                <img alt="Third Organizer Logo" className="h-32 object-contain" src="/lovable-uploads/21c9e800-6f9a-41fb-bbd9-085e95469934.png" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-serif font-bold mb-3 text-tpahla-gold">African Refugee Foundation (AREF)</h3>
-                <p className="text-tpahla-text-secondary">AREF stands as a pioneering Pan-African organization committed to the protection, empowerment, and dignified resettlement of refugees, internally displaced persons (IDPs), and other vulnerable populations across the continent. Established as a beacon of advocacy and innovation, AREF has spent over two decades at the forefront of humanitarian intervention, policy influence, and community resilience-building in Africa.</p>
               </div>
             </div>
           </div>
