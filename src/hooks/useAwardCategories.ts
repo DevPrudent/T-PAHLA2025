@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideProps } from "lucide-react";
@@ -41,11 +40,24 @@ export interface AwardCluster {
   imagePath: string | null;
 }
 
+// Define the order of categories as specified
+const categoryOrder = [
+  'leadership_legacy',
+  'governance_impact',
+  'youth_gender_equality',
+  'sustainable_development_environment',
+  'innovation_technology',
+  'disaster_relief_crisis_management',
+  'public_sector_recognition',
+  'social_cultural',
+  'human_rights',
+  'research_development'
+];
+
 const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
   const { data, error } = await supabase
     .from("award_categories")
-    .select("id, cluster_title, description, awards, icon_name, image_path")
-    .order("cluster_title", { ascending: true });
+    .select("id, cluster_title, description, awards, icon_name, image_path");
 
   if (error) {
     console.error("Error fetching award categories:", error);
@@ -55,7 +67,8 @@ const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
     return [];
   }
 
-  return data.map((category: AwardCategoryFromDB) => {
+  // Transform the data
+  const transformedData = data.map((category: AwardCategoryFromDB) => {
     let parsedAwards: string[] = [];
     if (category.awards && Array.isArray(category.awards)) {
       parsedAwards = category.awards.filter((award: unknown): award is string => typeof award === 'string');
@@ -70,6 +83,26 @@ const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
       imagePath: category.image_path,
     };
   });
+
+  // Sort the data according to the specified order
+  const sortedData = [...transformedData].sort((a, b) => {
+    const indexA = categoryOrder.indexOf(a.id);
+    const indexB = categoryOrder.indexOf(b.id);
+    
+    // If both IDs are in the order array, sort by their position
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    
+    // If only one ID is in the order array, prioritize it
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    
+    // If neither ID is in the order array, maintain alphabetical order
+    return a.clusterTitle.localeCompare(b.clusterTitle);
+  });
+
+  return sortedData;
 };
 
 export const useAwardCategories = () => {
@@ -78,4 +111,3 @@ export const useAwardCategories = () => {
     queryFn: fetchAwardCategories,
   });
 };
-
