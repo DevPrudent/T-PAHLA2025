@@ -51,8 +51,8 @@ const About = () => {
               <div className="rounded-lg overflow-hidden shadow-xl border-2 border-tpahla-gold/30">
                 <img alt="TPAHLA Mission" className="w-full h-auto" src="/lovable-uploads/73cabd00-698a-4407-8cbb-b158dc3fa958.png" />
               </div>
-              <div className="absolute -bottom-4 -right-4 p-6 bg-tpahla-gold text-tpahla-darkgreen rounded shadow-lg">
-                <p className="text-2xl font-serif">Est. 2025</p>
+              <div className="absolute -bottom-4 -right-4 p-4 bg-tpahla-gold text-tpahla-darkgreen rounded shadow-lg">
+                <p className="text-lg font-serif">Est. 2025</p>
               </div>
             </div>
           </div>

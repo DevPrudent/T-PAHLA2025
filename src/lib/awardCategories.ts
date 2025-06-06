@@ -50,6 +50,7 @@ export interface AwardCategory {
   awards: Award[];
 }
 
+// Updated order as specified
 export const awardCategoriesData: AwardCategory[] = [
   {
     id: 'leadership_legacy',
