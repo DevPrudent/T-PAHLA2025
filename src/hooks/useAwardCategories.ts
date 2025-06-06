@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideCrop as LucideProps } from "lucide-react";
+import { Users, ShieldCheck, Leaf, Lightbulb, Home, Users2, Landmark, Scale, BookOpen, Search, HelpCircle, LucideProps } from "lucide-react";
 
 // Type for icon components
 export type LucideIconComponent = React.FC<LucideProps>;
@@ -40,18 +40,18 @@ export interface AwardCluster {
   imagePath: string | null;
 }
 
-// Define the order of categories as specified
-const categoryOrder = [
-  'leadership_legacy',
-  'governance_impact',
-  'youth_gender_equality',
-  'sustainable_development_environment',
-  'innovation_technology',
-  'disaster_relief_crisis_management',
-  'public_sector_recognition',
-  'social_cultural',
-  'human_rights',
-  'research_development'
+// Define the specific order of categories
+const CATEGORY_ORDER = [
+  "PAN-AFRICAN HUMANITARIAN LEADERSHIP & LEGACY",
+  "EXEMPLARY GOVERNANCE FOR HUMANITARIAN IMPACT",
+  "YOUTH EMPOWERMENT & GENDER EQUALITY LEADERSHIP",
+  "SUSTAINABLE DEVELOPMENT & ENVIRONMENTAL STEWARDSHIP",
+  "HUMANITARIAN INNOVATION & TECHNOLOGY",
+  "DISASTER RELIEF & CRISIS MANAGEMENT",
+  "PUBLIC SECTOR AND INSTITUTIONAL RECOGNITION",
+  "HUMANITARIAN, SOCIAL & CULTURAL CONTRIBUTIONS",
+  "HUMAN RIGHTS & SOCIAL JUSTICE",
+  "HUMANITARIAN RESEARCH & DEVELOPMENT"
 ];
 
 const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
@@ -84,25 +84,23 @@ const fetchAwardCategories = async (): Promise<AwardCluster[]> => {
     };
   });
 
-  // Sort the data according to the specified order
-  const sortedData = [...transformedData].sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a.id);
-    const indexB = categoryOrder.indexOf(b.id);
+  // Sort the data according to the predefined order
+  return transformedData.sort((a, b) => {
+    const indexA = CATEGORY_ORDER.indexOf(a.clusterTitle);
+    const indexB = CATEGORY_ORDER.indexOf(b.clusterTitle);
     
-    // If both IDs are in the order array, sort by their position
+    // If both items are in the order array, sort by their position
     if (indexA !== -1 && indexB !== -1) {
       return indexA - indexB;
     }
     
-    // If only one ID is in the order array, prioritize it
+    // If only one item is in the order array, prioritize it
     if (indexA !== -1) return -1;
     if (indexB !== -1) return 1;
     
-    // If neither ID is in the order array, maintain alphabetical order
+    // If neither item is in the order array, maintain alphabetical sorting as fallback
     return a.clusterTitle.localeCompare(b.clusterTitle);
   });
-
-  return sortedData;
 };
 
 export const useAwardCategories = () => {
