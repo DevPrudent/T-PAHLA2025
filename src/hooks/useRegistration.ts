@@ -3,12 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { RegistrationData } from '@/components/registration/MultiStepRegistration';
 import type { Database } from '@/integrations/supabase/types';
+import { useEmailSender } from './useEmailSender';
 
 type RegistrationInsert = Database['public']['Tables']['registrations']['Insert'];
 
 export const useRegistration = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { sendRegistrationConfirmation } = useEmailSender();
 
   const saveRegistration = async (data: RegistrationData): Promise<string | null> => {
     setIsLoading(true);
@@ -59,6 +61,21 @@ export const useRegistration = () => {
         description: "Your registration has been saved successfully.",
       });
 
+      // Send registration confirmation email
+      try {
+        await sendRegistrationConfirmation({
+          registrationId: registration.id,
+          fullName: data.fullName,
+          email: data.email,
+          participationType: data.participationType!,
+          totalAmount: data.totalAmount,
+          paymentStatus: 'pending_payment',
+        });
+      } catch (emailError) {
+        console.error('Error sending registration confirmation email:', emailError);
+        // Don't block the flow if email fails
+      }
+
       return registration.id;
 
     } catch (error) {
@@ -74,106 +91,20 @@ export const useRegistration = () => {
     }
   };
 
-  const createPayment = async (registrationId: string, paymentMethod: string): Promise<string | null> => {
-    setIsLoading(true);
-    
+  const updatePaymentStatus = async (registrationId: string, status: string, transactionRef?: string) => {
     try {
-      // Get registration details
-      const { data: registration, error: regError } = await supabase
+      // Update registration status
+      const { error: updateError } = await supabase
         .from('registrations')
-        .select('total_amount')
-        .eq('id', registrationId)
-        .single();
+        .update({ 
+          registration_status: status === 'completed' ? 'paid' : 'pending_payment',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registrationId);
 
-      if (regError || !registration) {
-        toast({
-          title: "Error",
-          description: "Failed to retrieve registration details.",
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      // Create payment record with service role to bypass RLS
-      const { data: payment, error: paymentError } = await supabase.auth.getSession().then(async ({ data }) => {
-        // Use the service role client for this operation
-        return await supabase
-          .from('payments')
-          .insert({
-            registration_id: registrationId,
-            amount: registration.total_amount,
-            currency: 'USD',
-            payment_method: paymentMethod,
-            payment_status: 'pending',
-            transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          })
-          .select()
-          .single();
-      });
-
-      if (paymentError) {
-        console.error('Payment creation error:', paymentError);
-        toast({
-          title: "Payment Error",
-          description: "Failed to initialize payment. Please try again.",
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      return payment.id;
-
-    } catch (error) {
-      console.error('Payment creation error:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred during payment setup.",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updatePaymentStatus = async (paymentId: string, status: 'completed' | 'failed', transactionRef?: string) => {
-    try {
-      const updateData: any = {
-        payment_status: status,
-        paid_at: status === 'completed' ? new Date().toISOString() : null,
-      };
-
-      if (transactionRef) {
-        updateData.gateway_reference = transactionRef;
-      }
-
-      // Update payment status with service role to bypass RLS
-      const { error } = await supabase.auth.getSession().then(async ({ data }) => {
-        return await supabase
-          .from('payments')
-          .update(updateData)
-          .eq('id', paymentId);
-      });
-
-      if (error) {
-        console.error('Payment status update error:', error);
+      if (updateError) {
+        console.error('Registration status update error:', updateError);
         return false;
-      }
-
-      // If payment completed, update registration status
-      if (status === 'completed') {
-        const { data: payment } = await supabase
-          .from('payments')
-          .select('registration_id')
-          .eq('id', paymentId)
-          .single();
-
-        if (payment) {
-          await supabase
-            .from('registrations')
-            .update({ registration_status: 'paid' })
-            .eq('id', payment.registration_id);
-        }
       }
 
       return true;
@@ -185,7 +116,6 @@ export const useRegistration = () => {
 
   return {
     saveRegistration,
-    createPayment,
     updatePaymentStatus,
     isLoading,
   };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +39,7 @@ const ContactSection = () => {
     setIsSubmitting(true);
     
     try {
+      // First, save to database
       const { error } = await supabase.from('contact_messages').insert({
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -49,6 +50,23 @@ const ContactSection = () => {
       });
       
       if (error) throw error;
+      
+      // Then, send email notification
+      try {
+        await supabase.functions.invoke('contact-form-email', {
+          body: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            subject: formData.subject,
+            message: formData.message
+          }
+        });
+      } catch (emailError) {
+        console.error('Email notification error:', emailError);
+        // Continue even if email fails
+      }
       
       toast.success('Message sent successfully! We will get back to you soon.');
       setFormData({
@@ -172,7 +190,7 @@ const ContactSection = () => {
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Sending...
                     </>
                   ) : (

@@ -164,7 +164,7 @@ const MultiStepRegistration = () => {
           />
         );
       case 5:
-        return <ThankYouStep data={registrationData} />;
+        return <ThankYouStep data={registrationData} registrationId={registrationId || undefined} />;
       default:
         return null;
     }
@@ -236,7 +236,7 @@ const MultiStepRegistration = () => {
                   >
                     {isLoading ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Saving...
                       </>
                     ) : (
