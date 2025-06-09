@@ -1,6 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "npm:resend@3.4.0";
-
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'noreply@tpahla.africa';
 
@@ -21,31 +18,32 @@ interface RegistrationPayload {
   eventLocation?: string;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
-  }
-
-  // Check if Resend API key is configured
-  if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY is not set");
-    return new Response(
-      JSON.stringify({
-        error: "Email service not configured. Please set RESEND_API_KEY environment variable.",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
-  }
-
+Deno.serve(async (req) => {
   try {
+    // Handle CORS preflight requests
+    if (req.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+
+    // Check if Resend API key is configured
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not set");
+      return new Response(
+        JSON.stringify({
+          error: "Email service not configured. Please set RESEND_API_KEY environment variable.",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Initialize Resend client
+    const { Resend } = await import("npm:resend@3.4.0");
     const resend = new Resend(RESEND_API_KEY);
 
     // Parse request body
