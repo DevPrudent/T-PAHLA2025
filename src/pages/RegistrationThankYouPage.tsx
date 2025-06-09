@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle, Download, Mail, Calendar, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const RegistrationThankYouPage = () => {
+function RegistrationThankYouPage() {
   const generateTransactionId = () => {
     return `TPAHLA2025_${Date.now().toString().slice(-8)}`;
   };
@@ -67,7 +67,7 @@ const RegistrationThankYouPage = () => {
           
           <div className="bg-tpahla-gold/10 p-4 rounded-lg border border-tpahla-gold/20">
             <p className="text-center text-sm">
-              For any questions or special requests, please contact us at <a href="mailto:2025@tpahla.africa" className="text-tpahla-gold hover:underline">2025@tpahla.africa</a> or <a href="https://wa.me/2348104906878" target=\"_blank" rel="noopener noreferrer\" className="text-tpahla-gold hover:underline">+234-810-490-6878 (WhatsApp)</a>
+              For any questions or special requests, please contact us at <a href="mailto:2025@tpahla.africa" className="text-tpahla-gold hover:underline">2025@tpahla.africa</a> or <a href="https://wa.me/2348104906878" target="_blank" rel="noopener noreferrer" className="text-tpahla-gold hover:underline">+234-810-490-6878 (WhatsApp)</a>
             </p>
           </div>
           
@@ -87,6 +87,6 @@ const RegistrationThankYouPage = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default RegistrationThankYouPage;
