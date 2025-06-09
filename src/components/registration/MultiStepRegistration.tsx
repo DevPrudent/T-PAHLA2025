@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useRegistration } from '@/hooks/useRegistration';
 import { ParticipationTypeStep } from './steps/ParticipationTypeStep';
 import { OptionsStep } from './steps/OptionsStep';
