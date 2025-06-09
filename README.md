@@ -1,111 +1,73 @@
-# TPAHLA 2025 - The Pan-African Humanitarian Leadership Award
+# Welcome to your Lovable project
 
-## Project Overview
+## Project info
 
-TPAHLA 2025 is a web platform for The Pan-African Humanitarian Leadership Award, an event recognizing excellence in humanitarian leadership across Africa. The platform facilitates nominations, registrations, and sponsorships for the 2025 award ceremony.
+**URL**: https://lovable.dev/projects/dacd0432-e2dc-4bff-9df4-026dce72c113
 
-## Features
+## How can I edit this code?
 
-- Award nominations submission and management
-- Event registration with multiple participation types
-- Sponsorship opportunities
-- Payment integration with Paystack
-- Email notifications for various events
-- Admin dashboard for managing nominations, registrations, and payments
+There are several ways of editing your application.
 
-## Technology Stack
+**Use Lovable**
 
-- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
-- **Backend**: Supabase (PostgreSQL database, Authentication, Storage)
-- **Serverless Functions**: Supabase Edge Functions
-- **Payment Processing**: Paystack
-- **Email Service**: Resend
+Simply visit the [Lovable Project](https://lovable.dev/projects/dacd0432-e2dc-4bff-9df4-026dce72c113) and start prompting.
 
-## Setup Instructions
+Changes made via Lovable will be committed automatically to this repo.
 
-### Prerequisites
+**Use your preferred IDE**
 
-- Node.js (v18+)
-- npm or yarn
-- Supabase account
-- Paystack account
-- Resend account (for email functionality)
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### Environment Variables
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Create a `.env` file in the root directory with the following variables:
+Follow these steps:
 
-```
-# Supabase
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-# Paystack
-VITE_PAYSTACK_PUBLIC_KEY=your_paystack_public_key
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-For Supabase Edge Functions, set these environment variables in the Supabase dashboard:
+**Edit a file directly in GitHub**
 
-```
-PAYSTACK_SECRET_KEY=your_paystack_secret_key
-RESEND_API_KEY=your_resend_api_key
-FROM_EMAIL=noreply@yourdomain.com
-ADMIN_NOTIFICATION_EMAIL=admin@yourdomain.com
-```
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-### Installation
+**Use GitHub Codespaces**
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Start the development server:
-   ```
-   npm run dev
-   ```
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-### Deployment
+## What technologies are used for this project?
 
-#### Deploying Edge Functions
+This project is built with:
 
-To deploy the Supabase Edge Functions:
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-```bash
-supabase functions deploy send-email
-supabase functions deploy registration-confirmation
-supabase functions deploy payment-confirmation
-supabase functions deploy verify-payment
-```
+## How can I deploy this project?
 
-#### Deploying the Frontend
+Simply open [Lovable](https://lovable.dev/projects/dacd0432-e2dc-4bff-9df4-026dce72c113) and click on Share -> Publish.
 
-The project is configured for deployment with Netlify. Simply connect your repository to Netlify and it will automatically build and deploy the site.
+## Can I connect a custom domain to my Lovable project?
 
-## Email Configuration
+Yes, you can!
 
-This project uses Resend for sending emails. To set up email functionality:
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-1. Create an account at [Resend](https://resend.com)
-2. Verify your domain or use Resend's test email (onboarding@resend.dev)
-3. Get your API key and set it as the `RESEND_API_KEY` environment variable in Supabase
-4. Set your sender email as the `FROM_EMAIL` environment variable
-
-## Payment Integration
-
-The project uses Paystack for payment processing. To set up:
-
-1. Create an account at [Paystack](https://paystack.com)
-2. Get your public and secret keys
-3. Set the public key as `VITE_PAYSTACK_PUBLIC_KEY` in your frontend environment
-4. Set the secret key as `PAYSTACK_SECRET_KEY` in your Supabase Edge Functions environment
-
-## License
-
-This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
-
-## Contact
-
-For inquiries, please contact:
-- Email: tpahla@ihsd-ng.org
-- Phone: +234-810-490-6878 (WhatsApp)
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

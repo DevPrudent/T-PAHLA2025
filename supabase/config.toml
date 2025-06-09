@@ -1,25 +1,5 @@
+
 # Supabase Project Configuration
 
 [functions.send-nomination-email]
-allow_net = ["api.resend.com"]
-
-[functions.registration-confirmation]
-allow_net = ["api.resend.com"]
-
-[functions.contact-form-email]
-allow_net = ["api.resend.com"]
-
-[functions.send-email]
-allow_net = ["api.resend.com"]
-
-[functions.payment-confirmation]
-allow_net = ["api.resend.com"]
-
-[functions.process-payment]
-allow_net = ["api.paystack.co"]
-
-[functions.verify-payment]
-allow_net = ["api.paystack.co", "zrutcdhfqahfduxppudv.supabase.co"]
-
-[functions.webhook-paystack]
-allow_net = ["api.paystack.co"]
+# verify_jwt = false # Set to true if you need to check for a valid Supabase JWT

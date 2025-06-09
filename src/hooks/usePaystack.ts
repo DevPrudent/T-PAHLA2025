@@ -1,120 +1,114 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface PaystackConfig {
+  amount: number;
   email: string;
-  amount: number; // in kobo (multiply by 100)
-  publicKey: string;
-  reference?: string;
+  registrationId: string;
   metadata?: Record<string, any>;
-  callback?: (response: any) => void;
-  onClose?: () => void;
-}
-
-interface UsePaystackProps {
   onSuccess?: (response: any) => void;
   onError?: (error: any) => void;
-  onClose?: () => void;
 }
 
-export const usePaystack = ({ onSuccess, onError, onClose }: UsePaystackProps = {}) => {
+export const usePaystack = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [error, setError] = useState<Error | null>(null);
 
-  const initializePayment = async (config: Omit<PaystackConfig, 'publicKey'>) => {
+  const initializePayment = async ({
+    amount,
+    email,
+    registrationId,
+    metadata = {},
+    onSuccess,
+    onError
+  }: PaystackConfig) => {
     setIsLoading(true);
-    
+    setError(null);
+
     try {
-      // Get Paystack public key from environment variable
-      const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-      
-      if (!paystackPublicKey) {
-        throw new Error('Paystack public key not found. Please check your environment variables.');
-      }
-      
-      // Load Paystack script if not already loaded
-      if (!window.PaystackPop) {
-        await loadPaystackScript();
-      }
-      
-      // Initialize Paystack payment
-      const handler = window.PaystackPop.setup({
-        key: paystackPublicKey,
-        email: config.email,
-        amount: config.amount * 100, // Convert to kobo (Nigerian currency)
-        ref: config.reference || generateReference(),
-        metadata: config.metadata || {},
-        callback: (response: any) => {
-          setIsLoading(false);
-          
-          // Call the provided callback
-          if (config.callback) {
-            config.callback(response);
+      // Get the current origin for the callback URL
+      const origin = window.location.origin;
+      const callbackUrl = `${origin}/payment-callback`;
+
+      // Call our Supabase Edge Function to initialize payment
+      const { data, error: functionError } = await supabase.functions.invoke('process-payment', {
+        body: {
+          registrationId,
+          amount,
+          email,
+          callbackUrl,
+          metadata: {
+            ...metadata,
+            custom_fields: [
+              { display_name: "Registration ID", variable_name: "registration_id", value: registrationId },
+              { display_name: "Event", variable_name: "event", value: "TPAHLA 2025" }
+            ]
           }
-          
-          // Call the hook's onSuccess callback
-          if (onSuccess) {
-            onSuccess(response);
-          }
-          
-          toast({
-            title: "Payment Successful",
-            description: `Transaction reference: ${response.reference}`,
-          });
-        },
-        onClose: () => {
-          setIsLoading(false);
-          
-          // Call the provided onClose
-          if (config.onClose) {
-            config.onClose();
-          }
-          
-          // Call the hook's onClose callback
-          if (onClose) {
-            onClose();
-          }
-          
-          toast({
-            title: "Payment Cancelled",
-            description: "You have cancelled the payment",
-            variant: "destructive",
-          });
-        },
+        }
       });
+
+      if (functionError) {
+        throw new Error(functionError.message);
+      }
+
+      if (!data || !data.authorization_url) {
+        throw new Error('Failed to initialize payment: No authorization URL returned');
+      }
+
+      // Open Paystack checkout in a new window/tab
+      window.location.href = data.authorization_url;
+
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess(data);
+      }
+
+      return data;
+    } catch (err: any) {
+      console.error('Payment initialization error:', err);
+      setError(err);
       
-      // Open the payment modal
-      handler.openIframe();
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Paystack initialization error:', error);
+      // Show error toast
+      toast.error(`Payment initialization failed: ${err.message}`);
       
-      // Call the hook's onError callback
+      // Call error callback if provided
       if (onError) {
-        onError(error);
+        onError(err);
       }
       
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initialize payment",
-        variant: "destructive",
-      });
+      return null;
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  // Function to verify payment with Supabase Edge Function
-  const verifyPayment = async (reference: string, registrationId: string) => {
+
+  const verifyPayment = async (reference: string) => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: { reference, registrationId },
+      // Call our Supabase Edge Function to verify payment
+      const { data, error: functionError } = await supabase.functions.invoke('verify-payment', {
+        body: { reference }
       });
-      
-      if (error) throw error;
+
+      if (functionError) {
+        throw new Error(functionError.message);
+      }
+
+      if (!data || !data.success) {
+        throw new Error('Payment verification failed');
+      }
+
       return data;
-    } catch (error) {
-      console.error('Payment verification error:', error);
-      throw error;
+    } catch (err: any) {
+      console.error('Payment verification error:', err);
+      setError(err);
+      toast.error(`Payment verification failed: ${err.message}`);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -122,33 +116,6 @@ export const usePaystack = ({ onSuccess, onError, onClose }: UsePaystackProps = 
     initializePayment,
     verifyPayment,
     isLoading,
+    error
   };
 };
-
-// Helper function to load Paystack script
-const loadPaystackScript = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Paystack script'));
-    document.body.appendChild(script);
-  });
-};
-
-// Helper function to generate a unique reference
-const generateReference = (): string => {
-  return `TPAHLA_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-};
-
-// Add Paystack to Window interface
-declare global {
-  interface Window {
-    PaystackPop: {
-      setup: (config: PaystackConfig) => {
-        openIframe: () => void;
-      };
-    };
-  }
-}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRegistration } from '@/hooks/useRegistration';
 import { ParticipationTypeStep } from './steps/ParticipationTypeStep';
 import { OptionsStep } from './steps/OptionsStep';
@@ -164,7 +164,7 @@ const MultiStepRegistration = () => {
           />
         );
       case 5:
-        return <ThankYouStep data={registrationData} registrationId={registrationId || undefined} />;
+        return <ThankYouStep data={registrationData} />;
       default:
         return null;
     }
@@ -236,7 +236,7 @@ const MultiStepRegistration = () => {
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Saving...
                       </>
                     ) : (
