@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Building, Smartphone, ChevronsRight, Loader2 } from 'lucide-react';
+import { CreditCard, Building, ChevronsRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
 import type { RegistrationData } from '../MultiStepRegistration';
@@ -31,13 +31,6 @@ const paymentMethods = [
     name: 'Bank Transfer',
     description: 'Manual bank transfer (requires verification)',
     icon: Building,
-    recommended: false
-  },
-  {
-    id: 'flutterwave',
-    name: 'Flutterwave',
-    description: 'Multiple payment options',
-    icon: Smartphone,
     recommended: false
   }
 ];
@@ -164,8 +157,7 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
         // Initialize Paystack payment
         initializePaystack(paymentId);
       } else {
-        // For other payment methods (like Flutterwave)
-        // Implement similar to Paystack or redirect to their payment page
+        // This should not happen since we only have paystack and bank_transfer
         toast({
           title: "Payment Method Not Implemented",
           description: "This payment method is not fully implemented yet. Please try Paystack instead.",
