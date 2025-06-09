@@ -2,104 +2,111 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface PaystackInitializeResponse {
-  success: boolean;
-  data?: {
-    authorization_url: string;
-    reference: string;
-    payment_id: string;
-  };
-  error?: string;
-  details?: any;
-}
-
-interface PaystackVerifyResponse {
-  success: boolean;
-  data?: {
-    status: string;
-    reference: string;
-    transaction: any;
-  };
-  error?: string;
-  details?: any;
+interface PaystackConfig {
+  amount: number;
+  email: string;
+  registrationId: string;
+  metadata?: Record<string, any>;
+  onSuccess?: (response: any) => void;
+  onError?: (error: any) => void;
 }
 
 export const usePaystack = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const initializePayment = async (
-    email: string,
-    amount: number,
-    registrationId: string,
-    fullName: string,
-    callbackUrl: string
-  ): Promise<PaystackInitializeResponse> => {
+  const initializePayment = async ({
+    amount,
+    email,
+    registrationId,
+    metadata = {},
+    onSuccess,
+    onError
+  }: PaystackConfig) => {
     setIsLoading(true);
-    
-    try {
-      // Get the Supabase URL from environment variables
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!supabaseUrl) {
-        throw new Error("Supabase URL is not configured");
-      }
+    setError(null);
 
-      // Call the Supabase Edge Function to initialize payment
-      const { data, error } = await supabase.functions.invoke('initialize-payment', {
+    try {
+      // Get the current origin for the callback URL
+      const origin = window.location.origin;
+      const callbackUrl = `${origin}/payment-callback`;
+
+      // Call our Supabase Edge Function to initialize payment
+      const { data, error: functionError } = await supabase.functions.invoke('process-payment', {
         body: {
-          email,
-          amount,
           registrationId,
-          fullName,
-          callbackUrl
-        },
+          amount,
+          email,
+          callbackUrl,
+          metadata: {
+            ...metadata,
+            custom_fields: [
+              { display_name: "Registration ID", variable_name: "registration_id", value: registrationId },
+              { display_name: "Event", variable_name: "event", value: "TPAHLA 2025" }
+            ]
+          }
+        }
       });
 
-      if (error) {
-        console.error('Payment initialization error:', error);
-        throw new Error(`Edge Function error: ${error.message}`);
+      if (functionError) {
+        throw new Error(functionError.message);
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Payment initialization failed');
+      if (!data || !data.authorization_url) {
+        throw new Error('Failed to initialize payment: No authorization URL returned');
+      }
+
+      // Open Paystack checkout in a new window/tab
+      window.location.href = data.authorization_url;
+
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess(data);
       }
 
       return data;
-    } catch (error) {
-      console.error('Payment initialization error:', error);
-      return {
-        success: false,
-        error: error.message || 'Payment initialization failed'
-      };
+    } catch (err: any) {
+      console.error('Payment initialization error:', err);
+      setError(err);
+      
+      // Show error toast
+      toast.error(`Payment initialization failed: ${err.message}`);
+      
+      // Call error callback if provided
+      if (onError) {
+        onError(err);
+      }
+      
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const verifyPayment = async (reference: string): Promise<PaystackVerifyResponse> => {
+  const verifyPayment = async (reference: string) => {
     setIsLoading(true);
-    
+    setError(null);
+
     try {
-      // Call the Supabase Edge Function to verify payment
-      const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: { reference },
+      // Call our Supabase Edge Function to verify payment
+      const { data, error: functionError } = await supabase.functions.invoke('verify-payment', {
+        body: { reference }
       });
 
-      if (error) {
-        console.error('Payment verification error:', error);
-        throw new Error(`Edge Function error: ${error.message}`);
+      if (functionError) {
+        throw new Error(functionError.message);
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Payment verification failed');
+      if (!data || !data.success) {
+        throw new Error('Payment verification failed');
       }
 
       return data;
-    } catch (error) {
-      console.error('Payment verification error:', error);
-      return {
-        success: false,
-        error: error.message || 'Payment verification failed'
-      };
+    } catch (err: any) {
+      console.error('Payment verification error:', err);
+      setError(err);
+      toast.error(`Payment verification failed: ${err.message}`);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +115,7 @@ export const usePaystack = () => {
   return {
     initializePayment,
     verifyPayment,
-    isLoading
+    isLoading,
+    error
   };
 };

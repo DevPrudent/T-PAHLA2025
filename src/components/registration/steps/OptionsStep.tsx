@@ -105,22 +105,341 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
   const selectedSponsorshipType = data.sponsorshipType ? 
     sponsorshipTypes.find(s => s.id === data.sponsorshipType) : null;
 
-  // Set default amount for individual registration
-  useEffect(() => {
-    if (data.participationType === 'individual' && data.totalAmount === 0) {
-      onUpdate({ totalAmount: 200 });
-    }
-  }, [data.participationType, data.totalAmount, onUpdate]);
-
-  return (
+  const renderNomineeOptions = () => (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h3 className="text-xl font-semibold mb-2">Your Details & Options</h3>
-        <p className="text-muted-foreground">
-          Please provide your personal information and select your participation options
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="nomineeCategory">Award Category *</Label>
+          <Select value={data.nomineeCategory} onValueChange={(value) => {
+            handleInputChange('nomineeCategory', value);
+            // Reset specific award when category changes
+            handleInputChange('specificAward', '');
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {awardCategoriesData.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {data.nomineeCategory && availableAwards.length > 0 && (
+          <div>
+            <Label htmlFor="specificAward">Specific Award *</Label>
+            <Select value={data.specificAward} onValueChange={(value) => handleInputChange('specificAward', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select specific award" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAwards.map((award) => (
+                  <SelectItem key={award.value} value={award.value}>
+                    {award.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
+      <div>
+        <Label htmlFor="tier">Recognition Tier *</Label>
+        <div className="grid grid-cols-1 gap-4 mt-2">
+          {nomineeTiers.map((tier) => (
+            <Card
+              key={tier.id}
+              className={`cursor-pointer transition-all ${
+                data.tier === tier.id ? 'ring-2 ring-tpahla-gold border-tpahla-gold' : 'hover:border-tpahla-purple/30'
+              }`}
+              onClick={() => handleInputChange('tier', tier.id)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg flex items-center">
+                    <span className="mr-2">{tier.tier}</span> {tier.name}
+                    {data.tier === tier.id && (
+                      <span className="ml-2 text-tpahla-gold">
+                        <Check size={18} />
+                      </span>
+                    )}
+                  </CardTitle>
+                  <Badge className="text-lg px-4 py-2">${tier.price.toLocaleString()}</Badge>
+                </div>
+                <CardDescription>{tier.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="font-medium text-sm mb-2">Package Includes:</p>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                  {tier.includes.map((benefit, idx) => (
+                    <li key={idx} className="flex items-start text-sm">
+                      <span className="text-tpahla-gold mr-2 mt-0.5">✓</span>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderGroupOptions = () => (
+    <div className="space-y-6">
+      <div>
+        <Label htmlFor="groupName">Organization/Group Name *</Label>
+        <Input
+          id="groupName"
+          value={data.groupName || ''}
+          onChange={(e) => handleInputChange('groupName', e.target.value)}
+          placeholder="Enter organization name"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="groupType">Package Type *</Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+          {groupTypes.map((group) => (
+            <Card
+              key={group.id}
+              className={`cursor-pointer transition-all ${
+                data.groupType === group.id ? 'ring-2 ring-tpahla-gold border-tpahla-gold' : 'hover:border-tpahla-purple/30'
+              }`}
+              onClick={() => handleInputChange('groupType', group.id)}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  {group.name}
+                  {data.groupType === group.id && (
+                    <span className="ml-2 text-tpahla-gold">
+                      <Check size={18} />
+                    </span>
+                  )}
+                </CardTitle>
+                <CardDescription>{group.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Badge variant="outline">{group.seats} Delegates</Badge>
+                  <div className="text-lg font-bold text-tpahla-gold">
+                    ${group.price.toLocaleString()}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Includes all-inclusive general access, brand mention at events, and networking opportunities
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSponsorOptions = () => (
+    <div className="space-y-6">
+      <div>
+        <Label htmlFor="sponsorshipType">Sponsorship Type *</Label>
+        <Select 
+          value={data.sponsorshipType} 
+          onValueChange={(value) => {
+            handleInputChange('sponsorshipType', value);
+            
+            // If not custom, set the amount automatically
+            if (value !== 'custom') {
+              const sponsorType = sponsorshipTypes.find(s => s.id === value);
+              if (sponsorType) {
+                handleInputChange('customAmount', sponsorType.price);
+              }
+            }
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select sponsorship type" />
+          </SelectTrigger>
+          <SelectContent>
+            {sponsorshipTypes.map((type) => (
+              <SelectItem key={type.id} value={type.id}>
+                {type.name} {type.price > 0 && `($${type.price.toLocaleString()})`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="customAmount">
+          Sponsorship Amount (USD) {data.sponsorshipType === 'custom' ? '*' : ''}
+        </Label>
+        <Input
+          id="customAmount"
+          type="number"
+          value={data.customAmount || ''}
+          onChange={(e) => handleInputChange('customAmount', parseInt(e.target.value) || 0)}
+          placeholder="Enter amount"
+          disabled={data.sponsorshipType !== 'custom'}
+        />
+        {data.sponsorshipType !== 'custom' && (
+          <p className="text-sm text-muted-foreground mt-1">
+            Amount is fixed based on selected sponsorship type
+          </p>
+        )}
+      </div>
+
+      <Card className="bg-tpahla-purple/5 border-tpahla-purple/20">
+        <CardHeader>
+          <CardTitle className="text-lg">Sponsorship Benefits</CardTitle>
+          <CardDescription>Benefits vary based on sponsorship level</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Platinum Sponsorship ($100,000+)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Exclusive naming rights for one award category</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Keynote speaking opportunity at the gala</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Premier branding across all channels & red carpet</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 10 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Full-page brochure feature & branded items in guest packs</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Dedicated booth, media interviews, and a corporate video showcase</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Advisory Board invitation for future humanitarian strategy</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Inclusion in the TPAHLA Post-Event Global Report</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Gold Sponsorship ($50,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Panel speaking or moderation opportunity</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Strategic partner branding across marketing channels</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 6 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Half-page feature in brochure</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Branded gift inclusion</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Prime logo placement & media coverage</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Featured in event communiqués and award visuals</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Silver Sponsorship ($25,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Official sponsor branding on event and print materials</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Logo placement on website, banners & media</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 4 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Quarter-page feature in event brochure</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Stage mention & award presentation opportunity</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Post-event inclusion in digital archives</span>
+                </li>
+              </ul>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium mb-2">Bronze Sponsorship ($10,000)</h4>
+              <ul className="text-sm space-y-1">
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Acknowledgment as a supporter across key channels</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Logo on selected materials & online listings</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>VIP Seating for 2 guests</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Post-event appreciation & mention in final report</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tpahla-gold mr-2">✓</span>
+                  <span>Recognition on TPAHLA's social media platforms</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  return (
+    <div className="space-y-8">
       {/* Personal Information */}
       <Card>
         <CardHeader>
@@ -151,9 +470,10 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone *</Label>
+              <Label htmlFor="phone">Phone Number *</Label>
               <Input
                 id="phone"
+                type="tel"
                 value={data.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="Enter your phone number"
@@ -187,7 +507,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
             </div>
 
             <div>
-              <Label htmlFor="position">Position</Label>
+              <Label htmlFor="position">Position/Title</Label>
               <Input
                 id="position"
                 value={data.position || ''}
@@ -199,7 +519,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
         </CardContent>
       </Card>
 
-      {/* Registration Details */}
+      {/* Type-specific Options */}
       <Card>
         <CardHeader>
           <CardTitle>
@@ -291,343 +611,4 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
       )}
     </div>
   );
-
-  function renderNomineeOptions() {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="nomineeCategory">Award Category *</Label>
-            <Select value={data.nomineeCategory} onValueChange={(value) => {
-              handleInputChange('nomineeCategory', value);
-              // Reset specific award when category changes
-              handleInputChange('specificAward', '');
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {awardCategoriesData.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {data.nomineeCategory && availableAwards.length > 0 && (
-            <div>
-              <Label htmlFor="specificAward">Specific Award *</Label>
-              <Select value={data.specificAward} onValueChange={(value) => handleInputChange('specificAward', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select specific award" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableAwards.map((award) => (
-                    <SelectItem key={award.value} value={award.value}>
-                      {award.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="tier">Recognition Tier *</Label>
-          <div className="grid grid-cols-1 gap-4 mt-2">
-            {nomineeTiers.map((tier) => (
-              <Card
-                key={tier.id}
-                className={`cursor-pointer transition-all ${
-                  data.tier === tier.id ? 'ring-2 ring-tpahla-gold border-tpahla-gold' : 'hover:border-tpahla-purple/30'
-                }`}
-                onClick={() => handleInputChange('tier', tier.id)}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg flex items-center">
-                      <span className="mr-2">{tier.tier}</span> {tier.name}
-                      {data.tier === tier.id && (
-                        <span className="ml-2 text-tpahla-gold">
-                          <Check size={18} />
-                        </span>
-                      )}
-                    </CardTitle>
-                    <Badge className="text-lg px-4 py-2">${tier.price.toLocaleString()}</Badge>
-                  </div>
-                  <CardDescription>{tier.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="font-medium text-sm mb-2">Package Includes:</p>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
-                    {tier.includes.map((benefit, idx) => (
-                      <li key={idx} className="flex items-start text-sm">
-                        <span className="text-tpahla-gold mr-2 mt-0.5">✓</span>
-                        <span>{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function renderGroupOptions() {
-    return (
-      <div className="space-y-6">
-        <div>
-          <Label htmlFor="groupName">Organization/Group Name *</Label>
-          <Input
-            id="groupName"
-            value={data.groupName || ''}
-            onChange={(e) => handleInputChange('groupName', e.target.value)}
-            placeholder="Enter organization name"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="groupType">Package Type *</Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-            {groupTypes.map((group) => (
-              <Card
-                key={group.id}
-                className={`cursor-pointer transition-all ${
-                  data.groupType === group.id ? 'ring-2 ring-tpahla-gold border-tpahla-gold' : 'hover:border-tpahla-purple/30'
-                }`}
-                onClick={() => handleInputChange('groupType', group.id)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    {group.name}
-                    {data.groupType === group.id && (
-                      <span className="ml-2 text-tpahla-gold">
-                        <Check size={18} />
-                      </span>
-                    )}
-                  </CardTitle>
-                  <CardDescription>{group.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Badge variant="outline">{group.seats} Delegates</Badge>
-                    <div className="text-lg font-bold text-tpahla-gold">
-                      ${group.price.toLocaleString()}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Includes all-inclusive general access, brand mention at events, and networking opportunities
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function renderSponsorOptions() {
-    return (
-      <div className="space-y-6">
-        <div>
-          <Label htmlFor="sponsorshipType">Sponsorship Type *</Label>
-          <Select 
-            value={data.sponsorshipType} 
-            onValueChange={(value) => {
-              handleInputChange('sponsorshipType', value);
-              
-              // If not custom, set the amount automatically
-              if (value !== 'custom') {
-                const sponsorType = sponsorshipTypes.find(s => s.id === value);
-                if (sponsorType) {
-                  handleInputChange('customAmount', sponsorType.price);
-                }
-              }
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select sponsorship type" />
-            </SelectTrigger>
-            <SelectContent>
-              {sponsorshipTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name} {type.price > 0 && `($${type.price.toLocaleString()})`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="customAmount">
-            Sponsorship Amount (USD) {data.sponsorshipType === 'custom' ? '*' : ''}
-          </Label>
-          <Input
-            id="customAmount"
-            type="number"
-            value={data.customAmount || ''}
-            onChange={(e) => handleInputChange('customAmount', parseInt(e.target.value) || 0)}
-            placeholder="Enter amount"
-            disabled={data.sponsorshipType !== 'custom'}
-          />
-          {data.sponsorshipType !== 'custom' && (
-            <p className="text-sm text-muted-foreground mt-1">
-              Amount is fixed based on selected sponsorship type
-            </p>
-          )}
-        </div>
-
-        <Card className="bg-tpahla-purple/5 border-tpahla-purple/20">
-          <CardHeader>
-            <CardTitle className="text-lg">Sponsorship Benefits</CardTitle>
-            <CardDescription>Benefits vary based on sponsorship level</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">Platinum Sponsorship ($100,000+)</h4>
-                <ul className="text-sm space-y-1">
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Exclusive naming rights for one award category</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Keynote speaking opportunity at the gala</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Premier branding across all channels & red carpet</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>VIP Seating for 10 guests</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Full-page brochure feature & branded items in guest packs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Dedicated booth, media interviews, and a corporate video showcase</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Advisory Board invitation for future humanitarian strategy</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Inclusion in the TPAHLA Post-Event Global Report</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="font-medium mb-2">Gold Sponsorship ($50,000)</h4>
-                <ul className="text-sm space-y-1">
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Panel speaking or moderation opportunity</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Strategic partner branding across marketing channels</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>VIP Seating for 6 guests</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Half-page feature in brochure</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Branded gift inclusion</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Prime logo placement & media coverage</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Featured in event communiqués and award visuals</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="font-medium mb-2">Silver Sponsorship ($25,000)</h4>
-                <ul className="text-sm space-y-1">
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Official sponsor branding on event and print materials</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Logo placement on website, banners & media</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>VIP Seating for 4 guests</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Quarter-page feature in event brochure</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Stage mention & award presentation opportunity</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Post-event inclusion in digital archives</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="font-medium mb-2">Bronze Sponsorship ($10,000)</h4>
-                <ul className="text-sm space-y-1">
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Acknowledgment as a supporter across key channels</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Logo on selected materials & online listings</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>VIP Seating for 2 guests</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Post-event appreciation & mention in final report</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-tpahla-gold mr-2">✓</span>
-                    <span>Recognition on TPAHLA's social media platforms</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 };
