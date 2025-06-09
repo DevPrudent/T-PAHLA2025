@@ -33,6 +33,7 @@ import TransactionsPage from "./pages/admin/TransactionsPage";
 import MessagesPage from "./pages/admin/MessagesPage";
 import NominationFormPage from "./pages/NominationFormPage";
 import NewRegistrationPage from "./pages/NewRegistrationPage";
+import RegistrationDetailsPage from "./pages/RegistrationDetailsPage";
 
 // New Admin Pages for submenus
 import CompletedNominationsPage from "./pages/admin/CompletedNominationsPage";
@@ -44,9 +45,6 @@ import PendingRegistrationsPage from "./pages/admin/PendingRegistrationsPage";
 import PaidRegistrationsPage from "./pages/admin/PaidRegistrationsPage";
 import SponsorsTrackingPage from "./pages/admin/SponsorsTrackingPage";
 import SponsorshipInquiriesPage from "./pages/admin/SponsorshipInquiriesPage";
-
-// Payment pages
-import PaymentCallbackPage from "./pages/payment/PaymentCallbackPage";
 
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
@@ -81,11 +79,9 @@ const App = () => {
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/register" element={<Registration />} />
                 <Route path="/new-registration" element={<NewRegistrationPage />} />
+                <Route path="/registration-details" element={<RegistrationDetailsPage />} />
                 <Route path="/contact" element={<Contact />} />
               </Route>
-
-              {/* Payment Routes */}
-              <Route path="/payment-callback" element={<PaymentCallbackPage />} />
 
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLoginPage />} />

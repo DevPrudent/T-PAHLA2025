@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Download, Mail, Calendar, MapPin } from 'lucide-react';
 import type { RegistrationData } from '../MultiStepRegistration';
+import { Link } from 'react-router-dom';
 
 interface Props {
   data: RegistrationData;
@@ -117,14 +118,15 @@ export const ThankYouStep = ({ data }: Props) => {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Button
-          onClick={handleDownloadReceipt}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Download Receipt
-        </Button>
+        <Link to={`/registration-details?id=${data.registrationId}`}>
+          <Button
+            variant="outline"
+            className="w-full flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            View Registration Details
+          </Button>
+        </Link>
         
         <Button
           onClick={handleEmailSupport}

@@ -4,13 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Building, Smartphone, ChevronsRight, Loader2, CheckCircle } from 'lucide-react';
+import { CreditCard, Building, Smartphone, ChevronsRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
-import { usePaystack } from '@/hooks/usePaystack';
 import type { RegistrationData } from '../MultiStepRegistration';
 import { Separator } from '@/components/ui/separator';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   data: RegistrationData;
@@ -18,6 +17,30 @@ interface Props {
   onSuccess: () => void;
   registrationId?: string;
 }
+
+const paymentMethods = [
+  {
+    id: 'paystack',
+    name: 'Paystack',
+    description: 'Credit/Debit Cards, Bank Transfer',
+    icon: CreditCard,
+    recommended: true
+  },
+  {
+    id: 'bank_transfer',
+    name: 'Bank Transfer',
+    description: 'Manual bank transfer (requires verification)',
+    icon: Building,
+    recommended: false
+  },
+  {
+    id: 'flutterwave',
+    name: 'Flutterwave',
+    description: 'Multiple payment options',
+    icon: Smartphone,
+    recommended: false
+  }
+];
 
 const bankDetails = [
   {
@@ -38,62 +61,71 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
   const [selectedMethod, setSelectedMethod] = useState('paystack');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
-  const [paymentVerified, setPaymentVerified] = useState(false);
   const { toast } = useToast();
   const { createPayment, updatePaymentStatus } = useRegistration();
-  const { initializePayment, verifyPayment, isLoading: paystackLoading } = usePaystack();
-  const location = useLocation();
   const navigate = useNavigate();
 
-  // Check for payment reference in URL (for callback from Paystack)
-  useEffect(() => {
-    const checkPaymentStatus = async () => {
-      const urlParams = new URLSearchParams(location.search);
-      const reference = urlParams.get('reference');
-      const trxref = urlParams.get('trxref');
-      
-      // If we have a reference, verify the payment
-      if (reference && trxref) {
-        setIsProcessing(true);
-        try {
-          const result = await verifyPayment(reference);
-          
-          if (result && result.success) {
-            toast({
-              title: "Payment Successful!",
-              description: "Your registration has been completed successfully.",
-            });
-            setPaymentVerified(true);
-            
-            // Clear the URL parameters
-            navigate(location.pathname, { replace: true });
-            
-            // Move to success step
-            setTimeout(() => {
-              onSuccess();
-            }, 1500);
-          } else {
-            toast({
-              title: "Payment Verification Failed",
-              description: "Please try again or contact support.",
-              variant: "destructive",
-            });
+  const initializePaystack = (paymentId: string) => {
+    // @ts-ignore
+    const handler = PaystackPop.setup({
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4644d4ace969cf6fb98c0ef53e25b2b301e3c955',
+      email: data.email,
+      amount: data.totalAmount * 100, // Paystack expects amount in kobo (smallest currency unit)
+      currency: 'USD',
+      ref: `tpahla_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
+      metadata: {
+        registration_id: registrationId,
+        payment_id: paymentId,
+        custom_fields: [
+          {
+            display_name: "Registration Type",
+            variable_name: "registration_type",
+            value: data.participationType
+          },
+          {
+            display_name: "Full Name",
+            variable_name: "full_name",
+            value: data.fullName
           }
-        } catch (error) {
-          console.error('Error verifying payment:', error);
+        ]
+      },
+      callback: async function(response: any) {
+        // This is called when the payment is successful
+        console.log('Payment successful:', response);
+        
+        const success = await updatePaymentStatus(
+          paymentId, 
+          'completed', 
+          response.reference
+        );
+        
+        if (success) {
           toast({
-            title: "Payment Verification Error",
-            description: "An error occurred while verifying your payment.",
+            title: "Payment Successful!",
+            description: "Your registration has been completed successfully.",
+          });
+          
+          // Redirect to registration details page
+          navigate(`/registration-details?id=${registrationId}`);
+        } else {
+          toast({
+            title: "Payment Verification Failed",
+            description: "Your payment was processed but we couldn't update your registration. Please contact support.",
             variant: "destructive",
           });
-        } finally {
-          setIsProcessing(false);
         }
+      },
+      onClose: function() {
+        setIsProcessing(false);
+        toast({
+          title: "Payment Cancelled",
+          description: "You have cancelled the payment. You can try again when ready.",
+        });
       }
-    };
+    });
     
-    checkPaymentStatus();
-  }, [location.search, verifyPayment, toast, navigate, location.pathname, onSuccess]);
+    handler.openIframe();
+  };
 
   const handlePayment = async () => {
     if (!registrationId) {
@@ -119,39 +151,29 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       const paymentId = await createPayment(registrationId, selectedMethod);
       
       if (!paymentId) {
+        setIsProcessing(false);
         return;
       }
 
+      toast({
+        title: "Processing Payment",
+        description: "Please wait while we process your payment...",
+      });
+
       if (selectedMethod === 'paystack') {
         // Initialize Paystack payment
-        await initializePayment({
-          amount: data.totalAmount,
-          email: data.email,
-          registrationId: registrationId,
-          metadata: {
-            name: data.fullName,
-            registration_type: data.participationType,
-          },
-          onSuccess: (response) => {
-            console.log('Payment initialized successfully:', response);
-            // The user will be redirected to Paystack's payment page
-          },
-          onError: (error) => {
-            console.error('Payment initialization error:', error);
-            toast({
-              title: "Payment Failed",
-              description: "There was an error initializing your payment. Please try again.",
-              variant: "destructive",
-            });
-          }
-        });
+        initializePaystack(paymentId);
       } else {
-        // For other payment methods (e.g., flutterwave)
+        // For other payment methods (like Flutterwave)
+        // Implement similar to Paystack or redirect to their payment page
         toast({
           title: "Payment Method Not Implemented",
-          description: "This payment method is not fully implemented yet. Please use Paystack or Bank Transfer.",
+          description: "This payment method is not fully implemented yet. Please try Paystack instead.",
+          variant: "destructive",
         });
+        setIsProcessing(false);
       }
+
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -159,7 +181,6 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
         description: "There was an error processing your payment. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -169,24 +190,10 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       title: "Bank Transfer Instructions Sent",
       description: "Please complete your transfer and allow 24-48 hours for verification.",
     });
-    onSuccess();
+    
+    // Redirect to registration details page
+    navigate(`/registration-details?id=${registrationId}`);
   };
-
-  // If payment is already verified, show success message
-  if (paymentVerified) {
-    return (
-      <div className="space-y-6 text-center">
-        <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-        <h3 className="text-2xl font-bold">Payment Successful!</h3>
-        <p className="text-muted-foreground">
-          Your payment has been verified and your registration is complete.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          You will be redirected to the confirmation page shortly...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -240,29 +247,7 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
             <CardContent>
               <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
                 <div className="space-y-3">
-                  {[
-                    {
-                      id: 'paystack',
-                      name: 'Paystack',
-                      description: 'Credit/Debit Cards, Bank Transfer',
-                      icon: CreditCard,
-                      recommended: true
-                    },
-                    {
-                      id: 'bank_transfer',
-                      name: 'Bank Transfer',
-                      description: 'Manual bank transfer (requires verification)',
-                      icon: Building,
-                      recommended: false
-                    },
-                    {
-                      id: 'flutterwave',
-                      name: 'Flutterwave',
-                      description: 'Multiple payment options',
-                      icon: Smartphone,
-                      recommended: false
-                    }
-                  ].map((method) => {
+                  {paymentMethods.map((method) => {
                     const IconComponent = method.icon;
                     return (
                       <div
@@ -314,11 +299,11 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
           <div className="pt-4">
             <Button
               onClick={handlePayment}
-              disabled={isProcessing || paystackLoading}
+              disabled={isProcessing}
               className="w-full bg-tpahla-darkgreen hover:bg-tpahla-emerald text-white py-6 text-lg font-semibold"
               size="lg"
             >
-              {isProcessing || paystackLoading ? (
+              {isProcessing ? (
                 <>
                   <Loader2 className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
                   Processing Payment...
