@@ -45,6 +45,9 @@ import PaidRegistrationsPage from "./pages/admin/PaidRegistrationsPage";
 import SponsorsTrackingPage from "./pages/admin/SponsorsTrackingPage";
 import SponsorshipInquiriesPage from "./pages/admin/SponsorshipInquiriesPage";
 
+// Payment pages
+import PaymentCallbackPage from "./pages/payment/PaymentCallbackPage";
+
 const PublicLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
@@ -80,6 +83,9 @@ const App = () => {
                 <Route path="/new-registration" element={<NewRegistrationPage />} />
                 <Route path="/contact" element={<Contact />} />
               </Route>
+
+              {/* Payment Routes */}
+              <Route path="/payment-callback" element={<PaymentCallbackPage />} />
 
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLoginPage />} />
