@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
 import type { RegistrationData } from '../MultiStepRegistration';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   data: RegistrationData;
@@ -37,7 +38,8 @@ const paymentMethods = [
     name: 'Flutterwave',
     description: 'Multiple payment options',
     icon: Smartphone,
-    recommended: false
+    recommended: false,
+    disabled: true
   }
 ];
 
@@ -87,37 +89,69 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       const paymentId = await createPayment(registrationId, selectedMethod);
       
       if (!paymentId) {
+        setIsProcessing(false);
         return;
       }
 
-      toast({
-        title: "Processing Payment",
-        description: "Please wait while we process your payment...",
-      });
-
-      // Simulate payment processing (replace with actual payment gateway integration)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate successful payment
-      const success = await updatePaymentStatus(paymentId, 'completed', `${selectedMethod}_${Date.now()}`);
-      
-      if (success) {
-        toast({
-          title: "Payment Successful!",
-          description: "Your registration has been completed successfully.",
+      if (selectedMethod === 'paystack') {
+        // Initialize Paystack payment
+        const handler = PaystackPop.setup({
+          key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4644d4ace969cf6fb98c0ef53e25b2b301e3c955', // Use your test key
+          email: data.email,
+          amount: data.totalAmount * 100, // Paystack amount is in kobo (100 kobo = 1 Naira)
+          currency: 'USD', // or 'NGN' based on your preference
+          ref: `tpahla_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
+          callback: async function(response: any) {
+            try {
+              // Verify payment on the server
+              const verifyResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-payment`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                  reference: response.reference,
+                  registrationId: registrationId
+                })
+              });
+              
+              const verifyData = await verifyResponse.json();
+              
+              if (!verifyResponse.ok) {
+                throw new Error(verifyData.error || 'Payment verification failed');
+              }
+              
+              toast({
+                title: "Payment Successful!",
+                description: "Your registration has been completed successfully.",
+              });
+              
+              setTimeout(() => {
+                onSuccess();
+              }, 1000);
+            } catch (error) {
+              console.error('Payment verification error:', error);
+              toast({
+                title: "Payment Verification Failed",
+                description: error.message || "There was an error verifying your payment. Please contact support.",
+                variant: "destructive",
+              });
+            } finally {
+              setIsProcessing(false);
+            }
+          },
+          onClose: function() {
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You have cancelled the payment. You can try again when ready.",
+            });
+          }
         });
-
-        setTimeout(() => {
-          onSuccess();
-        }, 1000);
-      } else {
-        toast({
-          title: "Payment Update Failed",
-          description: "Payment processed but status update failed. Please contact support.",
-          variant: "destructive",
-        });
+        
+        handler.openIframe();
       }
-
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -125,7 +159,6 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
         description: "There was an error processing your payment. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -196,13 +229,14 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
                       <div
                         key={method.id}
                         className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all ${
+                          method.disabled ? 'opacity-50 cursor-not-allowed' : 
                           selectedMethod === method.id
                             ? 'border-tpahla-gold bg-tpahla-gold/5'
                             : 'border-border hover:border-tpahla-purple/30'
                         }`}
-                        onClick={() => setSelectedMethod(method.id)}
+                        onClick={() => !method.disabled && setSelectedMethod(method.id)}
                       >
-                        <RadioGroupItem value={method.id} id={method.id} />
+                        <RadioGroupItem value={method.id} id={method.id} disabled={method.disabled} />
                         <IconComponent className="w-5 h-5 text-tpahla-purple" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
