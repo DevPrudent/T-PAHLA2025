@@ -1,109 +1,48 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.38.4";
+import { createClient } from "npm:@supabase/supabase-js@2.39.7";
 
-// CORS headers for the function
+const PAYSTACK_SECRET_KEY = Deno.env.get('PAYSTACK_SECRET_KEY');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-// Handle CORS preflight requests
-function handleCors(req: Request) {
+serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-}
-
-serve(async (req: Request) => {
-  try {
-    // Handle CORS
-    const corsResponse = handleCors(req);
-    if (corsResponse) return corsResponse;
-
-    // Allow both GET and POST for flexibility
-    if (req.method !== "POST" && req.method !== "GET") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Get reference from query params (GET) or request body (POST)
-    let reference: string;
-    
-    if (req.method === "GET") {
-      const url = new URL(req.url);
-      reference = url.searchParams.get("reference") || "";
-      if (!reference) {
-        return new Response(
-          JSON.stringify({ error: "Missing reference parameter" }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    } else {
-      // POST method
-      const { reference: bodyReference } = await req.json();
-      reference = bodyReference;
-      if (!reference) {
-        return new Response(
-          JSON.stringify({ error: "Missing reference in request body" }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    }
-
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get Paystack secret key from environment variables
-    const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
-    if (!paystackSecretKey) {
-      return new Response(
-        JSON.stringify({ error: "Payment gateway not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Verify the transaction with Paystack
-    const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${paystackSecretKey}`,
-        "Content-Type": "application/json",
-      },
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
     });
+  }
 
-    const verifyData = await verifyResponse.json();
+  // Check if Paystack secret key is configured
+  if (!PAYSTACK_SECRET_KEY) {
+    console.error("PAYSTACK_SECRET_KEY is not set");
+    return new Response(
+      JSON.stringify({
+        error: "Payment verification service not configured. Please set PAYSTACK_SECRET_KEY environment variable.",
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
 
-    if (!verifyResponse.ok || !verifyData.status) {
-      console.error("Paystack verification error:", verifyData);
+  try {
+    // Parse request body
+    const { reference, registrationId } = await req.json();
+
+    // Validate required fields
+    if (!reference || !registrationId) {
       return new Response(
-        JSON.stringify({ 
-          error: "Payment verification failed", 
-          details: verifyData.message || "Could not verify payment" 
+        JSON.stringify({
+          error: "Missing required fields: reference or registrationId",
         }),
         {
           status: 400,
@@ -112,60 +51,64 @@ serve(async (req: Request) => {
       );
     }
 
-    // Find the payment record in our database
-    const { data: payment, error: paymentError } = await supabase
-      .from("payments")
-      .select("id, registration_id, payment_status")
-      .eq("transaction_id", reference)
-      .single();
+    // Verify payment with Paystack
+    const verificationResponse = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    if (paymentError) {
-      console.error("Error finding payment record:", paymentError);
-      return new Response(
-        JSON.stringify({ error: "Payment record not found", details: paymentError.message }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
+    const verificationData = await verificationResponse.json();
 
-    // Check if payment is already processed
-    if (payment.payment_status === "completed") {
+    if (!verificationResponse.ok || !verificationData.status) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Payment already verified and processed",
-          payment_id: payment.id,
-          registration_id: payment.registration_id,
-          status: "completed"
+        JSON.stringify({
+          error: "Payment verification failed",
+          details: verificationData.message || "Unknown error",
         }),
         {
-          status: 200,
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    // Process the payment based on Paystack verification
-    const paymentStatus = verifyData.data.status === "success" ? "completed" : 
-                         verifyData.data.status === "failed" ? "failed" : "processing";
-    
-    // Update payment record
-    const { error: updateError } = await supabase
-      .from("payments")
-      .update({
-        payment_status: paymentStatus,
-        gateway_response: verifyData,
-        paid_at: paymentStatus === "completed" ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", payment.id);
-
-    if (updateError) {
-      console.error("Error updating payment record:", updateError);
+    // Check if payment was successful
+    if (verificationData.data.status !== "success") {
       return new Response(
-        JSON.stringify({ error: "Failed to update payment record", details: updateError.message }),
+        JSON.stringify({
+          error: "Payment was not successful",
+          status: verificationData.data.status,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Initialize Supabase client with service role key
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Get registration details
+    const { data: registration, error: registrationError } = await supabase
+      .from("registrations")
+      .select("*")
+      .eq("id", registrationId)
+      .single();
+
+    if (registrationError) {
+      console.error("Error fetching registration:", registrationError);
+      return new Response(
+        JSON.stringify({
+          error: "Failed to fetch registration details",
+          details: registrationError.message,
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -173,46 +116,99 @@ serve(async (req: Request) => {
       );
     }
 
-    // If payment is successful, update registration status
-    if (paymentStatus === "completed") {
-      const { error: registrationError } = await supabase
-        .from("registrations")
-        .update({
-          registration_status: "paid",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", payment.registration_id);
+    // Create payment record
+    const { data: payment, error: paymentError } = await supabase
+      .from("payments")
+      .insert({
+        registration_id: registrationId,
+        amount: verificationData.data.amount / 100, // Convert from kobo to naira/dollars
+        currency: verificationData.data.currency,
+        payment_method: "paystack",
+        payment_status: "completed",
+        transaction_id: reference,
+        gateway_reference: verificationData.data.reference,
+        gateway_response: verificationData.data,
+        paid_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-      if (registrationError) {
-        console.error("Error updating registration status:", registrationError);
-        // Don't fail the request, but log the error
-      }
+    if (paymentError) {
+      console.error("Error creating payment record:", paymentError);
+      return new Response(
+        JSON.stringify({
+          error: "Failed to create payment record",
+          details: paymentError.message,
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Return success response
+    // Update registration status
+    const { error: updateError } = await supabase
+      .from("registrations")
+      .update({ registration_status: "paid" })
+      .eq("id", registrationId);
+
+    if (updateError) {
+      console.error("Error updating registration status:", updateError);
+      return new Response(
+        JSON.stringify({
+          error: "Failed to update registration status",
+          details: updateError.message,
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Send payment confirmation email
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/payment-confirmation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({
+          paymentId: payment.id,
+          registrationId: registrationId,
+          fullName: registration.full_name,
+          email: registration.email,
+          amount: payment.amount,
+          transactionReference: reference,
+          paymentMethod: "Paystack",
+          participationType: registration.participation_type,
+        }),
+      });
+    } catch (emailError) {
+      console.error("Error sending payment confirmation email:", emailError);
+      // Don't fail the whole request if email sending fails
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
-        payment_id: payment.id,
-        registration_id: payment.registration_id,
-        status: paymentStatus,
-        paystack_data: {
-          reference: verifyData.data.reference,
-          amount: verifyData.data.amount / 100, // Convert back from kobo to main currency
-          status: verifyData.data.status,
-          transaction_date: verifyData.data.transaction_date,
-          channel: verifyData.data.channel,
-        }
+        payment: payment,
+        message: "Payment verified and recorded successfully",
       }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (err) {
+    console.error("Error processing request:", err);
     return new Response(
-      JSON.stringify({ error: "Internal server error", details: error.message }),
+      JSON.stringify({
+        error: "Internal server error",
+        details: err.message,
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

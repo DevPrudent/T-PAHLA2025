@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Download, Mail, Calendar, MapPin } from 'lucide-react';
 import type { RegistrationData } from '../MultiStepRegistration';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   data: RegistrationData;
+  registrationId?: string;
 }
 
-export const ThankYouStep = ({ data }: Props) => {
+export const ThankYouStep = ({ data, registrationId }: Props) => {
   const generateTransactionId = () => {
     return `TPAHLA2025_${Date.now().toString().slice(-8)}`;
   };
@@ -22,6 +24,31 @@ export const ThankYouStep = ({ data }: Props) => {
   const handleEmailSupport = () => {
     window.location.href = 'mailto:tpahla@ihsd-ng.org?subject=TPAHLA 2025 Registration Inquiry';
   };
+
+  // Send confirmation email when component mounts
+  useEffect(() => {
+    const sendConfirmationEmail = async () => {
+      if (!registrationId || !data.email) return;
+      
+      try {
+        await supabase.functions.invoke('registration-confirmation', {
+          body: {
+            registrationId,
+            fullName: data.fullName,
+            email: data.email,
+            participationType: data.participationType,
+            totalAmount: data.totalAmount,
+            paymentStatus: 'pending_payment',
+          },
+        });
+        console.log('Confirmation email sent successfully');
+      } catch (error) {
+        console.error('Error sending confirmation email:', error);
+      }
+    };
+    
+    sendConfirmationEmail();
+  }, [registrationId, data]);
 
   return (
     <div className="space-y-6">
@@ -56,7 +83,7 @@ export const ThankYouStep = ({ data }: Props) => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">Transaction ID</div>
-              <div className="font-mono text-sm">{generateTransactionId()}</div>
+              <div className="font-mono text-sm">{registrationId?.substring(0, 8) || generateTransactionId()}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">Amount Paid</div>
