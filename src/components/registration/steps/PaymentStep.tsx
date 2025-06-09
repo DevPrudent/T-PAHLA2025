@@ -34,7 +34,7 @@ const bankDetails = [
   }
 ];
 
-export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
+export const PaymentStep = ({ data, onUpdate, onSuccess, registrationId }: Props) => {
   const [selectedMethod, setSelectedMethod] = useState('paystack');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -128,6 +128,7 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
           amount: data.totalAmount,
           email: data.email,
           registrationId: registrationId,
+          currency: 'USD', // Explicitly set currency to USD
           metadata: {
             name: data.fullName,
             registration_type: data.participationType,
@@ -244,7 +245,7 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
                     {
                       id: 'paystack',
                       name: 'Paystack',
-                      description: 'Credit/Debit Cards, Bank Transfer',
+                      description: 'Credit/Debit Cards, Bank Transfer (USD)',
                       icon: CreditCard,
                       recommended: true
                     },

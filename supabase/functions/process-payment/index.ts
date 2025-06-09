@@ -30,7 +30,7 @@ serve(async (req: Request) => {
     }
 
     // Get request body
-    const { registrationId, amount, email, callbackUrl, metadata } = await req.json();
+    const { registrationId, amount, email, callbackUrl, metadata, currency = "USD" } = await req.json();
 
     // Validate required fields
     if (!registrationId || !amount || !email) {
@@ -82,7 +82,7 @@ serve(async (req: Request) => {
         amount: amount,
         payment_method: "paystack",
         payment_status: "pending",
-        currency: "USD",
+        currency: currency, // Use the provided currency or default to USD
         gateway_response: { metadata },
       })
       .select()
@@ -109,6 +109,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         email: email,
         amount: Math.round(amount * 100), // Paystack expects amount in kobo (smallest currency unit)
+        currency: currency, // Explicitly set currency to USD
         callback_url: callbackUrl || `${req.headers.get("origin")}/payment-callback`,
         metadata: {
           registration_id: registrationId,

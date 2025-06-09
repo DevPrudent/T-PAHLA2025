@@ -38,6 +38,7 @@ export const usePaystack = () => {
           amount,
           email,
           callbackUrl,
+          currency: 'USD', // Explicitly set currency to USD
           metadata: {
             ...metadata,
             custom_fields: [

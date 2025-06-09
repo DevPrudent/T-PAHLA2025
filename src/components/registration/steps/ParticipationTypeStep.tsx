@@ -65,7 +65,18 @@ const participationTypes = [
 
 export const ParticipationTypeStep = ({ data, onUpdate }: Props) => {
   const selectType = (type: ParticipationType) => {
-    onUpdate({ participationType: type });
+    // Set default total amount based on participation type
+    let totalAmount = 0;
+    
+    // Set default amount for individual attendees
+    if (type === 'individual') {
+      totalAmount = 200; // Fixed price for individual attendees
+    }
+    
+    onUpdate({ 
+      participationType: type,
+      totalAmount: totalAmount
+    });
   };
 
   return (

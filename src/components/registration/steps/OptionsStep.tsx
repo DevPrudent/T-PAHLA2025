@@ -95,6 +95,13 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
     }
   }, [data.nomineeCategory]);
 
+  // Set default total amount for individual attendees when component mounts
+  useEffect(() => {
+    if (data.participationType === 'individual' && data.totalAmount === 0) {
+      onUpdate({ totalAmount: 200 });
+    }
+  }, [data.participationType, data.totalAmount, onUpdate]);
+
   // Get the selected tier details
   const selectedTier = data.tier ? nomineeTiers.find(t => t.id === data.tier) : null;
   
