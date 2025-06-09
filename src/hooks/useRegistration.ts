@@ -94,22 +94,19 @@ export const useRegistration = () => {
         return null;
       }
 
-      // Create payment record with service role to bypass RLS
-      const { data: payment, error: paymentError } = await supabase.auth.getSession().then(async ({ data }) => {
-        // Use the service role client for this operation
-        return await supabase
-          .from('payments')
-          .insert({
-            registration_id: registrationId,
-            amount: registration.total_amount,
-            currency: 'USD',
-            payment_method: paymentMethod,
-            payment_status: 'pending',
-            transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          })
-          .select()
-          .single();
-      });
+      // Create payment record
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          registration_id: registrationId,
+          amount: registration.total_amount,
+          currency: 'USD', // Changed from NGN to USD
+          payment_method: paymentMethod,
+          payment_status: 'pending',
+          transaction_id: `TPAHLA2025_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        })
+        .select()
+        .single();
 
       if (paymentError) {
         console.error('Payment creation error:', paymentError);
@@ -147,13 +144,11 @@ export const useRegistration = () => {
         updateData.gateway_reference = transactionRef;
       }
 
-      // Update payment status with service role to bypass RLS
-      const { error } = await supabase.auth.getSession().then(async ({ data }) => {
-        return await supabase
-          .from('payments')
-          .update(updateData)
-          .eq('id', paymentId);
-      });
+      // Update payment status
+      const { error } = await supabase
+        .from('payments')
+        .update(updateData)
+        .eq('id', paymentId);
 
       if (error) {
         console.error('Payment status update error:', error);

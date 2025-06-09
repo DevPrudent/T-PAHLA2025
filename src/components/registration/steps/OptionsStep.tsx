@@ -95,13 +95,6 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
     }
   }, [data.nomineeCategory]);
 
-  // Set default total amount for individual registration
-  useEffect(() => {
-    if (data.participationType === 'individual' && data.totalAmount === 0) {
-      calculateTotal();
-    }
-  }, [data.participationType]);
-
   // Get the selected tier details
   const selectedTier = data.tier ? nomineeTiers.find(t => t.id === data.tier) : null;
   

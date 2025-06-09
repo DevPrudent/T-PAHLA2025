@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Building, Smartphone, ChevronsRight, Loader2 } from 'lucide-react';
+import { CreditCard, Building, ChevronsRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
 import type { RegistrationData } from '../MultiStepRegistration';
 import { Separator } from '@/components/ui/separator';
-import { useNavigate } from 'react-router-dom';
 
 interface Props {
   data: RegistrationData;
@@ -32,27 +31,20 @@ const paymentMethods = [
     description: 'Manual bank transfer (requires verification)',
     icon: Building,
     recommended: false
-  },
-  {
-    id: 'flutterwave',
-    name: 'Flutterwave',
-    description: 'Multiple payment options',
-    icon: Smartphone,
-    recommended: false
   }
 ];
 
 const bankDetails = [
   {
-    currency: 'NGN',
-    accountName: 'The Pan African Humanitarian Leadership Award (TPAHLA)/IHSD',
-    accountNumber: '1229874160',
-    bank: 'Zenith Bank'
-  },
-  {
     currency: 'USD',
     accountName: 'The Pan African Humanitarian Leadership Award (TPAHLA)/IHSD',
     accountNumber: '5075232190',
+    bank: 'Zenith Bank'
+  },
+  {
+    currency: 'NGN',
+    accountName: 'The Pan African Humanitarian Leadership Award (TPAHLA)/IHSD',
+    accountNumber: '1229874160',
     bank: 'Zenith Bank'
   }
 ];
@@ -63,69 +55,6 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
   const [showBankDetails, setShowBankDetails] = useState(false);
   const { toast } = useToast();
   const { createPayment, updatePaymentStatus } = useRegistration();
-  const navigate = useNavigate();
-
-  const initializePaystack = (paymentId: string) => {
-    // @ts-ignore
-    const handler = PaystackPop.setup({
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4644d4ace969cf6fb98c0ef53e25b2b301e3c955',
-      email: data.email,
-      amount: data.totalAmount * 100, // Paystack expects amount in kobo (smallest currency unit)
-      currency: 'USD',
-      ref: `tpahla_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
-      metadata: {
-        registration_id: registrationId,
-        payment_id: paymentId,
-        custom_fields: [
-          {
-            display_name: "Registration Type",
-            variable_name: "registration_type",
-            value: data.participationType
-          },
-          {
-            display_name: "Full Name",
-            variable_name: "full_name",
-            value: data.fullName
-          }
-        ]
-      },
-      callback: async function(response: any) {
-        // This is called when the payment is successful
-        console.log('Payment successful:', response);
-        
-        const success = await updatePaymentStatus(
-          paymentId, 
-          'completed', 
-          response.reference
-        );
-        
-        if (success) {
-          toast({
-            title: "Payment Successful!",
-            description: "Your registration has been completed successfully.",
-          });
-          
-          // Redirect to registration details page
-          navigate(`/registration-details?id=${registrationId}`);
-        } else {
-          toast({
-            title: "Payment Verification Failed",
-            description: "Your payment was processed but we couldn't update your registration. Please contact support.",
-            variant: "destructive",
-          });
-        }
-      },
-      onClose: function() {
-        setIsProcessing(false);
-        toast({
-          title: "Payment Cancelled",
-          description: "You have cancelled the payment. You can try again when ready.",
-        });
-      }
-    });
-    
-    handler.openIframe();
-  };
 
   const handlePayment = async () => {
     if (!registrationId) {
@@ -151,29 +80,55 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       const paymentId = await createPayment(registrationId, selectedMethod);
       
       if (!paymentId) {
-        setIsProcessing(false);
         return;
       }
 
       toast({
         title: "Processing Payment",
-        description: "Please wait while we process your payment...",
+        description: "Please wait while we redirect you to the payment gateway...",
       });
 
+      // Initialize Paystack
       if (selectedMethod === 'paystack') {
-        // Initialize Paystack payment
-        initializePaystack(paymentId);
-      } else {
-        // For other payment methods (like Flutterwave)
-        // Implement similar to Paystack or redirect to their payment page
-        toast({
-          title: "Payment Method Not Implemented",
-          description: "This payment method is not fully implemented yet. Please try Paystack instead.",
-          variant: "destructive",
-        });
-        setIsProcessing(false);
-      }
+        const handler = window.PaystackPop?.setup({
+          key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4644d4ace969cf6fb98c0ef53e25b2b301e3c955',
+          email: data.email,
+          amount: data.totalAmount * 100, // Paystack expects amount in kobo (or cents)
+          currency: 'USD', // Changed from NGN to USD
+          ref: `tpahla_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
+          callback: async function(response: any) {
+            // This is called when payment is successful
+            const success = await updatePaymentStatus(paymentId, 'completed', response.reference);
+            
+            if (success) {
+              toast({
+                title: "Payment Successful!",
+                description: "Your registration has been completed successfully.",
+              });
 
+              setTimeout(() => {
+                onSuccess();
+              }, 1000);
+            } else {
+              toast({
+                title: "Payment Update Failed",
+                description: "Payment processed but status update failed. Please contact support.",
+                variant: "destructive",
+              });
+            }
+          },
+          onClose: function() {
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You have closed the payment window. Your registration is saved but not completed.",
+              variant: "destructive",
+            });
+          }
+        });
+        
+        handler.openIframe();
+      }
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -190,9 +145,7 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       title: "Bank Transfer Instructions Sent",
       description: "Please complete your transfer and allow 24-48 hours for verification.",
     });
-    
-    // Redirect to registration details page
-    navigate(`/registration-details?id=${registrationId}`);
+    onSuccess();
   };
 
   return (
