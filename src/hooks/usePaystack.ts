@@ -6,6 +6,7 @@ interface PaystackConfig {
   amount: number;
   email: string;
   registrationId: string;
+  currency?: 'NGN' | 'USD';
   metadata?: Record<string, any>;
   onSuccess?: (response: any) => void;
   onError?: (error: any) => void;
@@ -19,6 +20,7 @@ export const usePaystack = () => {
     amount,
     email,
     registrationId,
+    currency = 'NGN',
     metadata = {},
     onSuccess,
     onError
@@ -27,16 +29,15 @@ export const usePaystack = () => {
     setError(null);
 
     try {
-      // Get the current origin for the callback URL
       const origin = window.location.origin;
       const callbackUrl = `${origin}/payment-callback`;
 
-      // Call our Supabase Edge Function to initialize payment
       const { data, error: functionError } = await supabase.functions.invoke('process-payment', {
         body: {
           registrationId,
           amount,
           email,
+          currency,
           callbackUrl,
           metadata: {
             ...metadata,
@@ -56,10 +57,8 @@ export const usePaystack = () => {
         throw new Error('Failed to initialize payment: No authorization URL returned');
       }
 
-      // Open Paystack checkout in a new window/tab
       window.location.href = data.authorization_url;
 
-      // Call success callback if provided
       if (onSuccess) {
         onSuccess(data);
       }
@@ -68,15 +67,10 @@ export const usePaystack = () => {
     } catch (err: any) {
       console.error('Payment initialization error:', err);
       setError(err);
-      
-      // Show error toast
       toast.error(`Payment initialization failed: ${err.message}`);
-      
-      // Call error callback if provided
       if (onError) {
         onError(err);
       }
-      
       return null;
     } finally {
       setIsLoading(false);
@@ -88,7 +82,6 @@ export const usePaystack = () => {
     setError(null);
 
     try {
-      // Call our Supabase Edge Function to verify payment
       const { data, error: functionError } = await supabase.functions.invoke('verify-payment', {
         body: { reference }
       });
