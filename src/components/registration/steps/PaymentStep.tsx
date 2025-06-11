@@ -82,31 +82,34 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
           }
         ]
       },
-      callback: async function(response: any) {
+      callback: function(response: any) {
         // This is called when the payment is successful
         console.log('Payment successful:', response);
         
-        const success = await updatePaymentStatus(
-          paymentId, 
-          'completed', 
-          response.reference
-        );
-        
-        if (success) {
-          toast({
-            title: "Payment Successful!",
-            description: "Your registration has been completed successfully.",
-          });
+        // Use IIFE to handle async operations
+        (async () => {
+          const success = await updatePaymentStatus(
+            paymentId, 
+            'completed', 
+            response.reference
+          );
           
-          // Redirect to registration details page
-          navigate(`/registration-details?id=${registrationId}`);
-        } else {
-          toast({
-            title: "Payment Verification Failed",
-            description: "Your payment was processed but we couldn't update your registration. Please contact support.",
-            variant: "destructive",
-          });
-        }
+          if (success) {
+            toast({
+              title: "Payment Successful!",
+              description: "Your registration has been completed successfully.",
+            });
+            
+            // Redirect to registration details page
+            navigate(`/registration-details?id=${registrationId}`);
+          } else {
+            toast({
+              title: "Payment Verification Failed",
+              description: "Your payment was processed but we couldn't update your registration. Please contact support.",
+              variant: "destructive",
+            });
+          }
+        })();
       },
       onClose: function() {
         setIsProcessing(false);
