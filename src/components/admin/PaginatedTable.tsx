@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Search, Filter, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -77,7 +77,7 @@ function PaginatedTable<T>({
 }: PaginatedTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-  const [dateInput, setDateInput] = useState<string>("");
+  const [dateInput, setDateInput] = useState<string>(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "");
 
   // Calculate pagination
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -283,7 +283,7 @@ function PaginatedTable<T>({
         
         <div className="flex items-center gap-2">
           <div className="text-sm text-muted-foreground">
-            Showing {startIndex + 1}-{Math.min(endIndex, data.length)} of {data.length}
+            Showing {data.length > 0 ? startIndex + 1 : 0}-{Math.min(endIndex, data.length)} of {data.length}
           </div>
         </div>
       </div>
@@ -336,21 +336,31 @@ function PaginatedTable<T>({
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                aria-disabled={currentPage === 1}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-              />
+                disabled={currentPage === 1}
+                className="h-9 w-9 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Go to previous page</span>
+              </Button>
             </PaginationItem>
             
             {renderPaginationItems()}
             
             <PaginationItem>
-              <PaginationNext 
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                aria-disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-              />
+                disabled={currentPage === totalPages}
+                className="h-9 w-9 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Go to next page</span>
+              </Button>
             </PaginationItem>
           </PaginationContent>
         </Pagination>
