@@ -11,8 +11,8 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState('admin@tpahla.africa');
-  const [password, setPassword] = useState('Admin25@1');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { session, loading: authLoading } = useAuth();
@@ -80,7 +80,7 @@ const AdminLoginPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@tpahla.africa"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -93,6 +93,7 @@ const AdminLoginPage = () => {
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
