@@ -63,7 +63,7 @@ export const useFlutterwave = () => {
         throw new Error('Flutterwave SDK not loaded properly');
       }
 
-      // Configure Flutterwave - using the correct parameter name
+      // Configure Flutterwave checkout with the correct parameters
       const config = {
         public_key: data.public_key,
         tx_ref: data.tx_ref,
@@ -85,23 +85,6 @@ export const useFlutterwave = () => {
           registration_id: registrationId,
           payment_id: data.payment_id,
           ...metadata
-        },
-        callback: function(response: any) {
-          // Verify the transaction on the backend
-          verifyPayment(response.transaction_id, data.payment_id)
-            .then(verificationResult => {
-              if (verificationResult && verificationResult.success) {
-                if (onSuccess) onSuccess(verificationResult);
-                toast.success('Payment successful!');
-              } else {
-                throw new Error('Payment verification failed');
-              }
-            })
-            .catch(err => {
-              console.error('Verification error:', err);
-              toast.error(`Payment verification failed: ${err.message}`);
-              if (onError) onError(err);
-            });
         },
         onclose: function() {
           setIsLoading(false);
