@@ -65,7 +65,7 @@ serve(async (req: Request) => {
     // Get Flutterwave keys from environment variables
     const flutterwaveSecretKey = Deno.env.get("FLW_SECRET_KEY");
     const flutterwavePublicKey = Deno.env.get("FLW_PUBLIC_KEY");
-    const subaccountId = Deno.env.get("FLW_SUBACCOUNT_ID") || "RS_288BB910A3D1E6E93364D51AC9FDA928";
+    const subaccountId = Deno.env.get("FLW_SUBACCOUNT_ID") || "";
     
     if (!flutterwaveSecretKey || !flutterwavePublicKey) {
       return new Response(
@@ -93,7 +93,7 @@ serve(async (req: Request) => {
     }
 
     // Prepare the payment payload for Flutterwave
-    const paymentPayload = {
+    const paymentPayload: any = {
       tx_ref: txRef,
       amount: amount.toString(),
       currency: "USD",
@@ -109,18 +109,22 @@ serve(async (req: Request) => {
         description: "Secure payment for humanitarian award participation",
         logo: `${req.headers.get("origin")}/lovable-uploads/483603d8-00de-4ab9-a335-36a998ddd55f.png`
       },
-      subaccounts: [
-        {
-          id: subaccountId,
-          transaction_charge_type: "percentage",
-          transaction_charge: 100 // 100% of payment goes to subaccount
-        }
-      ],
       meta: {
         registration_id: registrationId,
         ...metadata
       }
     };
+
+    // Add subaccount if available
+    if (subaccountId) {
+      paymentPayload.subaccounts = [
+        {
+          id: subaccountId,
+          transaction_charge_type: "percentage",
+          transaction_charge: 100 // 100% of payment goes to subaccount
+        }
+      ];
+    }
 
     // Create a payment record in the database
     const { data: payment, error: paymentError } = await supabase

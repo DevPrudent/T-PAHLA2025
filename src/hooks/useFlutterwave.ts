@@ -58,8 +58,13 @@ export const useFlutterwave = () => {
         throw new Error('Failed to initialize payment: No payment ID returned');
       }
 
-      // Configure Flutterwave
-      const flutterwaveConfig = {
+      // Make sure FlutterwaveCheckout is available
+      if (typeof window.FlutterwaveCheckout !== 'function') {
+        throw new Error('Flutterwave SDK not loaded properly');
+      }
+
+      // Configure Flutterwave - using the correct parameter name
+      const config = {
         public_key: data.public_key,
         tx_ref: data.tx_ref,
         amount,
@@ -76,13 +81,11 @@ export const useFlutterwave = () => {
           description: 'Secure payment for humanitarian award participation',
           logo: `${origin}/lovable-uploads/483603d8-00de-4ab9-a335-36a998ddd55f.png`,
         },
-        subaccounts: [
-          {
-            id: data.subaccount_id || "RS_288BB910A3D1E6E93364D51AC9FDA928", // Use the one from the server or fallback
-            transaction_charge_type: "percentage",
-            transaction_charge: 100 // 100% of payment goes to subaccount
-          }
-        ],
+        meta: {
+          registration_id: registrationId,
+          payment_id: data.payment_id,
+          ...metadata
+        },
         callback: function(response: any) {
           // Verify the transaction on the backend
           verifyPayment(response.transaction_id, data.payment_id)
@@ -106,13 +109,8 @@ export const useFlutterwave = () => {
         }
       };
 
-      // @ts-ignore - Flutterwave is loaded from CDN
-      if (window.FlutterwaveCheckout) {
-        // @ts-ignore
-        window.FlutterwaveCheckout(flutterwaveConfig);
-      } else {
-        throw new Error('Flutterwave SDK not loaded');
-      }
+      // Initialize Flutterwave payment
+      window.FlutterwaveCheckout(config);
 
       return data;
     } catch (err: any) {
@@ -160,3 +158,10 @@ export const useFlutterwave = () => {
     error
   };
 };
+
+// Add TypeScript declaration for Flutterwave
+declare global {
+  interface Window {
+    FlutterwaveCheckout: (config: any) => void;
+  }
+}
