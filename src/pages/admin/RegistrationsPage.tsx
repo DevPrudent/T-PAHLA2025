@@ -3,32 +3,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
   Eye, 
   Loader2, 
   AlertCircle, 
   Inbox, 
-  Search, 
   Download,
   Mail,
   Phone,
   User,
   Calendar
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { 
   Dialog, 
   DialogContent, 
@@ -39,15 +27,27 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import PaginatedTable from '@/components/admin/PaginatedTable';
 
 type RegistrationRow = Database['public']['Tables']['registrations']['Row'];
 type RegistrationStatusEnum = Database['public']['Enums']['registration_status_enum'];
 
-const fetchRegistrations = async (): Promise<RegistrationRow[]> => {
-  const { data, error } = await supabase
+const fetchRegistrations = async (date?: Date): Promise<RegistrationRow[]> => {
+  let query = supabase
     .from('registrations')
     .select('*')
     .order('created_at', { ascending: false });
+  
+  // Add date filter if provided
+  if (date) {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    // Filter by date (this assumes created_at is in ISO format)
+    query = query.gte('created_at', `${dateStr}T00:00:00`)
+                .lt('created_at', `${dateStr}T23:59:59`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching registrations:', error);
@@ -60,25 +60,37 @@ const RegistrationsPage = () => {
   const queryClient = useQueryClient();
   const [selectedRegistration, setSelectedRegistration] = useState<RegistrationRow | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
-  const { data: registrations, isLoading, error } = useQuery<RegistrationRow[], Error>({
-    queryKey: ['registrations'],
-    queryFn: fetchRegistrations,
+  const { data: registrations, isLoading, error, refetch } = useQuery<RegistrationRow[], Error>({
+    queryKey: ['registrations', selectedDate?.toISOString().split('T')[0]],
+    queryFn: () => fetchRegistrations(selectedDate),
   });
 
+  // Refetch when date changes
+  React.useEffect(() => {
+    refetch();
+  }, [selectedDate, refetch]);
+
+  // Filtered registrations based on search term and status (client-side for now)
   const filteredRegistrations = React.useMemo(() => {
     if (!registrations) return [];
-    if (!searchTerm) return registrations;
+    
     return registrations.filter(registration => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        (registration.id && registration.id.toLowerCase().includes(searchLower)) ||
-        (registration.full_name && registration.full_name.toLowerCase().includes(searchLower)) ||
-        (registration.email && registration.email.toLowerCase().includes(searchLower)) ||
-        (registration.phone && registration.phone.toLowerCase().includes(searchLower))
-      );
+      // Apply search filter
+      const matchesSearch = !searchTerm || 
+        (registration.id && registration.id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (registration.full_name && registration.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (registration.email && registration.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (registration.phone && registration.phone.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Apply status filter
+      const matchesStatus = !selectedStatus || registration.registration_status === selectedStatus;
+      
+      return matchesSearch && matchesStatus;
     });
-  }, [registrations, searchTerm]);
+  }, [registrations, searchTerm, selectedStatus]);
 
   const updateStatusMutation = useMutation<
     RegistrationRow | null,
@@ -155,6 +167,91 @@ const RegistrationsPage = () => {
     document.body.removeChild(link);
   };
 
+  const statusOptions = [
+    { value: 'draft', label: 'Draft' },
+    { value: 'pending_payment', label: 'Pending Payment' },
+    { value: 'paid', label: 'Paid' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'refunded', label: 'Refunded' }
+  ];
+
+  const columns = [
+    { 
+      header: 'Name', 
+      accessor: 'full_name',
+      className: 'font-medium'
+    },
+    { 
+      header: 'Email', 
+      accessor: 'email'
+    },
+    { 
+      header: 'Type', 
+      accessor: (row: RegistrationRow) => (
+        <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold border-gray-200 bg-gray-100 text-gray-800">
+          {row.participation_type}
+        </span>
+      )
+    },
+    { 
+      header: 'Amount', 
+      accessor: (row: RegistrationRow) => `$${row.total_amount.toLocaleString()}`
+    },
+    { 
+      header: 'Date', 
+      accessor: (row: RegistrationRow) => {
+        const submissionDate = row.submitted_at || row.created_at;
+        return submissionDate ? format(new Date(submissionDate), 'PP') : 'N/A';
+      }
+    },
+    { 
+      header: 'Status', 
+      accessor: (row: RegistrationRow) => {
+        const statusVariant = 
+          row.registration_status === "paid" ? "success" : 
+          row.registration_status === "cancelled" ? "destructive" :
+          "outline";
+        
+        return (
+          <span className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold 
+            ${statusVariant === 'success' ? 'border-transparent bg-green-100 text-green-800' : 
+              statusVariant === 'destructive' ? 'border-transparent bg-red-100 text-red-800' : 
+              'border-gray-200 bg-gray-100 text-gray-800'}`}>
+            {row.registration_status || 'N/A'}
+          </span>
+        );
+      }
+    },
+  ];
+
+  const renderRowActions = (registration: RegistrationRow) => (
+    <div className="flex justify-end gap-2">
+      <Button size="sm" variant="ghost" onClick={() => handleViewDetails(registration)}>
+        <Eye size={16} className="mr-1" /> View
+      </Button>
+      {registration.registration_status === "pending_payment" && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-green-600 hover:text-green-700"
+          onClick={() => handleUpdateStatus(registration.id, 'paid')}
+        >
+          Mark as Paid
+        </Button>
+      )}
+      {registration.registration_status !== "cancelled" && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-red-600 hover:text-red-700"
+          onClick={() => handleUpdateStatus(registration.id, 'cancelled')}
+        >
+          Cancel
+        </Button>
+      )}
+    </div>
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -202,86 +299,23 @@ const RegistrationsPage = () => {
         Review and manage all registrations. You can view details and update status.
       </p>
 
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search by ID, Name, Email, Phone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8 w-full max-w-md mb-4" 
-        />
-      </div>
-      
-      <Table>
-        <TableCaption>List of all registrations.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredRegistrations.map((registration) => {
-            const submissionDate = registration.submitted_at || registration.created_at;
-
-            return (
-              <TableRow key={registration.id}>
-                <TableCell className="font-medium">{registration.full_name || 'N/A'}</TableCell>
-                <TableCell>{registration.email || 'N/A'}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {registration.participation_type}
-                  </Badge>
-                </TableCell>
-                <TableCell>${registration.total_amount.toLocaleString()}</TableCell>
-                <TableCell>{submissionDate ? format(new Date(submissionDate), 'PP') : 'N/A'}</TableCell>
-                <TableCell>
-                  <Badge variant={
-                    registration.registration_status === "paid" ? "success" : 
-                    registration.registration_status === "cancelled" ? "destructive" :
-                    "outline" 
-                  }>
-                    {registration.registration_status || 'N/A'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(registration)}>
-                      <Eye size={16} className="mr-1" /> View
-                    </Button>
-                    {registration.registration_status === "pending_payment" && (
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="text-green-600 hover:text-green-700"
-                        onClick={() => handleUpdateStatus(registration.id, 'paid')}
-                      >
-                        Mark as Paid
-                      </Button>
-                    )}
-                    {registration.registration_status !== "cancelled" && (
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleUpdateStatus(registration.id, 'cancelled')}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <PaginatedTable
+        data={filteredRegistrations}
+        columns={columns}
+        caption="List of all registrations."
+        itemsPerPage={10}
+        searchPlaceholder="Search by ID, Name, Email, Phone..."
+        onSearch={setSearchTerm}
+        searchTerm={searchTerm}
+        showDateFilter={true}
+        onDateChange={setSelectedDate}
+        selectedDate={selectedDate}
+        showStatusFilter={true}
+        statusOptions={statusOptions}
+        onStatusChange={setSelectedStatus}
+        selectedStatus={selectedStatus}
+        renderRowActions={renderRowActions}
+      />
 
       {/* Registration Details Dialog */}
       <Dialog open={!!selectedRegistration} onOpenChange={(open) => !open && setSelectedRegistration(null)}>

@@ -1,25 +1,21 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+  CheckCircle, 
+  XCircle, 
+  Eye, 
+  Loader2, 
+  AlertCircle, 
+  Inbox
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, Eye, Loader2, AlertCircle, Inbox, Search } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { NominationDetailsModal } from '@/components/admin/NominationDetailsModal';
+import PaginatedTable from '@/components/admin/PaginatedTable';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
@@ -30,12 +26,22 @@ interface FilteredNominationsTableProps {
   showActions?: boolean; // To control if Approve/Reject actions are shown
 }
 
-const fetchNominationsByStatus = async (status: NominationStatusEnum): Promise<NominationRow[]> => {
-  const { data, error } = await supabase
+const fetchNominationsByStatus = async (status: NominationStatusEnum, date?: Date): Promise<NominationRow[]> => {
+  let query = supabase
     .from('nominations')
     .select('*')
     .eq('status', status)
     .order('created_at', { ascending: false });
+  
+  // Add date filter if provided
+  if (date) {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    // Filter by date (this assumes created_at is in ISO format)
+    query = query.gte('created_at', `${dateStr}T00:00:00`)
+                .lt('created_at', `${dateStr}T23:59:59`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error(`Error fetching ${status} nominations:`, error);
@@ -48,26 +54,17 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
   const queryClient = useQueryClient();
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const { data: nominations, isLoading, error } = useQuery<NominationRow[], Error>({
-    queryKey: ['nominations', statusFilter],
-    queryFn: () => fetchNominationsByStatus(statusFilter),
+  const { data: nominations, isLoading, error, refetch } = useQuery<NominationRow[], Error>({
+    queryKey: ['nominations', statusFilter, selectedDate?.toISOString().split('T')[0]],
+    queryFn: () => fetchNominationsByStatus(statusFilter, selectedDate),
   });
 
-  const filteredNominations = useMemo(() => {
-    if (!nominations) return [];
-    if (!searchTerm) return nominations;
-    return nominations.filter(nomination => {
-      const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null;
-      const nomineeEmail = sectionAData?.nominee_email?.toLowerCase() || '';
-      
-      return (
-        nomination.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (nomination.nominee_name && nomination.nominee_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        nomineeEmail.includes(searchTerm.toLowerCase())
-      );
-    });
-  }, [nominations, searchTerm]);
+  // Refetch when date changes
+  useEffect(() => {
+    refetch();
+  }, [selectedDate, refetch]);
 
   const updateStatusMutation = useMutation<
     NominationRow | null,
@@ -105,6 +102,121 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
     setSelectedNomination(nomination);
   };
 
+  const statusOptions = [
+    { value: 'draft', label: 'Draft' },
+    { value: 'submitted', label: 'Submitted' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
+    { value: 'incomplete', label: 'Incomplete' }
+  ];
+
+  const columns = [
+    { 
+      header: 'Nomination ID', 
+      accessor: 'id',
+      className: 'font-mono text-xs'
+    },
+    { 
+      header: 'Nominee Name', 
+      accessor: 'nominee_name',
+      className: 'font-medium'
+    },
+    { 
+      header: 'Email', 
+      accessor: (row: NominationRow) => {
+        const sectionAData = row.form_section_a as { nominee_email?: string; } | null;
+        return sectionAData?.nominee_email || 'N/A';
+      }
+    },
+    { 
+      header: 'Category ID', 
+      accessor: 'award_category_id'
+    },
+    { 
+      header: 'Date Submitted', 
+      accessor: (row: NominationRow) => {
+        const submissionDate = row.submitted_at || row.created_at;
+        return submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A';
+      }
+    },
+    { 
+      header: 'Status', 
+      accessor: (row: NominationRow) => {
+        const statusVariant = 
+          row.status === "approved" ? "success" : 
+          row.status === "rejected" ? "destructive" :
+          row.status === "submitted" ? "default" : 
+          "outline";
+        
+        return (
+          <span className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold 
+            ${statusVariant === 'success' ? 'border-transparent bg-green-100 text-green-800' : 
+              statusVariant === 'destructive' ? 'border-transparent bg-red-100 text-red-800' : 
+              statusVariant === 'default' ? 'border-transparent bg-blue-100 text-blue-800' : 
+              'border-gray-200 bg-gray-100 text-gray-800'}`}>
+            {row.status || 'N/A'}
+          </span>
+        );
+      }
+    },
+  ];
+
+  const renderRowActions = (nomination: NominationRow) => (
+    <div className="flex justify-end gap-2">
+      <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
+        <Eye size={16} className="mr-1" /> View
+      </Button>
+      {showActions && (nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
+        <>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            className="text-green-600 hover:text-green-700"
+            onClick={() => handleUpdateStatus(nomination.id, 'approved')}
+            disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+          >
+            {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
+             Approve
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            className="text-red-600 hover:text-red-700"
+            onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
+            disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+          >
+            {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
+             Reject
+          </Button>
+        </>
+      )}
+      {showActions && (nomination.status === "approved") && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-red-600 hover:text-red-700"
+          onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
+          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+        >
+          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
+           Reject
+        </Button>
+      )}
+      {showActions && (nomination.status === "rejected") && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-green-600 hover:text-green-700"
+          onClick={() => handleUpdateStatus(nomination.id, 'approved')}
+          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
+        >
+          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
+           Approve
+        </Button>
+      )}
+    </div>
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -124,7 +236,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
     );
   }
 
-  if (!filteredNominations || filteredNominations.length === 0) {
+  if (!nominations || nominations.length === 0) {
     return (
       <div className="text-center py-10">
         <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -140,113 +252,20 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
         <h1 className="text-3xl font-bold">{pageTitle}</h1>
       </div>
       
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search by ID, Name, Email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8 w-full max-w-md mb-4" 
-        />
-      </div>
+      <PaginatedTable
+        data={nominations}
+        columns={columns}
+        caption={`List of ${pageTitle.toLowerCase()}.`}
+        itemsPerPage={10}
+        searchPlaceholder="Search by ID, Name, Email..."
+        onSearch={setSearchTerm}
+        searchTerm={searchTerm}
+        showDateFilter={true}
+        onDateChange={setSelectedDate}
+        selectedDate={selectedDate}
+        renderRowActions={renderRowActions}
+      />
       
-      <Table>
-        <TableCaption>List of {pageTitle.toLowerCase()}.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nomination ID</TableHead>
-            <TableHead>Nominee Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Category ID</TableHead>
-            <TableHead>Date Submitted</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredNominations.map((nomination) => {
-            const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null; 
-            const nomineeEmail = sectionAData?.nominee_email || 'N/A';
-            const submissionDate = nomination.submitted_at || nomination.created_at;
-
-            return (
-              <TableRow key={nomination.id}>
-                <TableCell className="font-mono text-xs">{nomination.id}</TableCell>
-                <TableCell className="font-medium">{nomination.nominee_name || 'N/A'}</TableCell>
-                <TableCell>{nomineeEmail}</TableCell>
-                <TableCell>{nomination.award_category_id || 'N/A'}</TableCell>
-                <TableCell>{submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'}</TableCell>
-                <TableCell>
-                  <Badge variant={
-                    nomination.status === "approved" ? "success" : 
-                    nomination.status === "rejected" ? "destructive" :
-                    nomination.status === "submitted" ? "default" : 
-                    "outline" 
-                  }>
-                    {nomination.status || 'N/A'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
-                      <Eye size={16} className="mr-1" /> View
-                    </Button>
-                    {showActions && (nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
-                      <>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-green-600 hover:text-green-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'approved')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
-                           Approve
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
-                           Reject
-                        </Button>
-                      </>
-                    )}
-                     {showActions && (nomination.status === "approved") && (
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'rejected')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
-                           Reject
-                        </Button>
-                    )}
-                     {showActions && (nomination.status === "rejected") && (
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-green-600 hover:text-green-700"
-                          onClick={() => handleUpdateStatus(nomination.id, 'approved')}
-                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
-                           Approve
-                        </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
       <NominationDetailsModal 
         nomination={selectedNomination}
         isOpen={!!selectedNomination}
@@ -255,4 +274,3 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
     </div>
   );
 };
-

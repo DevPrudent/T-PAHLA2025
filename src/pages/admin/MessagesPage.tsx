@@ -1,12 +1,11 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, AlertCircle, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
 import { Alert, AlertTitle } from '@/components/ui/alert';
+import PaginatedTable from '@/components/admin/PaginatedTable';
 
 type ContactMessage = Database['public']['Tables']['contact_messages']['Row'];
 
@@ -14,31 +13,84 @@ const MessagesPage = () => {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('contact_messages')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (fetchError) {
-          throw fetchError;
-        }
-        setMessages(data || []);
-      } catch (err: any) {
-        console.error("Error fetching messages:", err);
-        setError(err.message || "Failed to fetch messages.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMessages();
-  }, []);
+  }, [selectedDate]);
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let query = supabase
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      // Add date filter if provided
+      if (selectedDate) {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        // Filter by date (this assumes created_at is in ISO format)
+        query = query.gte('created_at', `${dateStr}T00:00:00`)
+                    .lt('created_at', `${dateStr}T23:59:59`);
+      }
+
+      const { data, error: fetchError } = await query;
+
+      if (fetchError) {
+        throw fetchError;
+      }
+      setMessages(data || []);
+    } catch (err: any) {
+      console.error("Error fetching messages:", err);
+      setError(err.message || "Failed to fetch messages.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter messages based on search term
+  const filteredMessages = messages.filter(message => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (message.first_name && message.first_name.toLowerCase().includes(searchLower)) ||
+      (message.last_name && message.last_name.toLowerCase().includes(searchLower)) ||
+      (message.email && message.email.toLowerCase().includes(searchLower)) ||
+      (message.subject && message.subject.toLowerCase().includes(searchLower)) ||
+      (message.message && message.message.toLowerCase().includes(searchLower))
+    );
+  });
+
+  const columns = [
+    { 
+      header: 'Date', 
+      accessor: (row: ContactMessage) => format(new Date(row.created_at), 'PPpp')
+    },
+    { 
+      header: 'Name', 
+      accessor: (row: ContactMessage) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'N/A',
+      className: 'font-medium'
+    },
+    { 
+      header: 'Email', 
+      accessor: 'email'
+    },
+    { 
+      header: 'Subject', 
+      accessor: 'subject'
+    },
+    { 
+      header: 'Message', 
+      accessor: (row: ContactMessage) => (
+        <div className="max-w-xs truncate">{row.message}</div>
+      ),
+      className: 'max-w-xs truncate'
+    },
+  ];
 
   if (loading) {
     return (
@@ -74,28 +126,18 @@ const MessagesPage = () => {
               <p className="mt-4 text-muted-foreground">No messages yet.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {messages.map((msg) => (
-                  <TableRow key={msg.id}>
-                    <TableCell>{format(new Date(msg.created_at), 'PPpp')}</TableCell>
-                    <TableCell>{msg.first_name} {msg.last_name}</TableCell>
-                    <TableCell>{msg.email}</TableCell>
-                    <TableCell>{msg.subject}</TableCell>
-                    <TableCell className="max-w-xs truncate">{msg.message}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <PaginatedTable
+              data={filteredMessages}
+              columns={columns}
+              caption="Contact messages received through the website"
+              itemsPerPage={10}
+              searchPlaceholder="Search messages..."
+              onSearch={setSearchTerm}
+              searchTerm={searchTerm}
+              showDateFilter={true}
+              onDateChange={setSelectedDate}
+              selectedDate={selectedDate}
+            />
           )}
         </CardContent>
       </Card>
