@@ -64,17 +64,25 @@ export const useFlutterwave = () => {
         tx_ref: data.tx_ref,
         amount,
         currency: 'USD',
-        payment_options: 'card,ussd,bank_transfer',
+        payment_options: 'card',
+        redirect_url: callbackUrl,
         customer: {
           email,
           name: metadata.name || 'Customer',
-          phone_number: metadata.phone || '',
+          phonenumber: metadata.phone || '',
         },
         customizations: {
           title: 'TPAHLA 2025 Registration',
-          description: 'Payment for TPAHLA 2025 Event Registration',
+          description: 'Secure payment for humanitarian award participation',
           logo: `${origin}/lovable-uploads/483603d8-00de-4ab9-a335-36a998ddd55f.png`,
         },
+        subaccounts: [
+          {
+            id: data.subaccount_id || "RS_288BB910A3D1E6E93364D51AC9FDA928", // Use the one from the server or fallback
+            transaction_charge_type: "percentage",
+            transaction_charge: 100 // 100% of payment goes to subaccount
+          }
+        ],
         callback: function(response: any) {
           // Verify the transaction on the backend
           verifyPayment(response.transaction_id, data.payment_id)

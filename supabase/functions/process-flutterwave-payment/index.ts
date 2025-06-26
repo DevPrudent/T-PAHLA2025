@@ -62,9 +62,10 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get Flutterwave secret key from environment variables
+    // Get Flutterwave keys from environment variables
     const flutterwaveSecretKey = Deno.env.get("FLW_SECRET_KEY");
     const flutterwavePublicKey = Deno.env.get("FLW_PUBLIC_KEY");
+    const subaccountId = Deno.env.get("FLW_SUBACCOUNT_ID") || "RS_288BB910A3D1E6E93364D51AC9FDA928";
     
     if (!flutterwaveSecretKey || !flutterwavePublicKey) {
       return new Response(
@@ -77,7 +78,49 @@ serve(async (req: Request) => {
     }
 
     // Generate a unique transaction reference
-    const txRef = `tpahla_flw_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+    const txRef = `TPAHLA2025_${Date.now()}`;
+
+    // Get registration details for better customer info
+    const { data: registration, error: registrationError } = await supabase
+      .from("registrations")
+      .select("full_name, phone")
+      .eq("id", registrationId)
+      .single();
+
+    if (registrationError) {
+      console.error("Error fetching registration details:", registrationError);
+      // Continue anyway, we'll use fallback values
+    }
+
+    // Prepare the payment payload for Flutterwave
+    const paymentPayload = {
+      tx_ref: txRef,
+      amount: amount.toString(),
+      currency: "USD",
+      redirect_url: callbackUrl || `${req.headers.get("origin")}/payment-callback`,
+      payment_options: "card",
+      customer: {
+        email: email,
+        phonenumber: registration?.phone || metadata?.phone || "",
+        name: registration?.full_name || metadata?.name || "Customer"
+      },
+      customizations: {
+        title: "TPAHLA 2025 Registration",
+        description: "Secure payment for humanitarian award participation",
+        logo: `${req.headers.get("origin")}/lovable-uploads/483603d8-00de-4ab9-a335-36a998ddd55f.png`
+      },
+      subaccounts: [
+        {
+          id: subaccountId,
+          transaction_charge_type: "percentage",
+          transaction_charge: 100 // 100% of payment goes to subaccount
+        }
+      ],
+      meta: {
+        registration_id: registrationId,
+        ...metadata
+      }
+    };
 
     // Create a payment record in the database
     const { data: payment, error: paymentError } = await supabase
@@ -89,7 +132,10 @@ serve(async (req: Request) => {
         payment_status: "pending",
         currency: "USD",
         transaction_id: txRef,
-        gateway_response: { metadata },
+        gateway_response: { 
+          metadata,
+          payment_payload: paymentPayload
+        },
       })
       .select()
       .single();
@@ -112,6 +158,10 @@ serve(async (req: Request) => {
         payment_id: payment.id,
         tx_ref: txRef,
         public_key: flutterwavePublicKey,
+        subaccount_id: subaccountId,
+        customer_name: registration?.full_name || metadata?.name || "",
+        customer_phone: registration?.phone || metadata?.phone || "",
+        payment_payload: paymentPayload
       }),
       {
         status: 200,

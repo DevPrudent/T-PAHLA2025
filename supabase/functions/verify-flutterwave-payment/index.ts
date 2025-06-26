@@ -183,6 +183,9 @@ serve(async (req: Request) => {
           currency: verifyData.data.currency,
           status: verifyData.data.status,
           payment_type: verifyData.data.payment_type,
+          tx_ref: verifyData.data.tx_ref,
+          flw_ref: verifyData.data.flw_ref,
+          customer: verifyData.data.customer
         }
       }),
       {
