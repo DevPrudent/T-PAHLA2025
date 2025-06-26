@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { CreditCard, Building, ChevronsRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRegistration } from '@/hooks/useRegistration';
+import { useFlutterwave } from '@/hooks/useFlutterwave';
 import type { RegistrationData } from '../MultiStepRegistration';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
@@ -20,11 +21,18 @@ interface Props {
 
 const paymentMethods = [
   {
-    id: 'paystack',
-    name: 'Paystack',
-    description: 'Credit/Debit Cards, Bank Transfer',
+    id: 'flutterwave',
+    name: 'Flutterwave',
+    description: 'Credit/Debit Cards, Bank Transfer (USD)',
     icon: CreditCard,
     recommended: true
+  },
+  {
+    id: 'paystack',
+    name: 'Paystack',
+    description: 'Credit/Debit Cards, Bank Transfer (NGN)',
+    icon: CreditCard,
+    recommended: false
   },
   {
     id: 'bank_transfer',
@@ -51,16 +59,17 @@ const bankDetails = [
 ];
 
 export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
-  const [selectedMethod, setSelectedMethod] = useState('paystack');
+  const [selectedMethod, setSelectedMethod] = useState('flutterwave');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const { toast } = useToast();
   const { createPayment, updatePaymentStatus } = useRegistration();
+  const { initializePayment: initializeFlutterwavePayment } = useFlutterwave();
   const navigate = useNavigate();
 
   const initializePaystack = (paymentId: string) => {
     // @ts-ignore
-    const handler = PaystackPop.setup({
+    const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4644d4ace969cf6fb98c0ef53e25b2b301e3c955',
       email: data.email,
       amount: data.totalAmount * 100, // Paystack expects amount in kobo (smallest currency unit)
@@ -159,11 +168,44 @@ export const PaymentStep = ({ data, onSuccess, registrationId }: Props) => {
       if (selectedMethod === 'paystack') {
         // Initialize Paystack payment
         initializePaystack(paymentId);
+      } else if (selectedMethod === 'flutterwave') {
+        // Initialize Flutterwave payment
+        const result = await initializeFlutterwavePayment({
+          amount: data.totalAmount,
+          email: data.email,
+          registrationId: registrationId,
+          metadata: {
+            name: data.fullName,
+            phone: data.phone,
+            registration_type: data.participationType
+          },
+          onSuccess: (response) => {
+            toast({
+              title: "Payment Successful!",
+              description: "Your registration has been completed successfully.",
+            });
+            
+            // Redirect to registration details page
+            navigate(`/registration-details?id=${registrationId}`);
+          },
+          onError: (error) => {
+            toast({
+              title: "Payment Failed",
+              description: `Error: ${error.message}`,
+              variant: "destructive",
+            });
+            setIsProcessing(false);
+          }
+        });
+
+        if (!result) {
+          setIsProcessing(false);
+        }
       } else {
-        // This should not happen since we only have paystack and bank_transfer
+        // This should not happen since we only have paystack, flutterwave and bank_transfer
         toast({
           title: "Payment Method Not Implemented",
-          description: "This payment method is not fully implemented yet. Please try Paystack instead.",
+          description: "This payment method is not fully implemented yet. Please try Flutterwave or Paystack instead.",
           variant: "destructive",
         });
         setIsProcessing(false);
