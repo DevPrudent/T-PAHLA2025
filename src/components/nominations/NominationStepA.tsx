@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -154,38 +153,48 @@ const NominationStepA = () => {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>3. Date of Birth (DD/MM/YYYY)</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal bg-gray-700 border-gray-600 hover:bg-gray-600 text-white hover:text-white",
-                        !field.value && "text-gray-400"
-                      )}
-                    >
-                      {field.value ? (
-                        format(new Date(field.value), "PPP") // Using new Date() in case field.value is just YYYY-MM-DD string
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : '')}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                    className="text-white [&_button]:text-white [&_button:hover]:bg-tpahla-gold [&_button[aria-selected]]:bg-tpahla-gold [&_button[aria-selected]]:text-tpahla-darkgreen"
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal bg-gray-700 border-gray-600 hover:bg-gray-600 text-white hover:text-white",
+                          !field.value && "text-gray-400"
+                        )}
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "PPP") // Using new Date() in case field.value is just YYYY-MM-DD string
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : '')}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      className="text-white [&_button]:text-white [&_button:hover]:bg-tpahla-gold [&_button[aria-selected]]:bg-tpahla-gold [&_button[aria-selected]]:text-tpahla-darkgreen"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormControl>
+                  <Input
+                    type="date"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
                   />
-                </PopoverContent>
-              </Popover>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}

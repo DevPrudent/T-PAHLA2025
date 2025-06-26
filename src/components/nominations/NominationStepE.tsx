@@ -1,4 +1,3 @@
-
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -258,38 +257,51 @@ const NominationStepE = () => {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel className="text-lg">Date of Signature</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal bg-gray-800 border-gray-700 hover:bg-gray-700 text-gray-100",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-gray-100" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                    className="[&_button]:text-gray-100 [&_button:hover]:bg-tpahla-gold/20 [&_.day_selected]:bg-tpahla-gold [&_.day_selected]:text-tpahla-darkgreen"
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal bg-gray-800 border-gray-700 hover:bg-gray-700 text-gray-100",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-gray-100" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      className="[&_button]:text-gray-100 [&_button:hover]:bg-tpahla-gold/20 [&_.day_selected]:bg-tpahla-gold [&_.day_selected]:text-tpahla-darkgreen"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormControl>
+                  <Input
+                    type="date"
+                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : undefined;
+                      field.onChange(date);
+                    }}
+                    className="bg-gray-800 border-gray-700 text-gray-100"
                   />
-                </PopoverContent>
-              </Popover>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -319,4 +331,3 @@ const NominationStepE = () => {
 };
 
 export default NominationStepE;
-
