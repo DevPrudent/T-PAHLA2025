@@ -88,7 +88,7 @@ function PaginatedTable<T>({
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  const paginatedData = data.slice(startIndex, endIndex);
 
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -318,11 +318,11 @@ function PaginatedTable<T>({
             {currentData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length + (renderRowActions ? 1 : 0)} className="h-24 text-center">
-                  No results found.
+                  {data.length > 0 ? "No results found for current filters." : "No data available."}
                 </TableCell>
               </TableRow>
             ) : (
-              currentData.map((row, rowIndex) => (
+              paginatedData.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column, colIndex) => (
                     <TableCell key={colIndex} className={column.className}>
@@ -346,7 +346,7 @@ function PaginatedTable<T>({
       </div>
 
       {totalPages > 1 && (
-        <Pagination className="mt-6">
+        <Pagination className="mt-6 flex justify-center">
           <PaginationContent>
             <PaginationItem>
               <Button
@@ -362,6 +362,13 @@ function PaginatedTable<T>({
             </PaginationItem>
             
             {renderPaginationItems()}
+            
+            {/* Current page indicator */}
+            <PaginationItem>
+              <span className="flex h-9 items-center justify-center px-3 text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+            </PaginationItem>
             
             <PaginationItem>
               <Button

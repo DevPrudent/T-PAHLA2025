@@ -290,7 +290,7 @@ const NomineesPage = () => {
       <PaginatedTable
         data={filteredNominations}
         columns={columns}
-        caption="List of all submitted nominations. Use sidebar for filtered views."
+        caption={`List of all submitted nominations (${filteredNominations.length} total). Use sidebar for filtered views.`}
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email..."
         onSearch={setSearchTerm}

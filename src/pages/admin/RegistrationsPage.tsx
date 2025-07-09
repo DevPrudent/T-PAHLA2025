@@ -308,9 +308,9 @@ const RegistrationsPage = () => {
       </p>
 
       <PaginatedTable
-        data={filteredRegistrations}
+        data={filteredRegistrations} 
         columns={columns}
-        caption="List of all registrations."
+        caption={`List of all registrations (${filteredRegistrations.length} total).`}
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email, Phone..."
         onSearch={setSearchTerm}

@@ -269,7 +269,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
       <PaginatedTable
         data={filteredNominations}
         columns={columns}
-        caption={`List of ${pageTitle.toLowerCase()}.`}
+        caption={`List of ${pageTitle.toLowerCase()}. Total: ${filteredNominations.length}`}
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email..."
         onSearch={setSearchTerm}
