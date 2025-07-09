@@ -315,7 +315,7 @@ function PaginatedTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentData.length === 0 ? (
+            {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length + (renderRowActions ? 1 : 0)} className="h-24 text-center">
                   {data.length > 0 ? "No results found for current filters." : "No data available."}
