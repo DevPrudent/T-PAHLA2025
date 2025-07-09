@@ -254,7 +254,7 @@ const TransactionsPage = () => {
         <PaginatedTable
           data={filteredTransactions}
           columns={columns}
-          caption="A list of all transactions"
+          caption={`A list of all transactions (${filteredTransactions.length} total)`}
           itemsPerPage={10}
           searchPlaceholder="Search by ID, Name, Email..."
           onSearch={setSearchTerm}
