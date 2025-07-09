@@ -308,13 +308,15 @@ const RegistrationsPage = () => {
       </p>
 
       <PaginatedTable
-        data={filteredRegistrations}
+        data={currentRegistrations}
         columns={columns}
         caption="List of all registrations."
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email, Phone..."
         onSearch={setSearchTerm}
         searchTerm={searchTerm}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         showDateFilter={true}
         onDateChange={setSelectedDate}
         selectedDate={selectedDate}

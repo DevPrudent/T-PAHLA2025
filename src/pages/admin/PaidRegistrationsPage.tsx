@@ -42,6 +42,8 @@ const fetchPaidRegistrations = async (date?: Date): Promise<RegistrationRow[]> =
 const PaidRegistrationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: registrations, isLoading, error, refetch } = useQuery<RegistrationRow[], Error>({
     queryKey: ['paidRegistrations', selectedDate?.toISOString().split('T')[0]],
@@ -59,13 +61,20 @@ const PaidRegistrationsPage = () => {
     if (!searchTerm) return registrations;
     
     const searchLower = searchTerm.toLowerCase();
-    return registrations.filter(registration => 
+    const filtered = registrations.filter(registration => 
       (registration.id && registration.id.toLowerCase().includes(searchLower)) ||
       (registration.full_name && registration.full_name.toLowerCase().includes(searchLower)) ||
       (registration.email && registration.email.toLowerCase().includes(searchLower)) ||
       (registration.phone && registration.phone.toLowerCase().includes(searchLower))
     );
+    return filtered;
   }, [registrations, searchTerm]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRegistrations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRegistrations = filteredRegistrations.slice(startIndex, endIndex);
 
   const columns = [
     { 
@@ -146,13 +155,15 @@ const PaidRegistrationsPage = () => {
       </p>
       
       <PaginatedTable
-        data={filteredRegistrations}
+        data={currentRegistrations}
         columns={columns}
         caption="List of paid registrations."
         itemsPerPage={10}
         searchPlaceholder="Search by Name, Email..."
         onSearch={setSearchTerm}
         searchTerm={searchTerm}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         showDateFilter={true}
         onDateChange={setSelectedDate}
         selectedDate={selectedDate}
