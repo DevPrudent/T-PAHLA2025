@@ -66,6 +66,20 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
     refetch();
   }, [selectedDate, refetch]);
 
+  // Filter nominations based on search term
+  const filteredNominations = useMemo(() => {
+    if (!nominations) return [];
+    if (!searchTerm) return nominations;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return nominations.filter(nomination => 
+      nomination.id.toLowerCase().includes(searchLower) ||
+      nomination.nominee_name.toLowerCase().includes(searchLower) ||
+      (nomination.form_section_a as any)?.nominee_email?.toLowerCase().includes(searchLower) ||
+      nomination.award_category_id?.toLowerCase().includes(searchLower)
+    );
+  }, [nominations, searchTerm]);
+
   const updateStatusMutation = useMutation<
     NominationRow | null,
     Error,
@@ -253,7 +267,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
       </div>
       
       <PaginatedTable
-        data={nominations}
+        data={filteredNominations}
         columns={columns}
         caption={`List of ${pageTitle.toLowerCase()}.`}
         itemsPerPage={10}

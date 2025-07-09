@@ -79,6 +79,11 @@ function PaginatedTable<T>({
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [dateInput, setDateInput] = useState<string>(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "");
 
+  // Reset to page 1 when data changes (e.g., when filters are applied)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDate, selectedStatus]);
+
   // Calculate pagination
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -132,36 +137,41 @@ function PaginatedTable<T>({
   // Generate pagination items
   const renderPaginationItems = () => {
     const items = [];
-    const maxVisiblePages = 5;
     const totalPages = Math.max(1, Math.ceil(data.length / itemsPerPage));
     
-    // Always show first page
-    items.push(
-      <PaginationItem key="first">
-        <PaginationLink 
-          onClick={() => setCurrentPage(1)} 
-          isActive={currentPage === 1}
-        >
-          1
-        </PaginationLink>
-      </PaginationItem>
-    );
+    // Determine which page numbers to show
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
     
-    // Show ellipsis if needed
-    if (currentPage > 3 && totalPages > 3) {
-      items.push(
-        <PaginationItem key="ellipsis-1">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
+    // Adjust if we're near the end
+    if (endPage - startPage < 4 && startPage > 1) {
+      startPage = Math.max(1, endPage - 4);
     }
     
-    // Show pages around current page
-    const startPage = Math.max(2, currentPage - 1);
-    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    // Show first page with ellipsis if needed
+    if (startPage > 1) {
+      items.push(
+        <PaginationItem key="1">
+          <PaginationLink 
+            onClick={() => setCurrentPage(1)} 
+            isActive={currentPage === 1}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+      
+      if (startPage > 2) {
+        items.push(
+          <PaginationItem key="ellipsis-start">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+    }
     
+    // Show page numbers
     for (let i = startPage; i <= endPage; i++) {
-      if (i <= 1 || i >= totalPages) continue;
       items.push(
         <PaginationItem key={i}>
           <PaginationLink 
@@ -174,30 +184,26 @@ function PaginatedTable<T>({
       );
     }
     
-    // Show ellipsis if needed
-    if (currentPage < totalPages - 2 && totalPages > 3) {
-      items.push(
-        <PaginationItem key="ellipsis-2">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-    
-    // Always show last page if there's more than one page
-    if (totalPages > 1) {
-      // Only add last page if it's not already included in the loop above
-      if (endPage < totalPages) {
+    // Show last page with ellipsis if needed
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
         items.push(
-          <PaginationItem key="last">
-            <PaginationLink 
-              onClick={() => setCurrentPage(totalPages)} 
-              isActive={currentPage === totalPages}
-            >
-              {totalPages}
-            </PaginationLink>
+          <PaginationItem key="ellipsis-end">
+            <PaginationEllipsis />
           </PaginationItem>
         );
       }
+      
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink 
+            onClick={() => setCurrentPage(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
     
     return items;
@@ -276,7 +282,7 @@ function PaginatedTable<T>({
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="all" key="all-statuses">All Statuses</SelectItem>
                   {statusOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -340,7 +346,7 @@ function PaginatedTable<T>({
       </div>
 
       {totalPages > 1 && (
-        <Pagination className="mt-4">
+        <Pagination className="mt-6">
           <PaginationContent>
             <PaginationItem>
               <Button
@@ -348,7 +354,7 @@ function PaginatedTable<T>({
                 size="icon"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-md"
               >
                 <ChevronLeft className="h-4 w-4" />
                 <span className="sr-only">Go to previous page</span>
@@ -363,7 +369,7 @@ function PaginatedTable<T>({
                 size="icon"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-md"
               >
                 <ChevronRight className="h-4 w-4" />
                 <span className="sr-only">Go to next page</span>
