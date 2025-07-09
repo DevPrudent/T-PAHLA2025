@@ -85,7 +85,7 @@ const NomineesPage = () => {
         nomineeEmail.includes(searchTerm.toLowerCase());
       
       // Apply status filter
-      const matchesStatus = !selectedStatus || nomination.status === selectedStatus;
+      const matchesStatus = selectedStatus === 'all' || !selectedStatus || nomination.status === selectedStatus;
       
       return matchesSearch && matchesStatus;
     });

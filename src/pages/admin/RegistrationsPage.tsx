@@ -88,7 +88,7 @@ const RegistrationsPage = () => {
         (registration.phone && registration.phone.toLowerCase().includes(searchTerm.toLowerCase()));
       
       // Apply status filter
-      const matchesStatus = !selectedStatus || registration.registration_status === selectedStatus;
+      const matchesStatus = selectedStatus === 'all' || !selectedStatus || registration.registration_status === selectedStatus;
       
       return matchesSearch && matchesStatus;
     });
