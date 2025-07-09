@@ -133,6 +133,7 @@ function PaginatedTable<T>({
   const renderPaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
+    const totalPages = Math.max(1, Math.ceil(data.length / itemsPerPage));
     
     // Always show first page
     items.push(
@@ -147,7 +148,7 @@ function PaginatedTable<T>({
     );
     
     // Show ellipsis if needed
-    if (currentPage > 3) {
+    if (currentPage > 3 && totalPages > 3) {
       items.push(
         <PaginationItem key="ellipsis-1">
           <PaginationEllipsis />
@@ -156,7 +157,10 @@ function PaginatedTable<T>({
     }
     
     // Show pages around current page
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
       if (i <= 1 || i >= totalPages) continue;
       items.push(
         <PaginationItem key={i}>
@@ -171,7 +175,7 @@ function PaginatedTable<T>({
     }
     
     // Show ellipsis if needed
-    if (currentPage < totalPages - 2) {
+    if (currentPage < totalPages - 2 && totalPages > 3) {
       items.push(
         <PaginationItem key="ellipsis-2">
           <PaginationEllipsis />
@@ -181,16 +185,19 @@ function PaginatedTable<T>({
     
     // Always show last page if there's more than one page
     if (totalPages > 1) {
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink 
-            onClick={() => setCurrentPage(totalPages)} 
-            isActive={currentPage === totalPages}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
+      // Only add last page if it's not already included in the loop above
+      if (endPage < totalPages) {
+        items.push(
+          <PaginationItem key="last">
+            <PaginationLink 
+              onClick={() => setCurrentPage(totalPages)} 
+              isActive={currentPage === totalPages}
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
     }
     
     return items;
@@ -333,7 +340,7 @@ function PaginatedTable<T>({
       </div>
 
       {totalPages > 1 && (
-        <Pagination>
+        <Pagination className="mt-4">
           <PaginationContent>
             <PaginationItem>
               <Button

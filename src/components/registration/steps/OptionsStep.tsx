@@ -42,7 +42,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
   const calculateTotal = (updates: Partial<RegistrationData> = {}) => {
     const currentData = { ...data, ...updates };
     let total = 0;
-
+    
     switch (currentData.participationType) {
       case 'nominee':
         if (currentData.tier) {
@@ -72,7 +72,7 @@ export const OptionsStep = ({ data, onUpdate }: Props) => {
         }
         break;
     }
-
+    
     onUpdate({ ...updates, totalAmount: total });
   };
 
