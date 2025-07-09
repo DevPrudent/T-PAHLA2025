@@ -57,6 +57,8 @@ const NomineesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: nominations, isLoading, error, refetch } = useQuery<NominationRow[], Error>({
     queryKey: ['nominations', selectedDate?.toISOString().split('T')[0]],
@@ -88,6 +90,12 @@ const NomineesPage = () => {
       return matchesSearch && matchesStatus;
     });
   }, [nominations, searchTerm, selectedStatus]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredNominations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentNominations = filteredNominations.slice(startIndex, endIndex);
 
   const updateStatusMutation = useMutation<
     NominationRow | null, // Supabase returns the updated row or null

@@ -62,6 +62,8 @@ const RegistrationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: registrations, isLoading, error, refetch } = useQuery<RegistrationRow[], Error>({
     queryKey: ['registrations', selectedDate?.toISOString().split('T')[0]],
@@ -91,6 +93,12 @@ const RegistrationsPage = () => {
       return matchesSearch && matchesStatus;
     });
   }, [registrations, searchTerm, selectedStatus]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRegistrations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRegistrations = filteredRegistrations.slice(startIndex, endIndex);
 
   const updateStatusMutation = useMutation<
     RegistrationRow | null,

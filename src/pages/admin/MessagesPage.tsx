@@ -15,6 +15,8 @@ const MessagesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchMessages();
@@ -64,6 +66,12 @@ const MessagesPage = () => {
       (message.message && message.message.toLowerCase().includes(searchLower))
     );
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentMessages = filteredMessages.slice(startIndex, endIndex);
 
   const columns = [
     { 
