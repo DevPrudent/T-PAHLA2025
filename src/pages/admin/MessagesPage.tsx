@@ -135,15 +135,13 @@ const MessagesPage = () => {
             </div>
           ) : (
             <PaginatedTable
-              data={currentMessages}
+              data={filteredMessages}
               columns={columns}
               caption="Contact messages received through the website"
               itemsPerPage={10}
               searchPlaceholder="Search messages..."
               onSearch={setSearchTerm}
               searchTerm={searchTerm}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
               showDateFilter={true}
               onDateChange={setSelectedDate}
               selectedDate={selectedDate}

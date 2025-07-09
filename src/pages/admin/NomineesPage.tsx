@@ -288,15 +288,13 @@ const NomineesPage = () => {
       </p>
 
       <PaginatedTable
-        data={currentNominations}
+        data={filteredNominations}
         columns={columns}
         caption="List of all submitted nominations. Use sidebar for filtered views."
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email..."
         onSearch={setSearchTerm}
         searchTerm={searchTerm}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
         showDateFilter={true}
         onDateChange={setSelectedDate}
         selectedDate={selectedDate}

@@ -50,8 +50,6 @@ interface PaginatedTableProps<T> {
   searchTerm?: string;
   showDateFilter?: boolean;
   onDateChange?: (date: Date | undefined) => void;
-  currentPage?: number;
-  setCurrentPage?: (page: number) => void;
   selectedDate?: Date | undefined;
   showStatusFilter?: boolean;
   statusOptions?: { value: string; label: string }[];
@@ -70,8 +68,6 @@ function PaginatedTable<T>({
   searchTerm = "",
   showDateFilter = false,
   onDateChange,
-  currentPage: externalCurrentPage,
-  setCurrentPage: setExternalCurrentPage,
   selectedDate,
   showStatusFilter = false,
   statusOptions = [],
@@ -79,17 +75,13 @@ function PaginatedTable<T>({
   selectedStatus,
   renderRowActions
 }: PaginatedTableProps<T>) {
-  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [dateInput, setDateInput] = useState<string>(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "");
 
-  // Use external page state if provided, otherwise use internal state
-  const pageState = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
-  const setPageState = setExternalCurrentPage || setInternalCurrentPage;
-
   // Calculate pagination
   const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (pageState - 1) * itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = data.slice(startIndex, endIndex);
 
@@ -100,7 +92,7 @@ function PaginatedTable<T>({
     if (onSearch) {
       onSearch(value);
     }
-    setPageState(1); // Reset to first page on search
+    setCurrentPage(1); // Reset to first page on search
   };
 
   // Handle date input
@@ -144,21 +136,19 @@ function PaginatedTable<T>({
     const totalPages = Math.max(1, Math.ceil(data.length / itemsPerPage));
     
     // Always show first page
-    if (totalPages > 0) {
-      items.push(
-        <PaginationItem key="first">
-          <PaginationLink 
-            onClick={() => setPageState(1)} 
-            isActive={pageState === 1}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          onClick={() => setCurrentPage(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
     
     // Show ellipsis if needed
-    if (pageState > 3 && totalPages > 3) {
+    if (currentPage > 3 && totalPages > 3) {
       items.push(
         <PaginationItem key="ellipsis-1">
           <PaginationEllipsis />
@@ -167,16 +157,16 @@ function PaginatedTable<T>({
     }
     
     // Show pages around current page
-    const startPage = Math.max(2, pageState - 1);
-    const endPage = Math.min(totalPages - 1, pageState + 1);
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
     
     for (let i = startPage; i <= endPage; i++) {
       if (i <= 1 || i >= totalPages) continue;
       items.push(
         <PaginationItem key={i}>
           <PaginationLink 
-            onClick={() => setPageState(i)} 
-            isActive={pageState === i}
+            onClick={() => setCurrentPage(i)} 
+            isActive={currentPage === i}
           >
             {i}
           </PaginationLink>
@@ -185,7 +175,7 @@ function PaginatedTable<T>({
     }
     
     // Show ellipsis if needed
-    if (pageState < totalPages - 2 && totalPages > 3) {
+    if (currentPage < totalPages - 2 && totalPages > 3) {
       items.push(
         <PaginationItem key="ellipsis-2">
           <PaginationEllipsis />
@@ -200,8 +190,8 @@ function PaginatedTable<T>({
         items.push(
           <PaginationItem key="last">
             <PaginationLink 
-              onClick={() => setPageState(totalPages)} 
-              isActive={pageState === totalPages}
+              onClick={() => setCurrentPage(totalPages)} 
+              isActive={currentPage === totalPages}
             >
               {totalPages}
             </PaginationLink>
@@ -356,8 +346,8 @@ function PaginatedTable<T>({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setPageState(Math.max(pageState - 1, 1))}
-                disabled={pageState === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
                 className="h-9 w-9 p-0"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -371,8 +361,8 @@ function PaginatedTable<T>({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setPageState(Math.min(pageState + 1, totalPages))}
-                disabled={pageState === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
                 className="h-9 w-9 p-0"
               >
                 <ChevronRight className="h-4 w-4" />

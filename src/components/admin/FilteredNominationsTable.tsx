@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { 
   CheckCircle, 
-  XCircle,
+  XCircle, 
   Eye, 
   Loader2, 
   AlertCircle, 
@@ -53,10 +53,8 @@ const fetchNominationsByStatus = async (status: NominationStatusEnum, date?: Dat
 export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> = ({ statusFilter, pageTitle, showActions = false }) => {
   const queryClient = useQueryClient();
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   const { data: nominations, isLoading, error, refetch } = useQuery<NominationRow[], Error>({
     queryKey: ['nominations', statusFilter, selectedDate?.toISOString().split('T')[0]],
@@ -67,28 +65,6 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
   useEffect(() => {
     refetch();
   }, [selectedDate, refetch]);
-
-  // Filter nominations based on search term
-  const filteredNominations = useMemo(() => {
-    if (!nominations) return [];
-    
-    return nominations.filter(nomination => {
-      if (!searchTerm) return true;
-      
-      const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null;
-      const nomineeEmail = sectionAData?.nominee_email?.toLowerCase() || '';
-      
-      return nomination.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (nomination.nominee_name && nomination.nominee_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        nomineeEmail.includes(searchTerm.toLowerCase());
-    });
-  }, [nominations, searchTerm]);
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredNominations.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentNominations = filteredNominations.slice(startIndex, endIndex);
 
   const updateStatusMutation = useMutation<
     NominationRow | null,
@@ -277,15 +253,13 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
       </div>
       
       <PaginatedTable
-        data={filteredNominations}
+        data={nominations}
         columns={columns}
         caption={`List of ${pageTitle.toLowerCase()}.`}
         itemsPerPage={10}
         searchPlaceholder="Search by ID, Name, Email..."
         onSearch={setSearchTerm}
         searchTerm={searchTerm}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
         showDateFilter={true}
         onDateChange={setSelectedDate}
         selectedDate={selectedDate}

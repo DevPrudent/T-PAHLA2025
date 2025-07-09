@@ -252,15 +252,13 @@ const TransactionsPage = () => {
         </div>
       ) : (
         <PaginatedTable
-          data={currentTransactions}
+          data={filteredTransactions}
           columns={columns}
           caption="A list of all transactions"
           itemsPerPage={10}
           searchPlaceholder="Search by ID, Name, Email..."
           onSearch={setSearchTerm}
           searchTerm={searchTerm}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
           showDateFilter={true}
           onDateChange={setSelectedDate}
           selectedDate={selectedDate}
