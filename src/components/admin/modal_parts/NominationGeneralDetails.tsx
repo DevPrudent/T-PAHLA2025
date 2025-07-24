@@ -3,6 +3,7 @@ import React from 'react';
 import DataPair from './DataPair';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
+import { getCategoryTitleById } from '@/lib/awardCategories';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 
@@ -12,6 +13,7 @@ interface NominationGeneralDetailsProps {
 
 const NominationGeneralDetails: React.FC<NominationGeneralDetailsProps> = ({ nomination }) => {
   const submissionDate = nomination.submitted_at || nomination.created_at;
+  const categoryTitle = nomination.award_category_id ? getCategoryTitleById(nomination.award_category_id) : null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 print:grid-cols-2">
@@ -28,6 +30,7 @@ const NominationGeneralDetails: React.FC<NominationGeneralDetailsProps> = ({ nom
         }
       />
       <DataPair label="Award Category ID" value={nomination.award_category_id} />
+      <DataPair label="Award Category Title" value={categoryTitle || 'Unknown Category'} />
       <DataPair label="Submitted At" value={submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'} />
       <DataPair label="Nominator Email" value={nomination.nominator_email} />
       <DataPair label="Nominator Name" value={nomination.nominator_name} />
