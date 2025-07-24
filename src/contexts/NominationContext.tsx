@@ -20,6 +20,7 @@ interface NominationContextType {
   resetNomination: () => void;
   isSubmittingNomination: boolean; // Added for global submission state
   setIsSubmittingNomination: (isSubmitting: boolean) => void; // Added
+  loadExistingNomination: (nominationId: string, nominationData: any) => void; // Added for loading existing nominations
 }
 
 const NominationContext = createContext<NominationContextType | undefined>(undefined);
@@ -30,6 +31,36 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
   const [nominationData, setNominationData] = useState<NominationData>({});
   const [isSubmittingNomination, setIsSubmittingNomination] = useState(false);
 
+
+  const loadExistingNomination = (id: string, data: any) => {
+    setNominationId(id);
+    
+    // Load existing form data
+    if (data.form_section_a) {
+      updateSectionData('sectionA', data.form_section_a);
+    }
+    if (data.form_section_b) {
+      updateSectionData('sectionB', data.form_section_b);
+    }
+    if (data.form_section_c) {
+      updateSectionData('sectionC', data.form_section_c);
+    }
+    if (data.form_section_d) {
+      updateSectionData('sectionD', data.form_section_d);
+    }
+    if (data.form_section_e) {
+      updateSectionData('sectionE', data.form_section_e);
+    }
+
+    // Determine which step to start from based on completed sections
+    let nextStep = 1;
+    if (data.form_section_a) nextStep = 2;
+    if (data.form_section_b) nextStep = 3;
+    if (data.form_section_c) nextStep = 4;
+    if (data.form_section_d) nextStep = 5;
+    
+    setCurrentStep(nextStep);
+  };
 
   const updateSectionData = (section: keyof NominationData, data: any) => {
     setNominationData(prevData => {
@@ -62,6 +93,7 @@ export const NominationProvider = ({ children }: { children: ReactNode }) => {
       resetNomination,
       isSubmittingNomination,
       setIsSubmittingNomination,
+      loadExistingNomination,
     }}>
       {children}
     </NominationContext.Provider>

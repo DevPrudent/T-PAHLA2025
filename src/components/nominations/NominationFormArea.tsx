@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useNomination } from "@/contexts/NominationContext";
 import NominationStepA from "@/components/nominations/NominationStepA";
 import NominationStepB from "@/components/nominations/NominationStepB";
@@ -8,10 +9,15 @@ import NominationStepE from "@/components/nominations/NominationStepE"; // Impor
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const NominationFormArea = () => {
+  const [searchParams] = useSearchParams();
+  const continueNominationId = searchParams.get('continue');
   const { currentStep, nominationId, resetNomination, nominationData } = useNomination();
   const [isNominationPeriodOpen, setIsNominationPeriodOpen] = useState(true); // Default to true for now
+  const [isLoadingContinuation, setIsLoadingContinuation] = useState(false);
 
   useEffect(() => {
     // Check if current date is within nomination period
@@ -21,6 +27,73 @@ const NominationFormArea = () => {
     const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
     setIsNominationPeriodOpen(isOpen);
   }, []);
+
+  // Handle continuation from email link
+  useEffect(() => {
+    const loadExistingNomination = async () => {
+      if (!continueNominationId || nominationId) return; // Don't load if already have a nomination
+      
+      setIsLoadingContinuation(true);
+      try {
+        const { data: nomination, error } = await supabase
+          .from('nominations')
+          .select('*')
+          .eq('id', continueNominationId)
+          .in('status', ['draft', 'incomplete'])
+          .single();
+
+        if (error) {
+          console.error('Error loading nomination:', error);
+          toast.error('Could not load your nomination. Please start a new one.');
+          return;
+        }
+
+        if (nomination) {
+          // Load the nomination data into context
+          const { setNominationId, updateSectionData, setCurrentStep } = useNomination();
+          setNominationId(nomination.id);
+          
+          // Load existing form data
+          if (nomination.form_section_a) {
+            updateSectionData('sectionA', nomination.form_section_a);
+          }
+          if (nomination.form_section_b) {
+            updateSectionData('sectionB', nomination.form_section_b);
+          }
+          if (nomination.form_section_c) {
+            updateSectionData('sectionC', nomination.form_section_c);
+          }
+          if (nomination.form_section_d) {
+            updateSectionData('sectionD', nomination.form_section_d);
+          }
+          if (nomination.form_section_e) {
+            updateSectionData('sectionE', nomination.form_section_e);
+          }
+
+          // Determine which step to start from based on completed sections
+          let nextStep = 1;
+          if (nomination.form_section_a) nextStep = 2;
+          if (nomination.form_section_b) nextStep = 3;
+          if (nomination.form_section_c) nextStep = 4;
+          if (nomination.form_section_d) nextStep = 5;
+          
+          setCurrentStep(nextStep);
+          
+          toast.success(`Welcome back! Continuing your nomination for ${nomination.nominee_name}`, {
+            description: `Nomination ID: ${nomination.id}`,
+            duration: 5000,
+          });
+        }
+      } catch (error) {
+        console.error('Error loading existing nomination:', error);
+        toast.error('Could not load your nomination. Please start a new one.');
+      } finally {
+        setIsLoadingContinuation(false);
+      }
+    };
+
+    loadExistingNomination();
+  }, [continueNominationId, nominationId]);
 
   const renderStep = () => {
     // NominationStepE will handle its own display logic (form or submitted view)
@@ -44,6 +117,22 @@ const NominationFormArea = () => {
   // Check if the nomination has been effectively submitted to control display of "Start New Nomination"
   const isEffectivelySubmitted = nominationData.sectionE && nominationData.sectionE.nominator_signature && nominationData.sectionE.confirm_accuracy;
 
+  if (isLoadingContinuation) {
+    return (
+      <div className="bg-gray-900 rounded-lg shadow-xl p-6 md:p-10">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-tpahla-gold/20 rounded-full mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tpahla-gold"></div>
+          </div>
+          <h3 className="text-xl font-bold text-tpahla-gold mb-2">Loading Your Nomination</h3>
+          <p className="text-gray-300">
+            We're retrieving your saved nomination data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-900 rounded-lg shadow-xl p-6 md:p-10">
       <div className="text-center mb-8">
@@ -53,6 +142,13 @@ const NominationFormArea = () => {
         <p className="text-lg text-gray-300">
           Honoring Heroes, Forging Forward.
         </p>
+        {continueNominationId && (
+          <div className="mt-4 p-3 bg-tpahla-gold/10 rounded-lg border border-tpahla-gold/30">
+            <p className="text-sm text-tpahla-gold">
+              📧 Continuing from email link - Nomination ID: {continueNominationId}
+            </p>
+          </div>
+        )}
       </div>
 
       {isNominationPeriodOpen ? (

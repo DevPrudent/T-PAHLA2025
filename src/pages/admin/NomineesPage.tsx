@@ -8,10 +8,22 @@ import {
   Eye, 
   Loader2, 
   AlertCircle, 
-  Inbox
+  Inbox,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { NominationDetailsModal } from '@/components/admin/NominationDetailsModal';
@@ -59,6 +71,7 @@ const NomineesPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSendingReminders, setIsSendingReminders] = useState(false);
   const itemsPerPage = 10;
 
   const { data: nominations, isLoading, error, refetch } = useQuery<NominationRow[], Error>({
@@ -125,6 +138,30 @@ const NomineesPage = () => {
       toast.error(`Failed to update status: ${err.message}`);
     },
   });
+
+  const sendNominationReminders = async (sendToAll = false, specificNominationId = null) => {
+    setIsSendingReminders(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-nomination-reminder', {
+        body: {
+          nominationId: specificNominationId,
+          sendToAll: sendToAll,
+          siteUrl: window.location.origin
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success(`Nomination reminders sent: ${data.successCount} successful, ${data.failureCount} failed`);
+    } catch (error) {
+      console.error('Error sending nomination reminders:', error);
+      toast.error(`Failed to send nomination reminders: ${error.message}`);
+    } finally {
+      setIsSendingReminders(false);
+    }
+  };
 
   const handleUpdateStatus = (nominationId: string, status: NominationStatusEnum) => {
     updateStatusMutation.mutate({ nominationId, status });
@@ -252,6 +289,18 @@ const NomineesPage = () => {
            Approve
         </Button>
       )}
+      {(nomination.status === "draft" || nomination.status === "incomplete") && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-blue-600 hover:text-blue-700"
+          onClick={() => sendNominationReminders(false, nomination.id)}
+          disabled={isSendingReminders}
+        >
+          {isSendingReminders ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Mail size={16} className="mr-1" />}
+          Send Reminder
+        </Button>
+      )}
     </div>
   );
 
@@ -288,6 +337,36 @@ const NomineesPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Manage All Nominations</h1>
+        <div className="flex gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                disabled={isSendingReminders || !nominations?.some(n => n.status === 'draft' || n.status === 'incomplete')}
+              >
+                {isSendingReminders ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail size={16} />}
+                Send Completion Reminders
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Send Nomination Completion Reminders</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will send reminder emails to all nominators with incomplete nominations (draft or incomplete status). 
+                  The emails will include a unique link to continue their nomination where they left off.
+                  Are you sure you want to proceed?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => sendNominationReminders(true)}>
+                  Send Reminders
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
       
       <p className="text-muted-foreground">
