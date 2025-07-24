@@ -1,6 +1,8 @@
 @@ .. @@
      for (const nomination of nominationsToRemind) {
        try {
+       }
+     }
 -        // Get nominator email from form_section_d or fallback to nominator_email
 -        const sectionD = nomination.form_section_d as any;
 -        const nominatorEmail = sectionD?.nominator_email || nomination.nominator_email;
@@ -12,3 +14,4 @@
 +        const nominatorName = sectionA?.nominator_name || sectionD?.nominator_full_name || nomination.nominator_name || 'Nominator';
          
          if (!nominatorEmail) {
+         }
