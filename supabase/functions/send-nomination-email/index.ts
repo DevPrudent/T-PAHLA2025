@@ -9,7 +9,7 @@ const corsHeaders = {
 // Check if Resend is configured
 const isResendConfigured = () => {
   const apiKey = Deno.env.get('RESEND_API_KEY');
-  return apiKey && apiKey.length > 0;
+  return apiKey && apiKey.length > 0 && apiKey !== 'your_resend_api_key_here';
 };
 
 function handleCors(req: Request) {
@@ -36,12 +36,11 @@ serve(async (req: Request) => {
     
     // Check if Resend is properly configured
     if (!isResendConfigured()) {
-      console.log('Resend not configured, skipping email sending');
+      console.error('Resend API key not found or invalid');
       return new Response(
         JSON.stringify({
-          success: true,
-          message: 'Nomination saved successfully. Email notifications are currently disabled.',
-          details: 'To enable email notifications, configure RESEND_API_KEY in your Supabase project settings.'
+          error: 'Email service not configured',
+          details: 'RESEND_API_KEY environment variable is missing or invalid. Please check your Supabase project settings.'
         }),
         {
           status: 500,
@@ -50,7 +49,11 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log("Resend API Key found, initializing Resend client...");
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const emailFrom = Deno.env.get('RESEND_SENDER_EMAIL') || 'TPAHLA <noreply@tpahla.africa>';
+    const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || '2025@tpahla.africa';
+
+    console.log("Resend API Key found, preparing to send emails...");
     
     // Use fetch API instead of Resend SDK for better compatibility
     const sendEmail = async (emailData: any) => {
@@ -89,10 +92,6 @@ serve(async (req: Request) => {
         }
       );
     }
-
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const emailFrom = Deno.env.get('RESEND_SENDER_EMAIL') || 'TPAHLA <noreply@tpahla.africa>';
-    const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || '2025@tpahla.africa';
 
     console.log("Attempting to send email with Resend...", { 
       from: emailFrom, 
