@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const nominationStepASchema = z.object({
+  nominator_email: z.string().email("Invalid email address").min(1, "Your email is required"),
+  nominator_name: z.string().min(1, "Your name is required"),
   nominee_full_name: z.string().min(1, "Full name is required"),
   nominee_gender: z.enum(["male", "female", "other"], {
     errorMap: () => ({ message: "Please select a gender." })

@@ -32,6 +32,8 @@ const NominationStepA = () => {
   const form = useForm<NominationStepAData>({
     resolver: zodResolver(nominationStepASchema),
     defaultValues: nominationData.sectionA || {
+      nominator_email: '',
+      nominator_name: '',
       nominee_full_name: '',
       nominee_gender: undefined,
       nominee_dob: '', // Will be YYYY-MM-DD
@@ -70,6 +72,8 @@ const NominationStepA = () => {
         const insertPayload: NominationInsert = {
             nominee_name: data.nominee_full_name,
             form_section_a: data as any,
+            nominator_email: data.nominator_email,
+            nominator_name: data.nominator_name,
             user_id: user?.id,
             status: 'draft',
         };
@@ -95,6 +99,40 @@ const NominationStepA = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-gray-100">
         <h2 className="text-2xl font-semibold text-tpahla-gold mb-6">SECTION A: NOMINEE INFORMATION</h2>
+
+        <div className="bg-tpahla-gold/10 p-4 rounded-lg border border-tpahla-gold/30 mb-6">
+          <h3 className="text-lg font-semibold text-tpahla-gold mb-4">Nominator Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="nominator_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your full name" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nominator_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Email Address *</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="Enter your email address" {...field} className="bg-gray-700 border-gray-600 placeholder-gray-400 text-white" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <FormField
           control={form.control}

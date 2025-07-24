@@ -89,14 +89,16 @@ const NomineesPage = () => {
     if (!nominations) return [];
     
     return nominations.filter(nomination => {
-      const sectionAData = nomination.form_section_a as { nominee_email?: string; } | null;
+      const sectionAData = nomination.form_section_a as { nominee_email?: string; nominator_email?: string; } | null;
       const nomineeEmail = sectionAData?.nominee_email?.toLowerCase() || '';
+      const nominatorEmail = sectionAData?.nominator_email?.toLowerCase() || '';
       
       // Apply search filter
       const matchesSearch = !searchTerm || 
         nomination.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (nomination.nominee_name && nomination.nominee_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        nomineeEmail.includes(searchTerm.toLowerCase());
+        nomineeEmail.includes(searchTerm.toLowerCase()) ||
+        nominatorEmail.includes(searchTerm.toLowerCase());
       
       // Apply status filter
       const matchesStatus = selectedStatus === 'all' || !selectedStatus || nomination.status === selectedStatus;
