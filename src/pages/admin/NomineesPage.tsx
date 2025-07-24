@@ -303,18 +303,6 @@ const NomineesPage = () => {
           Send Reminder
         </Button>
       )}
-      {(nomination.status === "draft" || nomination.status === "incomplete") && (
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          className="text-blue-600 hover:text-blue-700"
-          onClick={() => sendNominationReminders(false, nomination.id)}
-          disabled={isSendingReminders}
-        >
-          {isSendingReminders ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Mail size={16} className="mr-1" />}
-          Send Reminder
-        </Button>
-      )}
     </div>
   );
 
