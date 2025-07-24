@@ -37,7 +37,7 @@ const RegistrationDetailsPage = () => {
 
   useEffect(() => {
     const fetchRegistrationDetails = async () => {
-      if (!registrationId) {
+      if (!registrationId || registrationId === 'undefined' || registrationId.trim() === '') {
         setError('No registration ID provided');
         setLoading(false);
         return;
