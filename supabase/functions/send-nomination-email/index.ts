@@ -1,4 +1,4 @@
-import { Resend } from "npm:resend@3.4.0";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +12,7 @@ function handleCors(req: Request) {
   }
 }
 
-Deno.serve(async (req: Request) => {
+serve(async (req: Request) => {
   try {
     // Handle CORS
     const corsResponse = handleCors(req);
@@ -46,7 +46,26 @@ Deno.serve(async (req: Request) => {
     }
 
     console.log("Resend API Key found, initializing Resend client...");
-    const resend = new Resend(resendApiKey);
+    
+    // Use fetch API instead of Resend SDK for better compatibility
+    const sendEmail = async (emailData: any) => {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(emailData),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to send email");
+      }
+      
+      return { data: result, error: null };
+    };
 
     // Get request body
     const { nominatorEmail, nominatorName, nomineeName, nominationId, siteUrl } = await req.json();
@@ -156,7 +175,7 @@ Deno.serve(async (req: Request) => {
     let emailData, emailError;
     
     try {
-      const emailResponse = await resend.emails.send({
+      const emailResponse = await sendEmail({
         from: emailFrom,
         to: [nominatorEmail],
         subject: subject,
@@ -228,7 +247,7 @@ Deno.serve(async (req: Request) => {
       `;
 
       try {
-        const adminEmailResponse = await resend.emails.send({
+        const adminEmailResponse = await sendEmail({
           from: emailFrom,
           to: [adminEmail],
           subject: adminSubject,
