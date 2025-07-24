@@ -29,6 +29,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import PaginatedTable from '@/components/admin/PaginatedTable';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type RegistrationRow = Database['public']['Tables']['registrations']['Row'];
 type RegistrationStatusEnum = Database['public']['Enums']['registration_status_enum'];
@@ -64,6 +75,7 @@ const RegistrationsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [isSendingReminders, setIsSendingReminders] = useState(false);
 
   const { data: registrations, isLoading, error, refetch } = useQuery<RegistrationRow[], Error>({
     queryKey: ['registrations', selectedDate?.toISOString().split('T')[0]],
@@ -175,6 +187,29 @@ const RegistrationsPage = () => {
     document.body.removeChild(link);
   };
 
+  const sendPaymentReminders = async (sendToAll = false, specificRegistrationId = null) => {
+    setIsSendingReminders(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-payment-reminder', {
+        body: {
+          registrationId: specificRegistrationId,
+          sendToAll: sendToAll
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success(`Payment reminders sent: ${data.successCount} successful, ${data.failureCount} failed`);
+    } catch (error) {
+      console.error('Error sending payment reminders:', error);
+      toast.error(`Failed to send payment reminders: ${error.message}`);
+    } finally {
+      setIsSendingReminders(false);
+    }
+  };
+
   const statusOptions = [
     { value: 'draft', label: 'Draft' },
     { value: 'pending_payment', label: 'Pending Payment' },
@@ -241,6 +276,18 @@ const RegistrationsPage = () => {
         <Button 
           size="sm" 
           variant="ghost" 
+          className="text-blue-600 hover:text-blue-700"
+          onClick={() => sendPaymentReminders(false, registration.id)}
+          disabled={isSendingReminders}
+        >
+          {isSendingReminders ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Mail size={16} className="mr-1" />}
+          Send Reminder
+        </Button>
+      )}
+      {registration.registration_status === "pending_payment" && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
           className="text-green-600 hover:text-green-700"
           onClick={() => handleUpdateStatus(registration.id, 'paid')}
         >
@@ -293,14 +340,44 @@ const RegistrationsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Manage Registrations</h1>
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2"
-          onClick={handleExportCSV}
-        >
-          <Download size={16} />
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                disabled={isSendingReminders || !registrations?.some(r => r.registration_status === 'pending_payment')}
+              >
+                {isSendingReminders ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail size={16} />}
+                Send Payment Reminders
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Send Payment Reminders</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will send payment reminder emails to all registrations with pending payment status. 
+                  The emails will include the payment link and registration details.
+                  Are you sure you want to proceed?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => sendPaymentReminders(true)}>
+                  Send Reminders
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleExportCSV}
+          >
+            <Download size={16} />
+            Export CSV
+          </Button>
+        </div>
       </div>
       
       <p className="text-muted-foreground">
