@@ -15,7 +15,7 @@ import { toast } from "sonner";
 const NominationFormArea = () => {
   const [searchParams] = useSearchParams();
   const continueNominationId = searchParams.get('continue');
-  const { currentStep, nominationId, resetNomination, nominationData } = useNomination();
+  const { currentStep, nominationId, resetNomination, nominationData, loadExistingNomination } = useNomination();
   const [isNominationPeriodOpen, setIsNominationPeriodOpen] = useState(true); // Default to true for now
   const [isLoadingContinuation, setIsLoadingContinuation] = useState(false);
 
@@ -49,35 +49,8 @@ const NominationFormArea = () => {
         }
 
         if (nomination) {
-          // Load the nomination data into context
-          const { setNominationId, updateSectionData, setCurrentStep } = useNomination();
-          setNominationId(nomination.id);
-          
-          // Load existing form data
-          if (nomination.form_section_a) {
-            updateSectionData('sectionA', nomination.form_section_a);
-          }
-          if (nomination.form_section_b) {
-            updateSectionData('sectionB', nomination.form_section_b);
-          }
-          if (nomination.form_section_c) {
-            updateSectionData('sectionC', nomination.form_section_c);
-          }
-          if (nomination.form_section_d) {
-            updateSectionData('sectionD', nomination.form_section_d);
-          }
-          if (nomination.form_section_e) {
-            updateSectionData('sectionE', nomination.form_section_e);
-          }
-
-          // Determine which step to start from based on completed sections
-          let nextStep = 1;
-          if (nomination.form_section_a) nextStep = 2;
-          if (nomination.form_section_b) nextStep = 3;
-          if (nomination.form_section_c) nextStep = 4;
-          if (nomination.form_section_d) nextStep = 5;
-          
-          setCurrentStep(nextStep);
+          // Use the loadExistingNomination function from context
+          loadExistingNomination(nomination.id, nomination);
           
           toast.success(`Welcome back! Continuing your nomination for ${nomination.nominee_name}`, {
             description: `Nomination ID: ${nomination.id}`,
