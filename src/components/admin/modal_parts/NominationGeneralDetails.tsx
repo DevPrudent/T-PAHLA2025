@@ -14,6 +14,11 @@ interface NominationGeneralDetailsProps {
 const NominationGeneralDetails: React.FC<NominationGeneralDetailsProps> = ({ nomination }) => {
   const submissionDate = nomination.submitted_at || nomination.created_at;
   const categoryTitle = nomination.award_category_id ? getCategoryTitleById(nomination.award_category_id) : null;
+  
+  // Get nominator info from Section A (preferred) or fallback to top-level fields
+  const sectionAData = nomination.form_section_a as { nominator_email?: string; nominator_name?: string; } | null;
+  const nominatorEmail = sectionAData?.nominator_email || nomination.nominator_email;
+  const nominatorName = sectionAData?.nominator_name || nomination.nominator_name;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 print:grid-cols-2">
@@ -29,11 +34,11 @@ const NominationGeneralDetails: React.FC<NominationGeneralDetailsProps> = ({ nom
           "outline"
         }
       />
+      <DataPair label="Nominator Name" value={nominatorName} />
+      <DataPair label="Nominator Email" value={nominatorEmail} />
       <DataPair label="Award Category ID" value={nomination.award_category_id} />
       <DataPair label="Award Category Title" value={categoryTitle || 'Unknown Category'} />
       <DataPair label="Submitted At" value={submissionDate ? format(new Date(submissionDate), 'PPpp') : 'N/A'} />
-      <DataPair label="Nominator Email" value={nomination.nominator_email} />
-      <DataPair label="Nominator Name" value={nomination.nominator_name} />
     </div>
   );
 };
