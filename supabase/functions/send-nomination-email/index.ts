@@ -90,6 +90,10 @@ serve(async (req: Request) => {
       );
     }
 
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const emailFrom = Deno.env.get('RESEND_SENDER_EMAIL') || 'TPAHLA <noreply@tpahla.africa>';
+    const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || '2025@tpahla.africa';
+
     console.log("Attempting to send email with Resend...", { 
       from: emailFrom, 
       to: nominatorEmail, 
@@ -172,16 +176,9 @@ serve(async (req: Request) => {
             WhatsApp: <a href="https://wa.me/2348104906878">+234-810-490-6878</a></p>
             <p>Website: <a href="https://tpahla.africa">www.tpahla.africa</a></p>
           </div>
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        </body>
       </html>
     `;
-
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const senderEmail = Deno.env.get('RESEND_SENDER_EMAIL') || 'TPAHLA <noreply@tpahla.africa>';
-    const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || '2025@tpahla.africa>';
 
     // Send confirmation email to nominator
     let emailData, emailError;
@@ -279,9 +276,6 @@ serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: 'Nomination submitted and confirmation emails sent successfully' 
-      }),
         success: true, 
         message: "Nomination confirmation email sent successfully", 
         email_id: emailData?.id,
