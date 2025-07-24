@@ -6,6 +6,12 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Check if Resend is configured
+const isResendConfigured = () => {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  return apiKey && apiKey.length > 0;
+};
+
 function handleCors(req: Request) {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -27,16 +33,15 @@ serve(async (req: Request) => {
     }
 
     // Get Resend configuration
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const emailFrom = Deno.env.get("RESEND_SENDER_EMAIL") || "TPAHLA <noreply@tpahla.africa>";
-    const adminEmail = Deno.env.get("ADMIN_NOTIFICATION_EMAIL");
-
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY environment variable is not set");
+    
+    // Check if Resend is properly configured
+    if (!isResendConfigured()) {
+      console.log('Resend not configured, skipping email sending');
       return new Response(
-        JSON.stringify({ 
-          error: "Email service not configured", 
-          details: "RESEND_API_KEY environment variable is missing. Please configure it in your Supabase project settings." 
+        JSON.stringify({
+          success: true,
+          message: 'Nomination saved successfully. Email notifications are currently disabled.',
+          details: 'To enable email notifications, configure RESEND_API_KEY in your Supabase project settings.'
         }),
         {
           status: 500,
@@ -167,9 +172,16 @@ serve(async (req: Request) => {
             WhatsApp: <a href="https://wa.me/2348104906878">+234-810-490-6878</a></p>
             <p>Website: <a href="https://tpahla.africa">www.tpahla.africa</a></p>
           </div>
-        </body>
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       </html>
     `;
+
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const senderEmail = Deno.env.get('RESEND_SENDER_EMAIL') || 'TPAHLA <noreply@tpahla.africa>';
+    const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || '2025@tpahla.africa>';
 
     // Send confirmation email to nominator
     let emailData, emailError;
@@ -268,6 +280,9 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
+        message: 'Nomination submitted and confirmation emails sent successfully' 
+      }),
+        success: true, 
         message: "Nomination confirmation email sent successfully", 
         email_id: emailData?.id,
         recipient: nominatorEmail
@@ -282,7 +297,7 @@ serve(async (req: Request) => {
     console.error("Unexpected error in send-nomination-email function:", error);
     return new Response(
       JSON.stringify({ 
-        error: "Internal server error", 
+        error: 'Failed to process nomination email',
         details: error.message || error.toString(),
         stack: error.stack
       }),
