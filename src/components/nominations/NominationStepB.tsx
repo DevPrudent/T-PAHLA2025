@@ -79,7 +79,6 @@ const NominationStepB = () => {
         .from('nominations')
         .update({
           form_section_b: data as any,
-          award_category_id: data.award_category, // Update the top-level award_category_id field
           updated_at: new Date().toISOString(),
         })
         .eq('id', nominationId);
