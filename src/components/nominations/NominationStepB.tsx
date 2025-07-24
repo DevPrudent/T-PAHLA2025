@@ -61,7 +61,34 @@ const NominationStepB = () => {
   const onSubmit = (data: NominationStepBData) => {
     updateSectionData('sectionB', data);
     console.log("Section B data submitted:", data);
-    setCurrentStep(3); // Move to Section C
+    
+    // Save to database immediately when Section B is completed
+    if (nominationId) {
+      saveToDatabase(data);
+    } else {
+      console.error("No nomination ID available to save Section B");
+      toast.error("Error: No nomination ID found. Please go back to Section A.");
+    }
+  };
+
+  const saveToDatabase = async (data: NominationStepBData) => {
+    try {
+      const { error } = await supabase
+        .from('nominations')
+        .update({
+          form_section_b: data as any,
+          award_category_id: data.award_category, // Update the top-level award_category_id field
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', nominationId);
+
+      if (error) throw error;
+      toast.success('Section B saved successfully!');
+      setCurrentStep(3); // Move to Section C only after successful save
+    } catch (error: any) {
+      console.error('Error saving Section B:', error);
+      toast.error(`Failed to save Section B: ${error.message}`);
+    }
   };
 
   const handlePrevious = () => {
