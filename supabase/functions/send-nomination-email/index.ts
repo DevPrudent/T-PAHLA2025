@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "npm:resend@3.4.0";
 
 const corsHeaders = {
@@ -13,7 +12,7 @@ function handleCors(req: Request) {
   }
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   try {
     // Handle CORS
     const corsResponse = handleCors(req);
@@ -29,13 +28,16 @@ serve(async (req: Request) => {
 
     // Get Resend configuration
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const emailFrom = Deno.env.get("RESEND_SENDER_EMAIL") || "TPAHLA <noreply@tpahla.africa>";
+    const emailFrom = Deno.env.get("RESEND_SENDER_EMAIL") || "onboarding@resend.dev";
     const adminEmail = Deno.env.get("ADMIN_NOTIFICATION_EMAIL");
 
     if (!resendApiKey) {
-      console.error("RESEND_API_KEY is not set");
+      console.error("RESEND_API_KEY environment variable is not set");
       return new Response(
-        JSON.stringify({ error: "Email service not configured" }),
+        JSON.stringify({ 
+          error: "Email service not configured", 
+          details: "RESEND_API_KEY environment variable is missing. Please configure it in your Supabase project settings." 
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -43,6 +45,7 @@ serve(async (req: Request) => {
       );
     }
 
+    console.log("Resend API Key found, initializing Resend client...");
     const resend = new Resend(resendApiKey);
 
     // Get request body
@@ -50,6 +53,7 @@ serve(async (req: Request) => {
 
     // Validate required fields
     if (!nominatorEmail || !nominatorName || !nomineeName || !nominationId) {
+      console.error("Missing required fields:", { nominatorEmail: !!nominatorEmail, nominatorName: !!nominatorName, nomineeName: !!nomineeName, nominationId: !!nominationId });
       return new Response(
         JSON.stringify({ 
           error: "Missing required fields", 
@@ -61,6 +65,12 @@ serve(async (req: Request) => {
         }
       );
     }
+
+    console.log("Attempting to send email with Resend...", { 
+      from: emailFrom, 
+      to: nominatorEmail, 
+      nominationId 
+    });
 
     // Prepare email content
     const subject = `TPAHLA 2025 Nomination Confirmation - ${nomineeName}`;
@@ -143,19 +153,32 @@ serve(async (req: Request) => {
     `;
 
     // Send confirmation email to nominator
-    const { data: emailData, error: emailError } = await resend.emails.send({
-      from: emailFrom,
-      to: [nominatorEmail],
-      subject: subject,
-      html: htmlContent,
-    });
+    let emailData, emailError;
+    
+    try {
+      const emailResponse = await resend.emails.send({
+        from: emailFrom,
+        to: [nominatorEmail],
+        subject: subject,
+        html: htmlContent,
+      });
+      
+      emailData = emailResponse.data;
+      emailError = emailResponse.error;
+      
+      console.log("Resend API response:", { data: emailData, error: emailError });
+    } catch (resendError) {
+      console.error("Resend API call failed:", resendError);
+      emailError = resendError;
+    }
 
     if (emailError) {
-      console.error("Resend API Error:", emailError);
+      console.error("Resend email sending failed:", emailError);
       return new Response(
         JSON.stringify({ 
           error: "Failed to send confirmation email", 
-          details: emailError.message 
+          details: emailError.message || emailError.toString(),
+          resend_error: emailError
         }),
         {
           status: 500,
@@ -164,7 +187,7 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log("Nomination confirmation email sent successfully:", emailData);
+    console.log("Nomination confirmation email sent successfully to:", nominatorEmail, "Email ID:", emailData?.id);
 
     // Send admin notification if configured
     if (adminEmail) {
@@ -205,13 +228,18 @@ serve(async (req: Request) => {
       `;
 
       try {
-        await resend.emails.send({
+        const adminEmailResponse = await resend.emails.send({
           from: emailFrom,
           to: [adminEmail],
           subject: adminSubject,
           html: adminHtmlContent,
         });
-        console.log("Admin notification email sent successfully");
+        
+        if (adminEmailResponse.error) {
+          console.error("Admin notification email failed:", adminEmailResponse.error);
+        } else {
+          console.log("Admin notification email sent successfully to:", adminEmail);
+        }
       } catch (adminEmailError) {
         console.error("Failed to send admin notification:", adminEmailError);
         // Don't fail the whole request if admin email fails
@@ -221,8 +249,9 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Nomination confirmation email sent successfully",
-        email_id: emailData?.id 
+        message: "Nomination confirmation email sent successfully", 
+        email_id: emailData?.id,
+        recipient: nominatorEmail
       }),
       {
         status: 200,
@@ -231,11 +260,12 @@ serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error("Unexpected error:", error);
+    console.error("Unexpected error in send-nomination-email function:", error);
     return new Response(
       JSON.stringify({ 
         error: "Internal server error", 
-        details: error.message 
+        details: error.message || error.toString(),
+        stack: error.stack
       }),
       {
         status: 500,
