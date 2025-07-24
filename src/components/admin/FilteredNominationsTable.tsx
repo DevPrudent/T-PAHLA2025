@@ -8,7 +8,8 @@ import {
   Eye, 
   Loader2, 
   AlertCircle, 
-  Inbox
+  Inbox,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +18,7 @@ import { format } from 'date-fns';
 import { NominationDetailsModal } from '@/components/admin/NominationDetailsModal';
 import PaginatedTable from '@/components/admin/PaginatedTable';
 import { getCategoryTitleById } from '@/lib/awardCategories';
+import { supabase } from '@/integrations/supabase/client';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
@@ -56,6 +58,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
   const [selectedNomination, setSelectedNomination] = useState<NominationRow | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isSendingReminders, setIsSendingReminders] = useState(false);
 
   const { data: nominations, isLoading, error, refetch } = useQuery<NominationRow[], Error>({
     queryKey: ['nominations', statusFilter, selectedDate?.toISOString().split('T')[0]],
@@ -108,6 +111,30 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
       toast.error(`Failed to update status: ${err.message}`);
     },
   });
+
+  const sendNominationReminders = async (sendToAll = false, specificNominationId = null) => {
+    setIsSendingReminders(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-nomination-reminder', {
+        body: {
+          nominationId: specificNominationId,
+          sendToAll: sendToAll,
+          siteUrl: window.location.origin
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success(`Nomination reminders sent: ${data.successCount} successful, ${data.failureCount} failed`);
+    } catch (error) {
+      console.error('Error sending nomination reminders:', error);
+      toast.error(`Failed to send nomination reminders: ${error.message}`);
+    } finally {
+      setIsSendingReminders(false);
+    }
+  };
 
   const handleUpdateStatus = (nominationId: string, newStatus: NominationStatusEnum) => {
     updateStatusMutation.mutate({ nominationId, status: newStatus });
@@ -185,7 +212,8 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
   const renderRowActions = (nomination: NominationRow) => (
     <div className="flex justify-end gap-2">
       <Button size="sm" variant="ghost" onClick={() => handleViewDetails(nomination)}>
-        <Eye size={16} className="mr-1" /> View
+        <Eye size={16} className="mr-1" />
+        View
       </Button>
       {showActions && (nomination.status === "submitted" || nomination.status === "draft" || nomination.status === "incomplete") && (
         <>
@@ -197,7 +225,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
             disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
           >
             {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
-             Approve
+            Approve
           </Button>
           <Button 
             size="sm" 
@@ -207,7 +235,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
             disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
           >
             {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
-             Reject
+            Reject
           </Button>
         </>
       )}
@@ -220,7 +248,7 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
           disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
         >
           {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'rejected' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <XCircle size={16} className="mr-1" />}
-           Reject
+          Reject
         </Button>
       )}
       {showActions && (nomination.status === "rejected") && (
@@ -232,7 +260,19 @@ export const FilteredNominationsTable: React.FC<FilteredNominationsTableProps> =
           disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id}
         >
           {updateStatusMutation.isPending && updateStatusMutation.variables?.nominationId === nomination.id && updateStatusMutation.variables?.status === 'approved' ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle size={16} className="mr-1" />}
-           Approve
+          Approve
+        </Button>
+      )}
+      {(nomination.status === "draft" || nomination.status === "incomplete") && (
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="text-blue-600 hover:text-blue-700"
+          onClick={() => sendNominationReminders(false, nomination.id)}
+          disabled={isSendingReminders}
+        >
+          {isSendingReminders ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Mail size={16} className="mr-1" />}
+          Send Reminder
         </Button>
       )}
     </div>
