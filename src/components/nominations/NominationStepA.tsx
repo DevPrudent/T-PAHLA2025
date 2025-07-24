@@ -59,12 +59,9 @@ const NominationStepA = () => {
         user_id: user?.id,
         status: 'draft',
         nominee_name: data.nominee_full_name,
-        nominator_email: data.nominator_email,
-        nominator_name: data.nominator_name,
       };
 
       if (currentNominationId) {
-        // Update existing nomination - preserve the ID
         const { error } = await supabase
           .from('nominations')
           .update(nominationPayload)
@@ -72,7 +69,6 @@ const NominationStepA = () => {
         if (error) throw error;
         toast.success('Section A updated!');
       } else {
-        // Create new nomination only if no ID exists
         const insertPayload: NominationInsert = {
             nominee_name: data.nominee_full_name,
             form_section_a: data as any,
