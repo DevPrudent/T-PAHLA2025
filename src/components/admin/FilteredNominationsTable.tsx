@@ -18,7 +18,6 @@ import { format } from 'date-fns';
 import { NominationDetailsModal } from '@/components/admin/NominationDetailsModal';
 import PaginatedTable from '@/components/admin/PaginatedTable';
 import { getCategoryTitleById } from '@/lib/awardCategories';
-import { supabase } from '@/integrations/supabase/client';
 
 type NominationRow = Database['public']['Tables']['nominations']['Row'];
 type NominationStatusEnum = Database['public']['Enums']['nomination_status_enum'];
