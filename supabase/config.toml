@@ -1,5 +1,10 @@
 
 # Supabase Project Configuration
 
+[env]
+RESEND_API_KEY = "re_FuwNsq3p_KqHkTbEqeCbmaYTruHKR9SSh"
+RESEND_SENDER_EMAIL = "TPAHLA <noreply@tpahla.africa>"
+ADMIN_NOTIFICATION_EMAIL = "2025@tpahla.africa"
+
 [functions.send-nomination-email]
 # verify_jwt = false # Set to true if you need to check for a valid Supabase JWT
