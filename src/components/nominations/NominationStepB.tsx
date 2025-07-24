@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 
 const NominationStepB = () => {
-  const { setCurrentStep, nominationData, updateSectionData } = useNomination();
+  const { setCurrentStep, nominationData, updateSectionData, nominationId } = useNomination();
 
   const form = useForm<NominationStepBData>({
     resolver: zodResolver(nominationStepBSchema),
