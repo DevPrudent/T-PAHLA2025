@@ -23,7 +23,7 @@ const NominationFormArea = () => {
     // Check if current date is within nomination period
     const currentDate = new Date();
     const nominationsOpenDate = new Date("2025-06-20T00:00:00Z"); 
-    const nominationsCloseDate = new Date("2025-08-15T23:59:59Z");
+    const nominationsCloseDate = new Date("2025-09-01T23:59:59Z");
     const isOpen = currentDate >= nominationsOpenDate && currentDate <= nominationsCloseDate;
     setIsNominationPeriodOpen(isOpen);
   }, []);
